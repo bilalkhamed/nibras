@@ -1,26 +1,123 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 1) Light theme tokens */
+@theme {
+  /* Base */
+  --color-background: #fff7fb;
+  --color-foreground: #1f2933;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2933;
+
+  --color-muted: #f6eef6;
+  --color-muted-foreground: #6b6475;
+
+  --color-border: #e5d5e7;
+  --color-input: #e5d5e7;
+  --color-ring: #f25c88;
+
+  /* Primary (Gold) */
+  --color-primary: #f3a73b;
+  --color-primary-soft: #fff3da;
+  --color-primary-muted: #f6c874;
+  --color-primary-foreground: #3b2606;
+
+  /* Secondary (Coral) */
+  --color-secondary: #f25c88;
+  --color-secondary-soft: #ffe5ef;
+  --color-secondary-muted: #f89bb4;
+  --color-secondary-foreground: #4b071c;
+
+  /* Accent (Indigo) */
+  --color-accent: #5a4ae3;
+  --color-accent-soft: #ecebff;
+  --color-accent-muted: #8a80f0;
+  --color-accent-foreground: #140f4a;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-success-soft: #dcfce7;
+  --color-success-foreground: #064e24;
+
+  --color-warning: #facc15;
+  --color-warning-soft: #fef9c3;
+  --color-warning-foreground: #713f12;
+
+  --color-destructive: #f97373;
+  --color-destructive-soft: #fee2e2;
+  --color-destructive-foreground: #7f1d1d;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* 2) Dark theme tokens – scoped to .dark */
+@layer theme {
+  .dark {
+    /* Base */
+    --color-background: #0e0a16;
+    --color-foreground: #f9f5ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-card: #000;
+    --color-card-foreground: #f8efff;
+
+    --color-muted: #241a33;
+    --color-muted-foreground: #c8bbdc;
+
+    --color-border: #2f2243;
+    --color-input: #2f2243;
+    --color-ring: #f6c874;
+
+    /* Primary (Gold) */
+    --color-primary: #f6b649;
+    --color-primary-soft: #3c2a12;
+    --color-primary-muted: #f2c982;
+    --color-primary-foreground: #1b1002;
+
+    /* Secondary (Coral) */
+    --color-secondary: #ff7aa8;
+    --color-secondary-soft: #3a1724;
+    --color-secondary-muted: #f9a9c4;
+    --color-secondary-foreground: #ffeef6;
+
+    /* Accent (Indigo) */
+    --color-accent: #9e8bff;
+    --color-accent-soft: #292449;
+    --color-accent-muted: #c3b8ff;
+    --color-accent-foreground: #090212;
+
+    /* Status */
+    --color-success: #43d49f;
+    --color-success-soft: #0f2f25;
+    --color-success-foreground: #e4fff4;
+
+    --color-warning: #f5c65a;
+    --color-warning-soft: #3d2d13;
+    --color-warning-foreground: #fff4cc;
+
+    --color-destructive: #ff8fa3;
+    --color-destructive-soft: #37131b;
+    --color-destructive-foreground: #ffe5ea;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 3) Base layout styles */
+@layer base {
+  html {
+    @apply scroll-smooth;
+    background: linear-gradient(135deg, #fff7fb 0%, #ffeef7 45%, #fff6ea 100%);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Dark background override – NO extra background: red; */
+  html.dark {
+    background: radial-gradient(circle at top, #1b1326 0%, #0e0a16 100%);
+  }
+
+  .dark body {
+    @apply bg-background text-foreground;
+  }
 }
