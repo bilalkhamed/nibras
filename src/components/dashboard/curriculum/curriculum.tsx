@@ -1,5 +1,4 @@
 import { useState, type ElementType } from 'react';
-import { Button } from '@/components/ui/button';
 import labels from '@/lib/labels.json';
 import { LevelTabs } from './level-tabs';
 import { WeekNavigator } from './week-navigator';

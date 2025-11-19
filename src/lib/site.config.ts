@@ -1,3 +1,5 @@
-export default {
-    hideNavbarOnRoutes: ['/login', '/signup'],
+const config = {
+  hideNavbarOnRoutes: ['/login', '/signup'],
 };
+
+export default config;
