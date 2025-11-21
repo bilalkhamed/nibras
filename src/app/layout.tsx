@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { getCurrentUser } from '@/lib/current-user';
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
@@ -15,18 +16,20 @@ export const metadata: Metadata = {
     'منصة تعليمية شاملة تجمع برامج القراءة والمحاضرات وطمأنينة القلب للطالبات من عمر 12-17 سنة',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
+
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
         className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
+          <Navbar user={user} />
           {children}
         </ThemeProvider>
       </body>

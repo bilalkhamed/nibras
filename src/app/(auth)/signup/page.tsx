@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Info, Sparkles } from 'lucide-react';
-import { z } from 'zod';
+import { set, z } from 'zod';
 import labels from '@/lib/labels.json';
 import {
   Card,
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ReactNode, useState } from 'react';
 import { signupSchema } from '@/lib/auth-schemas';
+import { useRouter } from 'next/navigation';
 
 type SignupValues = {
   firstName: string;
@@ -31,13 +32,16 @@ type SignupValues = {
   email: string;
   password: string;
   confirmPassword: string;
+  birthYear: number;
 };
 
 export default function SignupPage() {
   const [errors, setErrors] = useState<{
     [key in keyof SignupValues]?: string;
   }>({});
+  const [serverError, setServerError] = useState<string>('');
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const [values, setValues] = useState<SignupValues>({
     firstName: '',
@@ -46,6 +50,7 @@ export default function SignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    birthYear: 2000,
   });
 
   const handleChange =
@@ -72,7 +77,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = signupSchema.safeParse(values);
     if (!result.success) {
@@ -86,6 +91,24 @@ export default function SignupPage() {
     } else {
       setErrors({});
       setSuccess(true);
+
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // Redirect to login page or show success message
+        router.replace('/account');
+      } else if (res.status === 409) {
+        // Handle server-side validation errors
+        setErrors({ email: 'البريد الإلكتروني مستخدم بالفعل' });
+      } else if (!res.ok) {
+        // Handle other server errors
+        setServerError('حدث خطأ أثناء إنشاء الحساب. الرجاء المحاولة مرة أخرى.');
+      }
     }
   };
 
@@ -147,6 +170,15 @@ export default function SignupPage() {
                 error={errors.email || ''}
                 value={values.email}
               />
+              <FormField
+                field="birthYear"
+                label="سنة الميلاد بالميلادي"
+                handleChange={handleChange}
+                handleOnBlur={handleOnBlur}
+                type="number"
+                error={errors.birthYear || ''}
+                value={values.birthYear.toString()}
+              />
               <PasswordField
                 field="password"
                 label={labels.common.password}
@@ -161,9 +193,11 @@ export default function SignupPage() {
                 label={labels.common.confirmPassword}
                 handleChange={handleChange}
                 handleOnBlur={handleOnBlur}
+                type="password"
                 error={errors.confirmPassword || ''}
                 value={values.confirmPassword}
               />
+
               <Button
                 className="w-full"
                 variant="hook"
@@ -173,6 +207,11 @@ export default function SignupPage() {
               >
                 {labels.common.signup}
               </Button>
+              {serverError && (
+                <p className="text-xs text-destructive text-center">
+                  {serverError}
+                </p>
+              )}
             </CardContent>
             <CardFooter className="flex flex-col space-y-4 pt-3">
               <div className="text-sm text-center text-muted-foreground">
@@ -203,7 +242,7 @@ export default function SignupPage() {
 type FormFieldProps = {
   field: keyof SignupValues;
   label: string;
-  type?: 'text' | 'password' | 'email';
+  type?: 'text' | 'password' | 'email' | 'number';
   leftSlot?: ReactNode;
   error: string;
   value: string;

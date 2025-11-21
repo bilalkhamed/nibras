@@ -2,22 +2,31 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, LayoutDashboard, Home, NotebookPen } from 'lucide-react';
+import {
+  Sparkles,
+  LayoutDashboard,
+  Home,
+  NotebookPen,
+  PersonStanding,
+  UserRound,
+} from 'lucide-react';
 import labels from '@/lib/labels.json';
 import config from '@/lib/site.config';
 import { Button } from '../ui/button';
 import { ThemeSwitch } from '../ThemeSwitch';
+import { User } from '@/types/types';
 
 interface NavbarProps {
-  showAuthLinks?: boolean;
   extraRight?: React.ReactNode;
+  user: User | null;
 }
 
-export function Navbar({ showAuthLinks = true, extraRight }: NavbarProps) {
+export function Navbar({ extraRight, user }: NavbarProps) {
   const pathname = usePathname();
   if (config.hideNavbarOnRoutes.includes(pathname)) {
     return null;
   }
+
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
@@ -43,16 +52,24 @@ export function Navbar({ showAuthLinks = true, extraRight }: NavbarProps) {
                 <NotebookPen className="h-4 w-4" /> خطة البرنامج
               </Link>
               <Link
-                href="/dashboard"
+                href="/account"
                 className="hover:text-primary transition-colors flex items-center gap-1"
               >
-                <LayoutDashboard className="h-4 w-4" /> الإدارة
+                <UserRound className="h-4 w-4" /> حسابي
               </Link>
+              {user?.role === 'admin' && (
+                <Link
+                  href="/dashboard"
+                  className="hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <LayoutDashboard className="h-4 w-4" /> الإدارة
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-4">
             {extraRight}
-            {showAuthLinks && (
+            {user == null && (
               <div className="flex items-center gap-3 text-sm font-medium">
                 <Button variant="primary" asChild>
                   <Link href="/login">{labels.common.login}</Link>
@@ -60,6 +77,14 @@ export function Navbar({ showAuthLinks = true, extraRight }: NavbarProps) {
                 <Button asChild variant="ghost">
                   <Link href="/signup">{labels.common.signup}</Link>
                 </Button>
+                <ThemeSwitch />
+              </div>
+            )}
+            {user != null && (
+              <div className="flex items-center gap-3 text-sm font-medium">
+                <span>
+                  {user.firstName} {user.lastName}
+                </span>
                 <ThemeSwitch />
               </div>
             )}

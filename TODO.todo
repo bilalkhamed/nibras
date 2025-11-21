@@ -1,0 +1,31 @@
+## Security Issues to be fixed:
+
+- No Rate Limiting
+
+Login endpoint vulnerable to brute force
+Fix: Add rate limiting (next-rate-limit, upstash/ratelimit)
+
+- [ ] No CSRF Protection Beyond SameSite
+
+SameSite: 'lax' helps but isn't foolproof
+Fix: Add CSRF tokens for sensitive mutations
+
+- [ ] Missing Account Lockout
+
+No protection after N failed login attempts
+Fix: Track failed attempts, lock account temporarily
+
+## Auth stuff to add:
+
+- [ ] Refresh token
+- [ ] Audit logging: Log auth events to DB (user_id, IP, timestamp, action)
+
+## Essential features:
+
+- Loading state for login/signup buttons
+
+- [ ]
+
+## Cool Features:
+
+- [ ] Cool welcome page

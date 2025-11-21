@@ -65,7 +65,7 @@ export default function UserDetailPage() {
                 {labels.dashboard.users.freeze}
               </Button>
               <Button
-                variant="danger"
+                variant="destructive"
                 className="bg-secondary hover:bg-secondary/80"
               >
                 {labels.dashboard.users.delete}

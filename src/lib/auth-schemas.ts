@@ -1,30 +1,37 @@
 import { z } from 'zod';
 
-export const signupSchema = z
-  .object({
-    firstName: z
-      .string()
-      .min(1, { error: 'يجب إدخال الاسم الأول' })
-      .min(2, { error: 'يجب أن يكون الاسم الأول حرفين على الأقل' })
-      .max(50, { error: 'يجب ألا يزيد الاسم الأول عن ٢٠ حرفًا' }),
-    middleName: z
-      .string()
-      .min(1, { error: 'يجب إدخال اسم الأب' })
-      .min(3, { error: 'يجب أن يكون اسم الأب ثلاث حروف على الأقل' })
-      .max(50, { error: 'يجب ألا يزيد اسم الأب عن ٢٠ حرفًا' }),
-    lastName: z
-      .string()
-      .min(1, { error: 'يجب إدخال اسم العائلة' })
-      .min(3, { error: 'يجب أن يكون اسم العائلة ثلاث حروف على الأقل' })
-      .max(50, { error: 'يجب ألا يزيد اسم العائلة عن ٣٠ حرفًا' }),
-    email: z.email({ error: 'يجب إدخال بريد إلكتروني صحيح وفعّال' }),
-    password: z
-      .string()
-      .min(1, { error: 'يجب إدخال كلمة سر' })
-      .min(8, { error: 'كلمة السر لا تستوفي الشروط المطلوبة' })
-      .regex(/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,64})/, {
-        error: 'كلمة السر لا تستوفي الشروط المطلوبة',
-      }),
+export const userSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, { error: 'يجب إدخال الاسم الأول' })
+    .min(2, { error: 'يجب أن يكون الاسم الأول حرفين على الأقل' })
+    .max(50, { error: 'يجب ألا يزيد الاسم الأول عن ٢٠ حرفًا' }),
+  middleName: z
+    .string()
+    .min(1, { error: 'يجب إدخال اسم الأب' })
+    .min(3, { error: 'يجب أن يكون اسم الأب ثلاث حروف على الأقل' })
+    .max(50, { error: 'يجب ألا يزيد اسم الأب عن ٢٠ حرفًا' }),
+  lastName: z
+    .string()
+    .min(1, { error: 'يجب إدخال اسم العائلة' })
+    .min(3, { error: 'يجب أن يكون اسم العائلة ثلاث حروف على الأقل' })
+    .max(50, { error: 'يجب ألا يزيد اسم العائلة عن ٣٠ حرفًا' }),
+  email: z.email({ error: 'يجب إدخال بريد إلكتروني صحيح وفعّال' }),
+  birthYear: z.coerce
+    .number({ error: 'يجب إدخال سنة الميلاد' })
+    .min(1900, { error: 'سنة الميلاد غير صحيحة' })
+    .max(new Date().getFullYear(), { error: 'سنة الميلاد غير صحيحة' }),
+  password: z
+    .string()
+    .min(1, { error: 'يجب إدخال كلمة سر' })
+    .min(8, { error: 'كلمة السر لا تستوفي الشروط المطلوبة' })
+    .regex(/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,64})/, {
+      error: 'كلمة السر لا تستوفي الشروط المطلوبة',
+    }),
+});
+
+export const signupSchema = userSchema
+  .extend({
     confirmPassword: z.string().min(1, { error: 'يجب تأكيد كلمة السر' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -32,4 +39,11 @@ export const signupSchema = z
     path: ['confirmPassword'],
   });
 
+export const loginSchema = z.object({
+  email: z.email({ error: 'يجب إدخال بريد إلكتروني صحيح' }),
+  password: z.string().min(1, { error: 'يجب إدخال كلمة السر' }),
+});
+
+export type UserData = z.infer<typeof userSchema>;
 export type SignupValues = z.infer<typeof signupSchema>;
+export type LoginValues = z.infer<typeof loginSchema>;

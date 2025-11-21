@@ -51,7 +51,7 @@ export function CurriculumTable({ items }: CurriculumTableProps) {
                 <Button size="sm" variant="outline">
                   تحرير
                 </Button>
-                <Button size="sm" variant="danger">
+                <Button size="sm" variant="destructive">
                   حذف
                 </Button>
               </TableCell>
