@@ -1,0 +1,29 @@
+// schema.prisma
+
+generator client {
+  provider   = "prisma-client-js"
+  output     = "./generated"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  supervisor
+  student
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "users")
+}
