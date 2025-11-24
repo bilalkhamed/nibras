@@ -29,3 +29,7 @@ Fix: Track failed attempts, lock account temporarily
 ## Cool Features:
 
 - [ ] Cool welcome page
+
+## Performance:
+
+- [ ] Use prisma try error instead of searching for existing user on signup

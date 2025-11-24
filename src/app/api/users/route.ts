@@ -1,14 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { userSchema, UserData } from '@/lib/auth-schemas';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { hashPassword } from '@/lib/hash-password';
-import { setAccessToken } from '@/lib/tokens';
+import {
+  ACCESS_TOKEN_COOKIE,
+  setAccessToken,
+  verifyAccessToken,
+} from '@/lib/tokens';
+import { cookies } from 'next/headers';
+import { ADMIN_ROLE } from '@/types/types';
 
 // Create a new user
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const body: UserData = await request.json();
   const { success, data, error } = userSchema.safeParse(body);
+
+  const cookie = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value || null;
+  const accessToken = cookie ? await verifyAccessToken(cookie) : null;
+
+  if (accessToken && accessToken.role !== ADMIN_ROLE) {
+    return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+  }
+
+  const isAdmin = accessToken?.role === ADMIN_ROLE;
   if (!success) {
     return NextResponse.json(z.treeifyError(error), { status: 422 });
   }
@@ -36,9 +51,15 @@ export async function POST(request: Request) {
     //   { message: 'user created', user },
     //   { status: 201 }
     // );
-    await setAccessToken(user.id, user.role);
+    if (!isAdmin) {
+      await setAccessToken(user.id, user.role);
+    }
+
     return NextResponse.json(
-      { success: true, message: 'User created successfully and logged in' },
+      {
+        success: true,
+        message: `User created successfully ${!isAdmin ? 'and logged in' : ''}`,
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -46,6 +67,41 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
-  return NextResponse.json({ message: 'User endpoint', you: request.url });
+export async function GET(request: NextRequest) {
+  const cookie = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  const accessToken = cookie ? await verifyAccessToken(cookie) : null;
+
+  if (!accessToken) {
+    return NextResponse.json(
+      { message: 'Unauthorized', accessToken, cookies: request.cookies },
+      { status: 401 }
+    );
+  }
+  if (accessToken.role !== ADMIN_ROLE) {
+    return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+  }
+
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        birthYear: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json(
+      { message: 'users retreived successfully', users },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(error, { status: 400 });
+  }
 }

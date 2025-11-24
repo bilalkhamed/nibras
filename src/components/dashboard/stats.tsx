@@ -20,7 +20,29 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
-import { dummyUsers } from './users-table';
+// import { dummyUsers } from './users-table';
+
+const dummyUsers = [
+  {
+    id: 1,
+    name: 'أحمد علي',
+    role: 'student',
+    status: 'نشطة',
+    cohort: 'الدفعة الأولى',
+    country: 'مصر',
+    age: 22,
+  },
+  {
+    id: 2,
+    name: 'سارة محمد',
+
+    role: 'teacher',
+    status: 'نشطة',
+    cohort: 'الدفعة الثانية',
+    country: 'السعودية',
+    age: 30,
+  },
+];
 
 export function UserStats() {
   const stats = useMemo(() => {

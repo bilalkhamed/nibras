@@ -1,25 +1,25 @@
-'use client';
-
 import labels from '@/lib/labels.json';
-import { AddUserForm } from '@/components/dashboard/add-user-form';
-import { UsersTable } from '@/components/dashboard/users-table';
 import { UserStats } from '@/components/dashboard/stats';
 import { DashboardTabs } from '@/components/layout/DashboardTabs';
-import { useState } from 'react';
 import Curriculum from '@/components/dashboard/curriculum/curriculum';
+import UsersSection from '@/components/dashboard/users/users-section';
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<'users' | 'curriculum' | 'stats'>(
-    'users'
-  );
+type SearchParams = {
+  tab?: 'users' | 'curriculum' | 'stats';
+};
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const activeTab = (await searchParams).tab || 'users';
+
+  // Fetch users data for UsersSection
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardTabs
-        value={activeTab}
-        onValueChange={(value) =>
-          setActiveTab(value as 'users' | 'curriculum' | 'stats')
-        }
-      />
+      <DashboardTabs value={activeTab} />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 animate-in fade-in duration-500">
@@ -29,12 +29,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Users Tab */}
-        {activeTab === 'users' && (
-          <section className="space-y-6 animate-in fade-in duration-300">
-            <AddUserForm />
-            <UsersTable />
-          </section>
-        )}
+        {activeTab === 'users' && <UsersSection />}
 
         {/* Curriculum Tab */}
         {activeTab === 'curriculum' && <Curriculum />}

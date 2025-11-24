@@ -23,50 +23,20 @@ import {
 
 interface User {
   id: string;
-  name: string;
-  age: number;
-  cohort: string;
-  country: string;
-  status: string;
-  role: 'student' | 'teacher';
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  birthYear: number;
 }
 
-export const dummyUsers: User[] = Array.from({ length: 120 }).map((_, i) => ({
-  id: `u${i + 1}`,
-  name: `طالبة ${i + 1}`,
-  age: 12 + (i % 6),
-  cohort: `دفعة ${(i % 5) + 1}`,
-  country: 'سوريا',
-  status: i % 3 === 0 ? 'نشطة' : 'معلقة',
-  role: i % 4 === 0 ? 'teacher' : 'student',
-}));
-
-dummyUsers.push(
-  {
-    id: 'u121',
-    name: 'أحمد علي',
-    age: 15,
-    cohort: 'دفعة 3',
-    country: 'مصر',
-    status: 'نشطة',
-    role: 'student',
-  },
-  {
-    id: 'u122',
-    name: 'سارة محمد',
-    age: 14,
-    cohort: 'دفعة 2',
-    country: 'الأردن',
-    status: 'معلقة',
-    role: 'teacher',
-  }
-);
-
 interface UsersTableProps {
+  users: User[];
   pageSize?: number;
 }
 
-export function UsersTable({ pageSize = 10 }: UsersTableProps) {
+export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [cohortFilter, setCohortFilter] = useState<string>('all');
@@ -75,14 +45,18 @@ export function UsersTable({ pageSize = 10 }: UsersTableProps) {
   const [page, setPage] = useState(0);
 
   const filtered = useMemo(() => {
-    return dummyUsers.filter((u) => {
-      const matchesName = u.name.includes(search.trim());
+    return users.filter((u) => {
+      const fullName =
+        `${u.firstName} ${u.middleName} ${u.lastName}`.toLowerCase();
+      const matchesName =
+        fullName.includes(search.trim().toLowerCase()) ||
+        u.email.toLowerCase().includes(search.trim().toLowerCase());
       const matchesRole = roleFilter === 'all' || u.role === roleFilter;
-      const matchesCohort = cohortFilter === 'all' || u.cohort === cohortFilter;
-      const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
+      const matchesCohort = cohortFilter === 'all';
+      const matchesStatus = statusFilter === 'all';
       return matchesName && matchesRole && matchesCohort && matchesStatus;
     });
-  }, [search, roleFilter, cohortFilter, statusFilter]);
+  }, [users, search, roleFilter, cohortFilter, statusFilter]);
 
   const pageCount = Math.ceil(filtered.length / itemsPerPage);
   const pageUsers = filtered.slice(
@@ -90,7 +64,7 @@ export function UsersTable({ pageSize = 10 }: UsersTableProps) {
     page * itemsPerPage + itemsPerPage
   );
 
-  const uniqueCohorts = Array.from(new Set(dummyUsers.map((u) => u.cohort)));
+  const age = (birthYear: number) => new Date().getFullYear() - birthYear;
 
   return (
     <div className="space-y-4">
@@ -157,11 +131,6 @@ export function UsersTable({ pageSize = 10 }: UsersTableProps) {
             </SelectTrigger>
             <SelectContent className="bg-card text-foreground border border-border">
               <SelectItem value="all">{labels.dashboard.users.all}</SelectItem>
-              {uniqueCohorts.map((cohort) => (
-                <SelectItem key={cohort} value={cohort}>
-                  {cohort}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
         </div>
@@ -275,34 +244,22 @@ export function UsersTable({ pageSize = 10 }: UsersTableProps) {
                     href={`/dashboard/users/${u.id}`}
                     className="text-primary hover:underline font-medium"
                   >
-                    {u.name}
+                    {u.firstName} {u.middleName} {u.lastName}
                   </Link>
                 </TableCell>
                 <TableCell className="text-foreground/90 dark:text-foreground">
-                  {u.age}
+                  {age(u.birthYear)}
                 </TableCell>
                 <TableCell className="text-foreground/90 dark:text-foreground">
-                  {u.cohort}
+                  N/A
                 </TableCell>
                 <TableCell className="text-foreground/90 dark:text-foreground">
-                  {u.country}
+                  N/A
                 </TableCell>
                 <TableCell className="text-foreground">
-                  <span
-                    className={
-                      u.status === 'نشطة'
-                        ? 'text-success font-medium'
-                        : 'text-warning font-medium'
-                    }
-                  >
-                    {u.status}
-                  </span>
+                  <span className="text-success font-medium">نشطة</span>
                 </TableCell>
-                <TableCell className="text-foreground">
-                  {u.role === 'student'
-                    ? labels.dashboard.users.student
-                    : labels.dashboard.users.teacher}
-                </TableCell>
+                <TableCell className="text-foreground">{u.role}</TableCell>
                 <TableCell>
                   <Link href={`/dashboard/users/${u.id}`}>
                     <Button

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import labels from '@/lib/labels.json';
 import { Users, BookOpen, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,10 +15,14 @@ interface TabItem {
 
 interface DashboardTabsProps {
   value: string;
-  onValueChange: (value: string) => void;
 }
 
-export function DashboardTabs({ value, onValueChange }: DashboardTabsProps) {
+export function DashboardTabs({ value }: DashboardTabsProps) {
+  const router = useRouter();
+
+  const handleTabChange = (newTab: string) => {
+    router.push(`/dashboard?tab=${newTab}`);
+  };
   const [sticky, setSticky] = useState(false);
 
   useEffect(() => {
@@ -71,7 +76,7 @@ export function DashboardTabs({ value, onValueChange }: DashboardTabsProps) {
           return (
             <button
               key={tab.key}
-              onClick={() => onValueChange(tab.key)}
+              onClick={() => handleTabChange(tab.key)}
               className={cn(
                 'cursor-pointer group relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-300',
                 'focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-md',

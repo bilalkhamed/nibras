@@ -6,7 +6,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  try {
+    var body = await req.json();
+  } catch {
+    return NextResponse.json({ message: 'Invalid JSON' }, { status: 400 });
+  }
+
   const { success, error, data } = loginSchema.safeParse(body);
 
   if (!success) {

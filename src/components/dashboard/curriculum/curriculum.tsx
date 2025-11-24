@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, type ElementType } from 'react';
 import labels from '@/lib/labels.json';
 import { LevelTabs } from './level-tabs';
