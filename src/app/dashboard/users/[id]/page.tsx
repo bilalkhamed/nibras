@@ -37,6 +37,17 @@ type StudentGroup = Prisma.GroupStudentGetPayload<{
   };
 }>;
 
+type SupervisorGroup = Prisma.GroupGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    supervisorId: true;
+    cohortId: true;
+    createdAt: true;
+    updatedAt: true;
+  };
+}>;
+
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const { id } = await params;
 
@@ -94,7 +105,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 
   const activeGroup = studentGroups.find((g) => g.isActive);
 
-  let supervisorGroups: Group[] = [];
+  let supervisorGroups: SupervisorGroup[] = [];
 
   if (user.role === SUPERVISOR_ROLE) {
     supervisorGroups = await prisma.group.findMany({
