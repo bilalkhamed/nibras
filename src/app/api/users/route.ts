@@ -8,8 +8,8 @@ import {
   setAccessToken,
   verifyAccessToken,
 } from '@/lib/tokens';
-import { cookies } from 'next/headers';
-import { ADMIN_ROLE } from '@/types/types';
+import { ADMIN_ROLE, Role } from '@/types/types';
+import { Prisma } from '../../../../prisma/generated';
 
 // Create a new user
 export async function POST(request: NextRequest) {
@@ -81,17 +81,51 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 
+  const searchParams = request.nextUrl.searchParams;
+
+  const role = searchParams.get('role');
+  const nameOnly = searchParams.get('nameOnly');
+  const groupStatus = searchParams.get('groupStatus');
+
+  const selectFields: Prisma.UserSelect =
+    nameOnly === 'true'
+      ? {
+          id: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        }
+      : {
+          id: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          birthYear: true,
+        };
+
+  if (![null, 'student', 'supervisor', 'admin'].includes(role)) {
+    return NextResponse.json(
+      { message: 'Invalid role filter' },
+      { status: 422 }
+    );
+  }
+
   try {
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        firstName: true,
-        middleName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        birthYear: true,
+      where: {
+        role: role ? (role as Role) : undefined,
+        groupsAsStudent:
+          groupStatus === 'inactive'
+            ? {
+                none: {
+                  isActive: true,
+                },
+              }
+            : undefined,
       },
+      select: selectFields,
       orderBy: {
         createdAt: 'desc',
       },

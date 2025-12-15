@@ -1,36 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { GroupList } from '@/components/group-list';
-import prisma from '@/lib/prisma';
+import GroupsListSection from './groups-list-section';
+import { Suspense } from 'react';
+import { GroupsListSkeleton } from '@/components/skeletons';
+import CreateGroupDialog from './create-group-dialog';
+import { Toaster } from '@/components/ui/sonner';
+import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 
 const cohorts = ['دفعة 2025', 'دفعة 2024', 'دفعة 2023'];
 
-export default async function GroupsPage() {
-  const groups = await prisma.group.findMany({
-    select: {
-      id: true,
-      cohortId: true,
-      name: true,
-      createdAt: true,
-      updatedAt: true,
-      _count: {
-        select: {
-          students: true,
-        },
-      },
-      supervisor: {
-        select: {
-          id: true,
-          firstName: true,
-          middleName: true,
-          lastName: true,
-        },
-      },
-    },
-  });
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['300', '400', '500', '600', '700'],
+});
 
+export default async function GroupsPage() {
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">المجموعات</h1>
+        <CreateGroupDialog />
+      </div>
+
       <Card className="border-border bg-card/80">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-foreground">
@@ -49,7 +40,19 @@ export default async function GroupsPage() {
         </CardContent>
       </Card>
 
-      <GroupList groups={groups} hrefBase="/dashboard/groups/" />
+      <Suspense fallback={<GroupsListSkeleton />}>
+        <GroupsListSection />
+      </Suspense>
+
+      <Toaster
+        richColors
+        className="rounded-2xl"
+        position="top-center"
+        style={{
+          fontFamily: ibmPlexSansArabic.style.fontFamily,
+          borderRadius: '1rem',
+        }}
+      />
     </div>
   );
 }

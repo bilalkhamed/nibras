@@ -23,6 +23,8 @@ export default async function UsersTablePage() {
       birthYear: true,
       country: true,
       status: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
   return <UsersTable users={users} />;

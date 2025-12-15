@@ -6,7 +6,7 @@ import getAuthSession from '@/lib/auth-session';
 import Link from 'next/link';
 import GroupInfoSection from './group-info-section';
 import { Suspense } from 'react';
-import { ProfileSectionSkeleton } from '@/components/skeletons';
+import { InfoSectionSkeleton } from '@/components/skeletons';
 
 type Props = {
   user: User;
@@ -33,11 +33,11 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <Suspense fallback={<ProfileSectionSkeleton />}>
+      <Suspense fallback={<InfoSectionSkeleton />}>
         <UserInfoSection />
       </Suspense>
       {auth.role === 'student' && (
-        <Suspense fallback={<ProfileSectionSkeleton />}>
+        <Suspense fallback={<InfoSectionSkeleton />}>
           <GroupInfoSection auth={auth} />
         </Suspense>
       )}

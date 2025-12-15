@@ -10,7 +10,7 @@ if (!secretKey) {
 const encodedKey = new TextEncoder().encode(secretKey);
 
 // Access token lives 15 minutes; adjust if needed.
-const ACCESS_TOKEN_EXP_MINUTES = 15;
+const ACCESS_TOKEN_EXP_MINUTES = 60;
 
 export async function setAccessToken(userId: string, role: Role) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);

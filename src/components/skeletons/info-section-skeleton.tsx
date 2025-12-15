@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function ProfileSectionSkeleton() {
+export function InfoSectionSkeleton() {
   return (
     <section>
       <Skeleton className="h-7 w-48 mb-3" />
