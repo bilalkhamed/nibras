@@ -51,12 +51,15 @@ export function Navbar({ extraRight, user }: NavbarProps) {
               >
                 <NotebookPen className="h-4 w-4" /> خطة البرنامج
               </Link>
-              <Link
-                href="/account"
-                className="hover:text-primary transition-colors flex items-center gap-1"
-              >
-                <UserRound className="h-4 w-4" /> حسابي
-              </Link>
+              {user != null && (
+                <Link
+                  href="/account"
+                  className="hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <UserRound className="h-4 w-4" /> حسابي
+                </Link>
+              )}
+
               {user?.role === 'admin' && (
                 <Link
                   href="/dashboard"

@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Edit3,
   LogOut,
   User as UserIcon,
   Settings as SettingsIcon,

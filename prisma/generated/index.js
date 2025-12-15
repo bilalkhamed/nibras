@@ -39,12 +39,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.0.0
- * Query Engine version: 0c19ccc313cf9911a90d99d2ac2eb0280c76c513
+ * Prisma Client JS version: 7.1.0
+ * Query Engine version: ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba
  */
 Prisma.prismaVersion = {
-  client: "7.0.0",
-  engine: "0c19ccc313cf9911a90d99d2ac2eb0280c76c513"
+  client: "7.1.0",
+  engine: "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba"
 }
 
 Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
@@ -102,6 +102,30 @@ exports.Prisma.UserScalarFieldEnum = {
   hashedPassword: 'hashedPassword',
   birthYear: 'birthYear',
   role: 'role',
+  status: 'status',
+  country: 'country',
+  phone: 'phone',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  cohortId: 'cohortId',
+  supervisorId: 'supervisorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupStudentScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  studentId: 'studentId',
+  joinedAt: 'joinedAt',
+  leftAt: 'leftAt',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -115,27 +139,40 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
 exports.Role = exports.$Enums.Role = {
   admin: 'admin',
   supervisor: 'supervisor',
   student: 'student'
 };
 
+exports.UserStatus = exports.$Enums.UserStatus = {
+  active: 'active',
+  frozen: 'frozen',
+  deleted: 'deleted'
+};
+
 exports.Prisma.ModelName = {
-  User: 'User'
+  User: 'User',
+  Group: 'Group',
+  GroupStudent: 'GroupStudent'
 };
 /**
  * Create the Client
  */
 const config = {
   "previewFeatures": [],
-  "clientVersion": "7.0.0",
-  "engineVersion": "0c19ccc313cf9911a90d99d2ac2eb0280c76c513",
+  "clientVersion": "7.1.0",
+  "engineVersion": "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba",
   "activeProvider": "postgresql",
-  "inlineSchema": "// schema.prisma\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./generated\"\n  engineType = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum Role {\n  admin\n  supervisor\n  student\n}\n\nmodel User {\n  id             String   @id @default(cuid())\n  firstName      String\n  middleName     String\n  lastName       String\n  email          String   @unique\n  hashedPassword String\n  birthYear      Int\n  role           Role     @default(student)\n  createdAt      DateTime @default(now()) @map(name: \"created_at\")\n  updatedAt      DateTime @updatedAt @map(name: \"updated_at\")\n\n  @@map(name: \"users\")\n}\n"
+  "inlineSchema": "// schema.prisma\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./generated\"\n  engineType = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum Role {\n  admin\n  supervisor\n  student\n}\n\nenum UserStatus {\n  active\n  frozen\n  deleted\n}\n\nmodel User {\n  id             String     @id @default(cuid())\n  firstName      String\n  middleName     String\n  lastName       String\n  email          String     @unique\n  hashedPassword String\n  birthYear      Int\n  role           Role       @default(student)\n  status         UserStatus @default(active)\n  country        String?\n  phone          String?\n\n  groupsAsSupervisor Group[]        @relation(\"SupervisedGroups\")\n  groupsAsStudent    GroupStudent[] @relation(\"StudentGroups\")\n\n  createdAt DateTime @default(now()) @map(name: \"created_at\")\n  updatedAt DateTime @updatedAt @map(name: \"updated_at\")\n\n  @@map(name: \"users\")\n}\n\nmodel Group {\n  id   String  @id @default(cuid())\n  name String\n  code String? @unique\n\n  cohortId     String // FK later → Cohort\n  supervisorId String\n  supervisor   User   @relation(\"SupervisedGroups\", fields: [supervisorId], references: [id])\n\n  students GroupStudent[]\n\n  // status GroupStatus @default(active)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"groups\")\n}\n\nmodel GroupStudent {\n  id String @id @default(cuid())\n\n  groupId   String\n  studentId String\n\n  group   Group @relation(fields: [groupId], references: [id])\n  student User  @relation(\"StudentGroups\", fields: [studentId], references: [id])\n\n  joinedAt DateTime  @default(now())\n  leftAt   DateTime?\n  isActive Boolean   @default(true)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  // ❌ we REMOVE this:\n  // @@unique([groupId, studentId, isActive])\n\n  @@map(\"group_students\")\n}\n"
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"middleName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthYear\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"users\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"middleName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthYear\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"UserStatus\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupsAsSupervisor\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"groupsAsStudent\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"StudentGroups\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"users\"},\"Group\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cohortId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisor\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"students\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"groups\"},\"GroupStudent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"studentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"group\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"student\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"StudentGroups\"},{\"name\":\"joinedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"leftAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"group_students\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.compilerWasm = {
       getRuntime: async () => require('./query_compiler_bg.js'),

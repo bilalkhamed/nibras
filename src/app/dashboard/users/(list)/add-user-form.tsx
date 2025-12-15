@@ -9,8 +9,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import CountrySelect from '../country-select';
+} from '@/components/ui/select';
+import CountrySelect from '@/components/country-select';
 
 export function AddUserForm() {
   return (

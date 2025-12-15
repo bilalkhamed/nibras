@@ -1,0 +1,46 @@
+import type { User } from '@/types/types';
+import UserInfoSection from './user-info-section';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { XIcon } from 'lucide-react';
+import getAuthSession from '@/lib/auth-session';
+import Link from 'next/link';
+import GroupInfoSection from './group-info-section';
+import { Suspense } from 'react';
+import { ProfileSectionSkeleton } from '@/components/skeletons';
+
+type Props = {
+  user: User;
+};
+
+export default async function ProfilePage() {
+  const auth = await getAuthSession();
+
+  if (!auth) {
+    return (
+      <Alert variant="destructive" className="max-w-2xl mx-auto">
+        <XIcon className="h-5 w-5 text-destructive" />
+        <AlertTitle>حدث خطأ</AlertTitle>
+        <AlertDescription>
+          عذرًا، لم نتمكن من توثيق هويتك. يرجى{' '}
+          <Link href="/login" className="underline ml-1">
+            تسجيل الدخول
+          </Link>{' '}
+          مرة أخرى للوصول إلى صفحة الملف الشخصي الخاصة بك.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<ProfileSectionSkeleton />}>
+        <UserInfoSection />
+      </Suspense>
+      {auth.role === 'student' && (
+        <Suspense fallback={<ProfileSectionSkeleton />}>
+          <GroupInfoSection auth={auth} />
+        </Suspense>
+      )}
+    </div>
+  );
+}

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import labels from '@/lib/labels.json';
-import { Users, BookOpen, BarChart3 } from 'lucide-react';
+import { Users, BookOpen, BarChart3, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabItem {
@@ -13,16 +13,26 @@ interface TabItem {
   icon: React.ElementType;
 }
 
+const TABS: string[] = ['users', 'groups', 'curriculum', 'statistics'];
+
 interface DashboardTabsProps {
-  value: string;
+  activeTab: 'users' | 'groups' | 'curriculum' | 'statistics';
 }
 
-export function DashboardTabs({ value }: DashboardTabsProps) {
+export function DashboardTabs() {
   const router = useRouter();
 
   const handleTabChange = (newTab: string) => {
-    router.push(`/dashboard?tab=${newTab}`);
+    router.push(`/dashboard/${newTab}`);
   };
+
+  const pathname = usePathname();
+  const pathSegments = pathname.split('/');
+  let activeTab;
+  if (TABS.includes(pathSegments[pathSegments.length - 1])) {
+    activeTab = pathSegments.pop();
+  } else activeTab = pathSegments[pathSegments.length - 2];
+
   const [sticky, setSticky] = useState(false);
 
   useEffect(() => {
@@ -42,15 +52,21 @@ export function DashboardTabs({ value }: DashboardTabsProps) {
       icon: Users,
     },
     {
+      key: 'groups',
+      label: labels.dashboard.nav.groups || 'المجموعات',
+      href: '/dashboard/groups',
+      icon: Layers,
+    },
+    {
       key: 'curriculum',
       label: labels.dashboard.nav.curriculum,
       href: '/dashboard/curriculum',
       icon: BookOpen,
     },
     {
-      key: 'stats',
+      key: 'statistics',
       label: labels.dashboard.nav.stats || labels.dashboard.stats.title,
-      href: '/dashboard/stats',
+      href: '/dashboard/statistics',
       icon: BarChart3,
     },
   ];
@@ -72,7 +88,7 @@ export function DashboardTabs({ value }: DashboardTabsProps) {
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const active = value === tab.key;
+          const active = activeTab === tab.key;
           return (
             <button
               key={tab.key}

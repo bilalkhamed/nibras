@@ -16,17 +16,71 @@ enum Role {
   student
 }
 
+enum UserStatus {
+  active
+  frozen
+  deleted
+}
+
 model User {
-  id             String   @id @default(cuid())
+  id             String     @id @default(cuid())
   firstName      String
   middleName     String
   lastName       String
-  email          String   @unique
+  email          String     @unique
   hashedPassword String
   birthYear      Int
-  role           Role     @default(student)
-  createdAt      DateTime @default(now()) @map(name: "created_at")
-  updatedAt      DateTime @updatedAt @map(name: "updated_at")
+  role           Role       @default(student)
+  status         UserStatus @default(active)
+  country        String?
+  phone          String?
+
+  groupsAsSupervisor Group[]        @relation("SupervisedGroups")
+  groupsAsStudent    GroupStudent[] @relation("StudentGroups")
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   @@map(name: "users")
+}
+
+model Group {
+  id   String  @id @default(cuid())
+  name String
+  code String? @unique
+
+  cohortId     String // FK later → Cohort
+  supervisorId String
+  supervisor   User   @relation("SupervisedGroups", fields: [supervisorId], references: [id])
+
+  students GroupStudent[]
+
+  // status GroupStatus @default(active)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("groups")
+}
+
+model GroupStudent {
+  id String @id @default(cuid())
+
+  groupId   String
+  studentId String
+
+  group   Group @relation(fields: [groupId], references: [id])
+  student User  @relation("StudentGroups", fields: [studentId], references: [id])
+
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+  isActive Boolean   @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // ❌ we REMOVE this:
+  // @@unique([groupId, studentId, isActive])
+
+  @@map("group_students")
 }

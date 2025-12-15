@@ -24,7 +24,12 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html
+      lang="ar"
+      dir="rtl"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <body
         className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
       >

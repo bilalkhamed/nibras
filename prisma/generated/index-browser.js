@@ -24,12 +24,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.0.0
- * Query Engine version: 0c19ccc313cf9911a90d99d2ac2eb0280c76c513
+ * Prisma Client JS version: 7.1.0
+ * Query Engine version: ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba
  */
 Prisma.prismaVersion = {
-  client: "7.0.0",
-  engine: "0c19ccc313cf9911a90d99d2ac2eb0280c76c513"
+  client: "7.1.0",
+  engine: "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -129,6 +129,30 @@ exports.Prisma.UserScalarFieldEnum = {
   hashedPassword: 'hashedPassword',
   birthYear: 'birthYear',
   role: 'role',
+  status: 'status',
+  country: 'country',
+  phone: 'phone',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  cohortId: 'cohortId',
+  supervisorId: 'supervisorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupStudentScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  studentId: 'studentId',
+  joinedAt: 'joinedAt',
+  leftAt: 'leftAt',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -142,14 +166,27 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
 exports.Role = exports.$Enums.Role = {
   admin: 'admin',
   supervisor: 'supervisor',
   student: 'student'
 };
 
+exports.UserStatus = exports.$Enums.UserStatus = {
+  active: 'active',
+  frozen: 'frozen',
+  deleted: 'deleted'
+};
+
 exports.Prisma.ModelName = {
-  User: 'User'
+  User: 'User',
+  Group: 'Group',
+  GroupStudent: 'GroupStudent'
 };
 
 /**

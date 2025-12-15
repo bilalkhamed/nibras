@@ -14,7 +14,8 @@
     "cancel": "إلغاء",
     "continue": "متابعة",
     "startNow": "ابدأي الآن",
-    "learnMore": "تعرفي على البرامج"
+    "learnMore": "تعرفي على البرامج",
+    "null": "غير محدد"
   },
   "navbar": {},
   "home": {
@@ -88,7 +89,7 @@
     "title": {
       "users": "إدارة المستخدمين",
       "curriculum": "إدارة المناهج",
-      "stats": "الإحصائيات والتقارير"
+      "statistics": "الإحصائيات والتقارير"
     },
     "subtitle": "إدارة النظام والمستخدمين والمناهج",
     "commonPeek": "القائمة",
@@ -98,7 +99,8 @@
       "curriculum": "المناهج",
       "stats": "الإحصائيات",
       "reports": "التقارير",
-      "settings": "الإعدادات"
+      "settings": "الإعدادات",
+      "groups": "المجموعات"
     },
     "users": {
       "sectionTitle": "إدارة المستخدمين",
@@ -116,10 +118,11 @@
       "filterCohort": "تصفية حسب الدفعة",
       "filterStatus": "تصفية حسب الحالة",
       "student": "طالبة",
-      "teacher": "مشرفة",
+      "supervisor": "مشرفة",
       "admin": "مسؤولة",
       "active": "نشطة",
-      "suspended": "معلقة",
+      "frozen": "معلقة",
+      "deleted": "حساب محذوف",
       "inactive": "غير نشطة",
       "all": "الكل",
       "create": "إنشاء المستخدم",

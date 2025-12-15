@@ -29,7 +29,13 @@ Fix: Track failed attempts, lock account temporarily
 ## Cool Features:
 
 - [ ] Cool welcome page
+- [] Update to CUID2 for IDs
 
 ## Performance:
 
 - [ ] Use prisma try error instead of searching for existing user on signup
+- [] Remove user fetch from /app/layout.tsx
+
+## Error handling:
+
+- [ ] Handle all "Unexpected end of JSON input"

@@ -1,7 +1,7 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { Role } from '@/types/types';
+import { AccessTokenPayload, Role } from '@/types/types';
 
 const secretKey = process.env.SESSION_SECRET;
 if (!secretKey) {
@@ -27,12 +27,6 @@ export async function setAccessToken(userId: string, role: Role) {
 export async function deleteAccessToken() {
   (await cookies()).delete('accessToken');
 }
-
-type AccessTokenPayload = {
-  userId: string;
-  role: Role;
-  expiresAt: Date;
-};
 
 export async function signAccessToken(payload: AccessTokenPayload) {
   return new SignJWT(payload)

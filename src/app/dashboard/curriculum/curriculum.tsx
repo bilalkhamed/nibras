@@ -2,9 +2,9 @@
 
 import { useState, type ElementType } from 'react';
 import labels from '@/lib/labels.json';
-import { LevelTabs } from './level-tabs';
-import { WeekNavigator } from './week-navigator';
-import { CurriculumTable } from './curriculum-table';
+import { LevelTabs } from './components/level-tabs';
+import { WeekNavigator } from './components/week-navigator';
+import { CurriculumTable } from './components/curriculum-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Video, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
