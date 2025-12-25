@@ -1,17 +1,8 @@
 import { cookies } from 'next/headers';
-import { AddUserForm } from '../add-user-form';
-import { UsersTable } from '../users-table';
+import { AddUserForm } from '@/app/dashboard/users/(list)/add-user-form';
+import { UsersTable } from '@/app/dashboard/users/(list)/table';
 import { ACCESS_TOKEN_COOKIE } from '@/lib/tokens';
-
-type User = {
-  id: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  birthYear: number;
-};
+import { User } from '@/types/types';
 
 export default async function UsersSection() {
   const cookie = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;

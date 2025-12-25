@@ -134,24 +134,24 @@ export default function SignupPage() {
               <FormField
                 field="firstName"
                 label="الاسم الأول"
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('firstName')}
+                handleOnBlur={handleOnBlur('firstName')}
                 error={errors.firstName || ''}
                 value={values.firstName}
               />
               <FormField
                 field="middleName"
                 label="اسم الأب"
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('middleName')}
+                handleOnBlur={handleOnBlur('middleName')}
                 error={errors.middleName || ''}
                 value={values.middleName}
               />
               <FormField
                 field="lastName"
                 label="اسم العائلة"
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('lastName')}
+                handleOnBlur={handleOnBlur('lastName')}
                 error={errors.lastName || ''}
                 value={values.lastName}
               />
@@ -159,16 +159,16 @@ export default function SignupPage() {
                 field="email"
                 label={labels.common.email}
                 type="email"
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('email')}
+                handleOnBlur={handleOnBlur('email')}
                 error={errors.email || ''}
                 value={values.email}
               />
               <FormField
                 field="birthYear"
                 label="سنة الميلاد بالميلادي"
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('birthYear')}
+                handleOnBlur={handleOnBlur('birthYear')}
                 type="number"
                 error={errors.birthYear || ''}
                 value={values.birthYear.toString()}
@@ -176,8 +176,8 @@ export default function SignupPage() {
               <PasswordField
                 field="password"
                 label={labels.common.password}
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('password')}
+                handleOnBlur={handleOnBlur('password')}
                 error={errors.password || ''}
                 value={values.password}
               />
@@ -185,8 +185,8 @@ export default function SignupPage() {
               <FormField
                 field="confirmPassword"
                 label={labels.common.confirmPassword}
-                handleChange={handleChange}
-                handleOnBlur={handleOnBlur}
+                handleChange={handleChange('confirmPassword')}
+                handleOnBlur={handleOnBlur('confirmPassword')}
                 type="password"
                 error={errors.confirmPassword || ''}
                 value={values.confirmPassword}

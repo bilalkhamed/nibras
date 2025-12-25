@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { groupId: string; studentId: string } }
+  { params }: { params: Promise<{ groupId: string; studentId: string }> }
 ) {
   const auth = await getAuthSession();
   if (!auth) {

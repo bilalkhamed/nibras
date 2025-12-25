@@ -4,7 +4,7 @@ import {
   CohortLevels,
   CohortStatus,
   User as PrismaUser,
-} from '../../prisma/generated';
+} from '@prisma/client';
 import labels from '@/lib/labels.json';
 
 export const ADMIN_ROLE = 'admin';

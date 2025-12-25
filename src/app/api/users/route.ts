@@ -4,7 +4,7 @@ import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
 import { ADMIN_ROLE, INVITED_STATUS, Role, STUDENT_ROLE } from '@/types/types';
-import { Prisma } from '../../../../prisma/generated';
+import { Prisma } from '@prisma/client';
 import { generateInvite } from '@/lib/hash';
 
 // Create a new user

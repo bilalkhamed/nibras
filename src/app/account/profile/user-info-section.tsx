@@ -45,7 +45,7 @@ export default async function UserInfoSection() {
             />
             <InfoField
               label="البريد الإلكتروني"
-              value={user.email}
+              value={user.email || 'غير محدد'}
               icon={<MailIcon className="h-4 w-4" />}
             />
             <InfoField

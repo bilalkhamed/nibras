@@ -17,7 +17,7 @@ type FormFieldProps = {
   leftSlot?: ReactNode;
   error?: string | null;
   value: string;
-  handleChange: () => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleOnBlur: () => void;
 };
 

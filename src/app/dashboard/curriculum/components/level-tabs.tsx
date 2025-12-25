@@ -9,16 +9,23 @@ import { useCallback } from 'react';
 interface LevelTabsProps {
   // optional override; if undefined we read from URL
   activeIndex?: number;
+  onChange?: (i: number) => void;
 }
 
-export function LevelTabs({ activeIndex }: LevelTabsProps) {
-  const levels = labels.dashboard.curriculum.levels;
+export function LevelTabs({ activeIndex, onChange }: LevelTabsProps) {
+  const levelsObj = labels.dashboard.curriculum.levels;
+  const levels = Object.values(levelsObj);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const currentLevelFromUrl = Number(searchParams.get('level') ?? '0');
-  const resolvedActive = isNaN(currentLevelFromUrl) ? 0 : currentLevelFromUrl;
+  const resolvedActive =
+    activeIndex !== undefined
+      ? activeIndex
+      : isNaN(currentLevelFromUrl)
+      ? 0
+      : currentLevelFromUrl;
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -30,8 +37,12 @@ export function LevelTabs({ activeIndex }: LevelTabsProps) {
   );
 
   const handleSelect = (i: number) => {
-    const qs = createQueryString('level', String(i));
-    router.push(`${pathname}?${qs}`);
+    if (onChange) {
+      onChange(i);
+    } else {
+      const qs = createQueryString('level', String(i));
+      router.push(`${pathname}?${qs}`);
+    }
   };
 
   return (

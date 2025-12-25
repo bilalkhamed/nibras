@@ -8,9 +8,14 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 interface WeekNavigatorProps {
   week?: number; // optional override; otherwise read from URL (?week)
   maxWeeks?: number;
+  onChange?: (week: number) => void;
 }
 
-export function WeekNavigator({ week, maxWeeks = 16 }: WeekNavigatorProps) {
+export function WeekNavigator({
+  week,
+  maxWeeks = 16,
+  onChange,
+}: WeekNavigatorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -22,7 +27,7 @@ export function WeekNavigator({ week, maxWeeks = 16 }: WeekNavigatorProps) {
     ? Math.min(Math.max(parsed, 1), maxWeeks)
     : 1;
 
-  const currentWeek = urlWeek;
+  const currentWeek = week !== undefined ? week : urlWeek;
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -35,8 +40,12 @@ export function WeekNavigator({ week, maxWeeks = 16 }: WeekNavigatorProps) {
 
   const setWeek = (next: number) => {
     const clamped = Math.min(Math.max(next, 1), maxWeeks);
-    const qs = createQueryString('week', String(clamped));
-    router.replace(`${pathname}?${qs}`);
+    if (onChange) {
+      onChange(clamped);
+    } else {
+      const qs = createQueryString('week', String(clamped));
+      router.replace(`${pathname}?${qs}`);
+    }
   };
 
   return (

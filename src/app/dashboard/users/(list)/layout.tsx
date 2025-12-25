@@ -1,4 +1,4 @@
-import { AddUserForm } from './add-user-form_v0';
+import { AddUserForm } from './add-user-form';
 
 export default function UsersLayout({
   children,

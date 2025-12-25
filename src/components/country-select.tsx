@@ -55,25 +55,28 @@ export default function CountrySelect() {
             <CommandList>
               <CommandEmpty>لم يتم العثور على دولة.</CommandEmpty>
               <CommandGroup>
-                {Object.keys(labels.countries).map((country) => (
-                  <CommandItem
-                    key={country}
-                    value={labels.countries[country]}
-                    onSelect={(currentValue) => {
-                      setValue(currentValue === value ? '' : currentValue);
-                      setOpen(false);
-                    }}
-                    className="cursor-pointer text-right"
-                  >
-                    {labels.countries[country]}
-                    <Check
-                      className={cn(
-                        'mr-auto h-4 w-4 text-primary',
-                        value === country ? 'opacity-100' : 'opacity-0'
-                      )}
-                    />
-                  </CommandItem>
-                ))}
+                {Object.keys(labels.countries).map((country) => {
+                  const countryKey = country as keyof typeof labels.countries;
+                  return (
+                    <CommandItem
+                      key={country}
+                      value={labels.countries[countryKey]}
+                      onSelect={(currentValue) => {
+                        setValue(currentValue === value ? '' : currentValue);
+                        setOpen(false);
+                      }}
+                      className="cursor-pointer text-right"
+                    >
+                      {labels.countries[countryKey]}
+                      <Check
+                        className={cn(
+                          'mr-auto h-4 w-4 text-primary',
+                          value === country ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>
