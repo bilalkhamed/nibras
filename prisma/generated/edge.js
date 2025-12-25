@@ -39,12 +39,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 7.1.0
- * Query Engine version: ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba
+ * Prisma Client JS version: 7.2.0
+ * Query Engine version: 0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
  */
 Prisma.prismaVersion = {
-  client: "7.1.0",
-  engine: "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba"
+  client: "7.2.0",
+  engine: "0c8ef2ce45c83248ab3df073180d5eda9e8be7a3"
 }
 
 Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
@@ -207,8 +207,8 @@ exports.Prisma.ModelName = {
  */
 const config = {
   "previewFeatures": [],
-  "clientVersion": "7.1.0",
-  "engineVersion": "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba",
+  "clientVersion": "7.2.0",
+  "engineVersion": "0c8ef2ce45c83248ab3df073180d5eda9e8be7a3",
   "activeProvider": "postgresql",
   "inlineSchema": "// schema.prisma\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./generated\"\n  engineType = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum Role {\n  admin\n  supervisor\n  student\n}\n\nenum UserStatus {\n  active\n  suspended\n  invited\n  deleted\n}\n\nenum CohortStatus {\n  active\n  archived\n}\n\nenum CohortLevels {\n  level1\n  level2\n  level3\n  level4\n}\n\nmodel User {\n  id             String     @id @default(cuid(2))\n  firstName      String\n  middleName     String\n  lastName       String\n  email          String?    @unique\n  hashedPassword String?\n  birthYear      Int\n  role           Role       @default(student)\n  status         UserStatus @default(active)\n  country        String?\n  phone          String?\n\n  groupsAsSupervisor Group[]        @relation(\"SupervisedGroups\")\n  groupsAsStudent    GroupStudent[] @relation(\"StudentGroups\")\n\n  cohort   Cohort? @relation(\"CohortStudents\", fields: [cohortId], references: [id])\n  cohortId String?\n\n  invite Invite?\n\n  createdAt DateTime @default(now()) @map(name: \"created_at\")\n  updatedAt DateTime @updatedAt @map(name: \"updated_at\")\n\n  @@index([role])\n  @@index([role, status])\n  @@index([cohortId, role])\n  @@map(\"users\")\n}\n\nmodel Group {\n  id   String @id @default(cuid(2))\n  name String\n  code String @unique\n\n  cohortId     String\n  cohort       Cohort @relation(fields: [cohortId], references: [id])\n  supervisorId String\n  supervisor   User   @relation(\"SupervisedGroups\", fields: [supervisorId], references: [id])\n\n  students GroupStudent[]\n\n  // status GroupStatus @default(active)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([cohortId, name])\n  @@index([cohortId])\n  @@index([supervisorId])\n  @@index([cohortId, supervisorId])\n  @@map(\"groups\")\n}\n\nmodel Cohort {\n  id           String       @id @default(cuid(2))\n  name         String\n  slug         String       @unique\n  startDate    DateTime\n  endDate      DateTime?\n  entryLevel   CohortLevels @default(level1)\n  groups       Group[]\n  students     User[]       @relation(\"CohortStudents\")\n  status       CohortStatus @default(active)\n  label        String\n  currentLevel CohortLevels @default(level1)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([status])\n  @@map(\"cohorts\")\n}\n\nmodel GroupStudent {\n  id String @id @default(cuid(2))\n\n  groupId   String\n  studentId String\n\n  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)\n  student User  @relation(\"StudentGroups\", fields: [studentId], references: [id], onDelete: Cascade)\n\n  joinedAt DateTime  @default(now())\n  leftAt   DateTime?\n  isActive Boolean   @default(true)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([groupId, isActive])\n  @@index([studentId, isActive])\n  @@map(\"group_students\")\n}\n\nmodel Invite {\n  id            String @id @default(cuid(2))\n  userId        String @unique\n  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n  selector      String @unique\n  validatorHash String @map(\"validator_hash\")\n\n  attempts Int @default(0)\n\n  expiresAt DateTime  @map(\"expires_at\")\n  usedAt    DateTime? @map(\"used_at\")\n  createdAt DateTime  @default(now()) @map(\"created_at\")\n  updatedAt DateTime  @updatedAt @map(\"updated_at\")\n\n  @@index([selector])\n  @@map(\"invites\")\n}\n"
 }
