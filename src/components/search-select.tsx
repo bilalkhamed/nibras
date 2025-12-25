@@ -32,6 +32,8 @@ interface SearchSelectProps {
   searchPlaceholder?: string;
   emptyMessage?: string;
   disabled?: boolean;
+  name?: string;
+  onBlur?: () => void;
 }
 
 export default function SearchSelect({
@@ -42,6 +44,8 @@ export default function SearchSelect({
   searchPlaceholder = 'ابحث...',
   emptyMessage = 'لم يتم العثور على نتائج.',
   disabled = false,
+  name,
+  onBlur,
 }: SearchSelectProps) {
   const [open, setOpen] = useState(false);
 
@@ -50,14 +54,22 @@ export default function SearchSelect({
 
   return (
     <div dir="rtl">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          if (open && !next) {
+            onBlur?.(); // 👈 HERE
+          }
+          setOpen(next);
+        }}
+      >
+        <PopoverTrigger asChild name={name}>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
             disabled={disabled}
-            className="h-9 w-full justify-between rounded-xl bg-input/30 border-border text-foreground"
+            className="h-9 w-full justify-between rounded-xl bg-card border-border text-foreground"
           >
             {selectedLabel}
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
@@ -66,7 +78,7 @@ export default function SearchSelect({
 
         <PopoverContent
           align="end"
-          className="w-[var(--radix-popover-trigger-width)] p-0 bg-card text-foreground border border-border rounded-xl shadow-lg"
+          className="w-[var(--radix-popover-trigger-width)] p-0 bg-card text-foreground border border-border rounded-xl shadow-lg "
         >
           <Command
             className="w-full bg-card text-foreground rounded-xl"
@@ -78,13 +90,14 @@ export default function SearchSelect({
             />
             <CommandList>
               <CommandEmpty>{emptyMessage}</CommandEmpty>
-              <CommandGroup>
+              <CommandGroup className="max-h-60 overflow-y-auto">
                 {options.map((option) => (
                   <CommandItem
                     key={option.id}
                     value={option.label}
                     onSelect={() => {
                       onChange(value === option.id ? '' : option.id);
+                      onBlur?.();
                       setOpen(false);
                     }}
                     className="cursor-pointer text-right"

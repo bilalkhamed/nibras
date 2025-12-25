@@ -22,8 +22,12 @@ type StudentGroup = Prisma.GroupStudentGetPayload<{
     group: {
       select: {
         id: true;
-        cohortId: true;
         name: true;
+        cohort: {
+          select: {
+            label: true;
+          };
+        };
         supervisor: {
           select: {
             id: true;
@@ -88,7 +92,11 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
           select: {
             id: true,
             name: true,
-            cohortId: true,
+            cohort: {
+              select: {
+                label: true,
+              },
+            },
             supervisor: {
               select: {
                 id: true,
@@ -125,16 +133,6 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 
   const age = new Date().getFullYear() - user.birthYear;
   const fullName = `${user.firstName} ${user.middleName} ${user.lastName}`;
-  const roleLabel = {
-    admin: 'مسؤولة',
-    supervisor: 'مشرفة',
-    student: 'طالبة',
-  } as const;
-  const statusLabel = {
-    active: 'نشطة',
-    frozen: 'مجمّدة',
-    deleted: 'محذوفة',
-  } as const;
 
   return (
     <div className="space-y-6">
@@ -151,13 +149,22 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CopyValue label="البريد الإلكتروني" value={user.email} />
+              <CopyValue
+                label="البريد الإلكتروني"
+                value={user.email || labels.common.null}
+              />
               <CopyValue
                 label="رقم الهاتف"
                 value={user.phone || labels.common.null}
               />
-              <InfoField label="الدور" value={roleLabel[user.role]} />
-              <InfoField label="الحالة" value={statusLabel[user.status]} />
+              <InfoField
+                label="الدور"
+                value={labels.dashboard.users[user.role]}
+              />
+              <InfoField
+                label="الحالة"
+                value={labels.dashboard.users[user.status]}
+              />
               <InfoField label="سنة الميلاد" value={String(user.birthYear)} />
               <InfoField label="العمر" value={`${age} سنة`} />
               <InfoField
@@ -270,7 +277,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                           {item.group.supervisor.lastName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          الدفعة: {item.group.cohortId}
+                          الدفعة: {item.group.cohort.label}
                         </p>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
@@ -356,15 +363,23 @@ function RoleBadge({ role }: { role: 'admin' | 'supervisor' | 'student' }) {
   return <Badge className={`border ${cfg.className}`}>{cfg.label}</Badge>;
 }
 
-function StatusBadge({ status }: { status: 'active' | 'frozen' | 'deleted' }) {
+function StatusBadge({
+  status,
+}: {
+  status: 'active' | 'suspended' | 'invited' | 'deleted';
+}) {
   const map = {
     active: {
       label: 'نشطة',
       className: 'bg-success/15 text-success border-success/30',
     },
-    frozen: {
+    suspended: {
       label: 'مجمّدة',
       className: 'bg-warning/15 text-warning border-warning/30',
+    },
+    invited: {
+      label: 'مدعوة',
+      className: 'bg-info/15 text-info border-info/30',
     },
     deleted: {
       label: 'محذوفة',

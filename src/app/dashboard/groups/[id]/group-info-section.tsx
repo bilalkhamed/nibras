@@ -3,15 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Mail,
-  Phone,
-  User,
-  Edit,
-  Archive,
-  Trash2,
-  ExternalLink,
-} from 'lucide-react';
+import { User, Edit, Archive, Trash2, ExternalLink } from 'lucide-react';
 import { InfoField } from '@/components/info-field';
 import {
   Tooltip,
@@ -20,6 +12,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Link from 'next/link';
+import { CohortLevels } from '@/types/types';
+import labels from '@/lib/labels.json';
 
 interface GroupInfoSectionProps {
   groupName: string;
@@ -33,6 +27,11 @@ interface GroupInfoSectionProps {
     email?: string;
     phone?: string;
   };
+  cohort: {
+    id: string;
+    name: string;
+    currentLevel: CohortLevels;
+  };
 }
 
 export default function GroupInfoSection({
@@ -40,6 +39,7 @@ export default function GroupInfoSection({
   cohortId,
   studentCount,
   supervisor,
+  cohort,
 }: GroupInfoSectionProps) {
   return (
     <TooltipProvider>
@@ -80,7 +80,12 @@ export default function GroupInfoSection({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InfoField label="اسم المجموعة" value={groupName} />
-              <InfoField label="الدفعة" value={`دفعة ${cohortId}`} />
+              <InfoField
+                label="الدفعة"
+                value={`${cohort.name} - ${
+                  labels.dashboard.curriculum.levels[cohort.currentLevel]
+                }`}
+              />
               <InfoField label="عدد الطالبات" value={`${studentCount} طالبة`} />
             </div>
           </div>

@@ -132,6 +132,7 @@ exports.Prisma.UserScalarFieldEnum = {
   status: 'status',
   country: 'country',
   phone: 'phone',
+  cohortId: 'cohortId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -146,6 +147,20 @@ exports.Prisma.GroupScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CohortScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  entryLevel: 'entryLevel',
+  status: 'status',
+  label: 'label',
+  currentLevel: 'currentLevel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.GroupStudentScalarFieldEnum = {
   id: 'id',
   groupId: 'groupId',
@@ -153,6 +168,18 @@ exports.Prisma.GroupStudentScalarFieldEnum = {
   joinedAt: 'joinedAt',
   leftAt: 'leftAt',
   isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InviteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  selector: 'selector',
+  validatorHash: 'validatorHash',
+  attempts: 'attempts',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -179,14 +206,29 @@ exports.Role = exports.$Enums.Role = {
 
 exports.UserStatus = exports.$Enums.UserStatus = {
   active: 'active',
-  frozen: 'frozen',
+  suspended: 'suspended',
+  invited: 'invited',
   deleted: 'deleted'
+};
+
+exports.CohortLevels = exports.$Enums.CohortLevels = {
+  level1: 'level1',
+  level2: 'level2',
+  level3: 'level3',
+  level4: 'level4'
+};
+
+exports.CohortStatus = exports.$Enums.CohortStatus = {
+  active: 'active',
+  archived: 'archived'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
   Group: 'Group',
-  GroupStudent: 'GroupStudent'
+  Cohort: 'Cohort',
+  GroupStudent: 'GroupStudent',
+  Invite: 'Invite'
 };
 
 /**

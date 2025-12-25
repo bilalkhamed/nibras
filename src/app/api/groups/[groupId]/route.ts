@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
 import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/prisma';
-import { generateGroupCode } from '@/lib/utils';
+import { generateSixCharCode } from '@/lib/utils';
 
 export async function GET(
   request: NextRequest,

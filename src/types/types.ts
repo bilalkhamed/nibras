@@ -1,40 +1,60 @@
-import { Role, UserStatus } from '../../prisma/generated';
+import {
+  Role,
+  UserStatus,
+  CohortLevels,
+  CohortStatus,
+  User as PrismaUser,
+} from '../../prisma/generated';
+import labels from '@/lib/labels.json';
 
 export const ADMIN_ROLE = 'admin';
 export const SUPERVISOR_ROLE = 'supervisor';
 export const STUDENT_ROLE = 'student';
 
-export const ACTIVE_STATUS = 'active';
-export const FROZEN_STATUS = 'frozen';
-export const DELETED_STATUS = 'deleted';
+export const ACTIVE_STATUS = UserStatus.active;
+export const SUSPENDED_STATUS = UserStatus.suspended;
+export const DELETED_STATUS = UserStatus.deleted;
+export const INVITED_STATUS = UserStatus.invited;
 
-export { Role, UserStatus };
+export { Role, UserStatus, CohortLevels, CohortStatus };
 
 export type AccessTokenPayload = {
   userId: string;
   role: Role;
   expiresAt: Date;
+  status: UserStatus;
 };
 
-export interface User {
-  id: string;
-  email: string;
-  role: Role;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  birthYear: number;
-  status: UserStatus;
-  country?: string | null;
-  phone?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type CountryCode = keyof typeof labels.countries;
+
+// export interface User {
+//   id: string;
+//   email: string;
+//   role: Role;
+//   firstName: string;
+//   middleName: string;
+//   lastName: string;
+//   birthYear: number;
+//   status: UserStatus;
+//   country?: CountryCode | null;
+//   phone?: string | null;
+//   cohort?: Cohort | null;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+export type User = Omit<
+  PrismaUser,
+  'hashedPassword' | 'country' | 'cohortId'
+> & {
+  country?: CountryCode | null;
+  cohortId?: string | null;
+  cohort?: Cohort | null;
+};
 
 export interface Group {
   id: string;
   name: string;
-  cohortId: string;
   createdAt: Date;
   updatedAt: Date;
   supervisor: {
@@ -43,7 +63,17 @@ export interface Group {
     middleName: string;
     lastName: string;
   };
+  cohort: {
+    currentLevel: CohortLevels;
+    name: string;
+  };
   _count: {
     students: number;
   };
 }
+
+export type Cohort = {
+  id: string;
+  name: string;
+  currentLevel?: CohortLevels;
+};

@@ -39,3 +39,6 @@ Fix: Track failed attempts, lock account temporarily
 ## Error handling:
 
 - [ ] Handle all "Unexpected end of JSON input"
+
+## UI FIXES/IMPROVEMENTS:
+  - [] Fix scroll issue with search select

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/prisma';
-import { generateGroupCode } from '@/lib/utils';
+import { generateSixCharCode } from '@/lib/utils';
 
 type GroupData = {
   name: string;
@@ -57,3 +57,24 @@ export async function GET(request: NextRequest) {
     Which is better?
 
 */
+
+export async function POST(request: NextRequest) {
+  const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  if (!accessToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const payload = await verifyAccessToken(accessToken);
+  if (!payload || payload.role !== ADMIN_ROLE) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const invite = await prisma.invite.create({
+    data: {
+      selector: generateSixCharCode(),
+      validatorHash: generateSixCharCode(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      userId: 'cmi8u647n0000our2sey70edx',
+    },
+  });
+}

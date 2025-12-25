@@ -6,6 +6,7 @@ import {
   User,
   UserCheck,
   Users,
+  XCircleIcon,
   XIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -108,7 +109,7 @@ export default async function GroupInfoSection({ auth }: Props) {
             </>
           ) : (
             <Alert variant="warning" className="max-w-2xl mx-auto">
-              <XIcon className="h-5 w-5 text-warning" />
+              <XCircleIcon className="h-5 w-5 text-warning" />
               <AlertTitle>لا توجد مجموعة نشطة</AlertTitle>
               <AlertDescription>
                 عذرًا، لا يبدو أن لديك مجموعة نشطة في الوقت الحالي. يرجى التواصل

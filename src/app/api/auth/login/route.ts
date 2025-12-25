@@ -1,5 +1,5 @@
 import { loginSchema } from '@/lib/auth-schemas';
-import { comparePasswords } from '@/lib/hash-password';
+import { comparePasswords } from '@/lib/hash';
 import prisma from '@/lib/prisma';
 import { setAccessToken } from '@/lib/tokens';
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,10 +22,16 @@ export async function POST(req: NextRequest) {
 
   const foundUser = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true, role: true, hashedPassword: true },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      hashedPassword: true,
+    },
   });
 
-  if (!foundUser) {
+  if (!foundUser || !foundUser.hashedPassword) {
     return NextResponse.json(
       {
         error: 'Invalid email or password',
@@ -48,7 +54,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await setAccessToken(foundUser.id, foundUser.role);
+  await setAccessToken(foundUser.id, foundUser.role, foundUser.status);
   return NextResponse.json({ success: true }, { status: 200 });
 }
 

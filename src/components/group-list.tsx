@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, UserRound } from 'lucide-react';
+import { Users, UserRound, XCircleIcon } from 'lucide-react';
 import { Group } from '@/types/types';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type GroupListProps = {
   groups: Group[];
@@ -12,9 +13,15 @@ type GroupListProps = {
 export function GroupList({ groups, hrefBase }: GroupListProps) {
   if (!groups.length) {
     return (
-      <p className="text-sm text-muted-foreground text-right">
-        لا توجد مجموعات حالياً.
-      </p>
+      <div className="flex items-center justify-center">
+        <Alert variant="warning" className="max-w-md">
+          <XCircleIcon className="h-4 w-4 shrink-0 mr-2" />
+          <AlertTitle>لا توجد مجموعات متاحة.</AlertTitle>
+          <AlertDescription>
+            يمكنك إنشاء مجمموعة جديدة من خلال الزر في الأعلى
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
@@ -31,7 +38,7 @@ export function GroupList({ groups, hrefBase }: GroupListProps) {
                     {group.name}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    الدفعة: {group.cohortId}
+                    الدفعة: {group.cohort.name}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">

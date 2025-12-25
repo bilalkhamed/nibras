@@ -6,7 +6,7 @@ import {
 } from '@/lib/tokens';
 import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/prisma';
-import { generateGroupCode } from '@/lib/utils';
+import { generateSixCharCode } from '@/lib/utils';
 import { Prisma } from '../../../../prisma/generated';
 
 type GroupData = {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         name,
         cohortId,
         supervisorId,
-        code: generateGroupCode(),
+        code: generateSixCharCode(),
       },
     });
     return NextResponse.json(

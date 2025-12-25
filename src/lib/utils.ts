@@ -12,7 +12,7 @@ export function formatRole(role: string) {
   return role;
 }
 
-export function generateGroupCode() {
+export function generateSixCharCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
   const array = new Uint32Array(6);

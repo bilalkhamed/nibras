@@ -1,12 +1,14 @@
 import prisma from './prisma';
-import { AccessTokenPayload, User } from '@/types/types';
+import { AccessTokenPayload, CountryCode, User } from '@/types/types';
 import getAuthSession from './auth-session';
 
-export async function getCurrentUser(authSession?: AccessTokenPayload) {
+export async function getCurrentUser(
+  authSession?: AccessTokenPayload
+): Promise<User | null> {
   const auth = authSession ?? (await getAuthSession());
   if (!auth) return null;
 
-  const user: User | null = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: auth.userId },
     select: {
       id: true,
@@ -24,5 +26,6 @@ export async function getCurrentUser(authSession?: AccessTokenPayload) {
     },
   });
 
-  return user;
+  if (!user) return null;
+  return { ...user, country: user.country as CountryCode };
 }

@@ -17,9 +17,13 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 async function GroupStudentsSection({
   groupId,
   groupStudents,
+  cohortId,
+  cohortName,
 }: {
   groupId: string;
   groupStudents: GroupStudent[];
+  cohortId: string;
+  cohortName: string;
 }) {
   // TODO: Replace with actual data fetching
   return (
@@ -28,7 +32,11 @@ async function GroupStudentsSection({
         <CardTitle className="text-lg font-semibold">
           الطالبات ({groupStudents.length})
         </CardTitle>
-        <AddStudentDialog groupId={groupId} />
+        <AddStudentDialog
+          groupId={groupId}
+          cohortId={cohortId}
+          cohortName={cohortName}
+        />
       </CardHeader>
       <CardContent>
         <GroupStudentsTable groupId={groupId} groupStudents={groupStudents} />
@@ -49,6 +57,9 @@ export default async function GroupDetailPage({
     include: {
       supervisor: {
         select: { id: true, firstName: true, middleName: true, lastName: true },
+      },
+      cohort: {
+        select: { id: true, name: true, currentLevel: true },
       },
       students: {
         where: { isActive: true },
@@ -87,15 +98,16 @@ export default async function GroupDetailPage({
         cohortId={group.cohortId}
         studentCount={group.students.length}
         supervisor={group.supervisor}
+        cohort={group.cohort}
       />
 
       {/* Students Section with Suspense */}
-      <Suspense fallback={<TableSkeleton rows={5} columns={4} />}>
-        <GroupStudentsSection
-          groupId={group.id}
-          groupStudents={group.students}
-        />
-      </Suspense>
+      <GroupStudentsSection
+        groupId={group.id}
+        groupStudents={group.students}
+        cohortId={group.cohort.id}
+        cohortName={group.cohort.name}
+      />
 
       <Toaster
         richColors

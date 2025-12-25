@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
 import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/prisma';
-import { generateGroupCode } from '@/lib/utils';
 
 export async function POST(
   request: NextRequest,
@@ -37,10 +36,34 @@ export async function POST(
 
   const student = await prisma.user.findUnique({
     where: { id: body.studentId },
+    select: {
+      id: true,
+      role: true,
+      cohortId: true,
+    },
   });
 
   if (!student || student.role !== STUDENT_ROLE) {
     return NextResponse.json({ error: 'Invalid student ID' }, { status: 400 });
+  }
+
+  const group = await prisma.group.findUnique({
+    where: { id: groupId },
+    select: {
+      id: true,
+      cohortId: true,
+    },
+  });
+
+  if (!group) {
+    return NextResponse.json({ error: 'Invalid group ID' }, { status: 400 });
+  }
+
+  if (student.cohortId !== group.cohortId) {
+    return NextResponse.json(
+      { error: 'Student and group cohort mismatch' },
+      { status: 400 }
+    );
   }
 
   try {

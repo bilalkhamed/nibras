@@ -55,17 +55,17 @@ export default function CountrySelect() {
             <CommandList>
               <CommandEmpty>لم يتم العثور على دولة.</CommandEmpty>
               <CommandGroup>
-                {labels.countries.map((country) => (
+                {Object.keys(labels.countries).map((country) => (
                   <CommandItem
                     key={country}
-                    value={country}
+                    value={labels.countries[country]}
                     onSelect={(currentValue) => {
                       setValue(currentValue === value ? '' : currentValue);
                       setOpen(false);
                     }}
                     className="cursor-pointer text-right"
                   >
-                    {country}
+                    {labels.countries[country]}
                     <Check
                       className={cn(
                         'mr-auto h-4 w-4 text-primary',

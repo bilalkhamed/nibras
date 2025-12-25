@@ -1,10 +1,12 @@
 import { cookies } from 'next/headers';
 import { UsersTable } from './table';
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
-import { User } from '../../../../../../prisma/generated';
 import prisma from '@/lib/prisma';
+import { CountryCode } from '@/types/types';
 
-export default async function UsersTablePage() {
+export default async function UsersTableSection() {
+  //dummy wait
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   const cookie = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
 
   const accessToken = await verifyAccessToken(cookie || '');
@@ -25,7 +27,14 @@ export default async function UsersTablePage() {
       status: true,
       createdAt: true,
       updatedAt: true,
+      phone: true,
+      cohort: { select: { id: true, name: true } },
     },
   });
-  return <UsersTable users={users} />;
+
+  return (
+    <UsersTable
+      users={users.map((u) => ({ ...u, country: u.country as CountryCode }))}
+    />
+  );
 }

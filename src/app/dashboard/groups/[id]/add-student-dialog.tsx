@@ -26,7 +26,15 @@ type Student = {
   lastName: string;
 };
 
-export default function AddStudentDialog({ groupId }: { groupId: string }) {
+export default function AddStudentDialog({
+  groupId,
+  cohortId,
+  cohortName,
+}: {
+  groupId: string;
+  cohortId: string;
+  cohortName: string;
+}) {
   const [open, setOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,6 +53,7 @@ export default function AddStudentDialog({ groupId }: { groupId: string }) {
       try {
         const searchParams = new URLSearchParams({
           role: STUDENT_ROLE,
+          cohortId: cohortId,
           groupStatus: 'inactive',
         });
 
@@ -118,6 +127,8 @@ export default function AddStudentDialog({ groupId }: { groupId: string }) {
           <DialogTitle className="text-right">إضافة طالبة للمجموعة</DialogTitle>
           <DialogDescription className="text-right text-muted-foreground">
             ابحثي عن طالبة واختاريها لإضافتها للمجموعة.
+            <br />
+            ملاحظة: يمكنك إضافة الطالبات في {cohortName} فقط.
           </DialogDescription>
         </DialogHeader>
 

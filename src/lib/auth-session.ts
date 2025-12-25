@@ -3,7 +3,7 @@ import { verifyAccessToken } from './tokens';
 import { cache } from 'react';
 
 const getAuthSession = cache(async () => {
-  console.log('Getting auth session...');
+  // console.log('Getting auth session...');
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
 

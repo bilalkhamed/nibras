@@ -105,6 +105,7 @@ exports.Prisma.UserScalarFieldEnum = {
   status: 'status',
   country: 'country',
   phone: 'phone',
+  cohortId: 'cohortId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -119,6 +120,20 @@ exports.Prisma.GroupScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CohortScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  entryLevel: 'entryLevel',
+  status: 'status',
+  label: 'label',
+  currentLevel: 'currentLevel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.GroupStudentScalarFieldEnum = {
   id: 'id',
   groupId: 'groupId',
@@ -126,6 +141,18 @@ exports.Prisma.GroupStudentScalarFieldEnum = {
   joinedAt: 'joinedAt',
   leftAt: 'leftAt',
   isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InviteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  selector: 'selector',
+  validatorHash: 'validatorHash',
+  attempts: 'attempts',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -152,14 +179,29 @@ exports.Role = exports.$Enums.Role = {
 
 exports.UserStatus = exports.$Enums.UserStatus = {
   active: 'active',
-  frozen: 'frozen',
+  suspended: 'suspended',
+  invited: 'invited',
   deleted: 'deleted'
+};
+
+exports.CohortStatus = exports.$Enums.CohortStatus = {
+  active: 'active',
+  archived: 'archived'
+};
+
+exports.CohortLevels = exports.$Enums.CohortLevels = {
+  level1: 'level1',
+  level2: 'level2',
+  level3: 'level3',
+  level4: 'level4'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
   Group: 'Group',
-  GroupStudent: 'GroupStudent'
+  Cohort: 'Cohort',
+  GroupStudent: 'GroupStudent',
+  Invite: 'Invite'
 };
 /**
  * Create the Client
@@ -169,10 +211,10 @@ const config = {
   "clientVersion": "7.1.0",
   "engineVersion": "ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba",
   "activeProvider": "postgresql",
-  "inlineSchema": "// schema.prisma\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./generated\"\n  engineType = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum Role {\n  admin\n  supervisor\n  student\n}\n\nenum UserStatus {\n  active\n  frozen\n  deleted\n}\n\nmodel User {\n  id             String     @id @default(cuid())\n  firstName      String\n  middleName     String\n  lastName       String\n  email          String     @unique\n  hashedPassword String\n  birthYear      Int\n  role           Role       @default(student)\n  status         UserStatus @default(active)\n  country        String?\n  phone          String?\n\n  groupsAsSupervisor Group[]        @relation(\"SupervisedGroups\")\n  groupsAsStudent    GroupStudent[] @relation(\"StudentGroups\")\n\n  createdAt DateTime @default(now()) @map(name: \"created_at\")\n  updatedAt DateTime @updatedAt @map(name: \"updated_at\")\n\n  @@map(name: \"users\")\n}\n\nmodel Group {\n  id   String  @id @default(cuid())\n  name String\n  code String? @unique\n\n  cohortId     String // FK later → Cohort\n  supervisorId String\n  supervisor   User   @relation(\"SupervisedGroups\", fields: [supervisorId], references: [id])\n\n  students GroupStudent[]\n\n  // status GroupStatus @default(active)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"groups\")\n}\n\nmodel GroupStudent {\n  id String @id @default(cuid())\n\n  groupId   String\n  studentId String\n\n  group   Group @relation(fields: [groupId], references: [id])\n  student User  @relation(\"StudentGroups\", fields: [studentId], references: [id])\n\n  joinedAt DateTime  @default(now())\n  leftAt   DateTime?\n  isActive Boolean   @default(true)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  // ❌ we REMOVE this:\n  // @@unique([groupId, studentId, isActive])\n\n  @@map(\"group_students\")\n}\n"
+  "inlineSchema": "// schema.prisma\n\ngenerator client {\n  provider   = \"prisma-client-js\"\n  output     = \"./generated\"\n  engineType = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum Role {\n  admin\n  supervisor\n  student\n}\n\nenum UserStatus {\n  active\n  suspended\n  invited\n  deleted\n}\n\nenum CohortStatus {\n  active\n  archived\n}\n\nenum CohortLevels {\n  level1\n  level2\n  level3\n  level4\n}\n\nmodel User {\n  id             String     @id @default(cuid(2))\n  firstName      String\n  middleName     String\n  lastName       String\n  email          String?    @unique\n  hashedPassword String?\n  birthYear      Int\n  role           Role       @default(student)\n  status         UserStatus @default(active)\n  country        String?\n  phone          String?\n\n  groupsAsSupervisor Group[]        @relation(\"SupervisedGroups\")\n  groupsAsStudent    GroupStudent[] @relation(\"StudentGroups\")\n\n  cohort   Cohort? @relation(\"CohortStudents\", fields: [cohortId], references: [id])\n  cohortId String?\n\n  invite Invite?\n\n  createdAt DateTime @default(now()) @map(name: \"created_at\")\n  updatedAt DateTime @updatedAt @map(name: \"updated_at\")\n\n  @@index([role])\n  @@index([role, status])\n  @@index([cohortId, role])\n  @@map(\"users\")\n}\n\nmodel Group {\n  id   String @id @default(cuid(2))\n  name String\n  code String @unique\n\n  cohortId     String\n  cohort       Cohort @relation(fields: [cohortId], references: [id])\n  supervisorId String\n  supervisor   User   @relation(\"SupervisedGroups\", fields: [supervisorId], references: [id])\n\n  students GroupStudent[]\n\n  // status GroupStatus @default(active)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([cohortId, name])\n  @@index([cohortId])\n  @@index([supervisorId])\n  @@index([cohortId, supervisorId])\n  @@map(\"groups\")\n}\n\nmodel Cohort {\n  id           String       @id @default(cuid(2))\n  name         String\n  slug         String       @unique\n  startDate    DateTime\n  endDate      DateTime?\n  entryLevel   CohortLevels @default(level1)\n  groups       Group[]\n  students     User[]       @relation(\"CohortStudents\")\n  status       CohortStatus @default(active)\n  label        String\n  currentLevel CohortLevels @default(level1)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([status])\n  @@map(\"cohorts\")\n}\n\nmodel GroupStudent {\n  id String @id @default(cuid(2))\n\n  groupId   String\n  studentId String\n\n  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)\n  student User  @relation(\"StudentGroups\", fields: [studentId], references: [id], onDelete: Cascade)\n\n  joinedAt DateTime  @default(now())\n  leftAt   DateTime?\n  isActive Boolean   @default(true)\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([groupId, isActive])\n  @@index([studentId, isActive])\n  @@map(\"group_students\")\n}\n\nmodel Invite {\n  id            String @id @default(cuid(2))\n  userId        String @unique\n  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n  selector      String @unique\n  validatorHash String @map(\"validator_hash\")\n\n  attempts Int @default(0)\n\n  expiresAt DateTime  @map(\"expires_at\")\n  usedAt    DateTime? @map(\"used_at\")\n  createdAt DateTime  @default(now()) @map(\"created_at\")\n  updatedAt DateTime  @updatedAt @map(\"updated_at\")\n\n  @@index([selector])\n  @@map(\"invites\")\n}\n"
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"middleName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthYear\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"UserStatus\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupsAsSupervisor\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"groupsAsStudent\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"StudentGroups\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"users\"},\"Group\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cohortId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisor\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"students\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"groups\"},\"GroupStudent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"studentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"group\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"student\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"StudentGroups\"},{\"name\":\"joinedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"leftAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"group_students\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"middleName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthYear\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"UserStatus\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupsAsSupervisor\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"groupsAsStudent\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"StudentGroups\"},{\"name\":\"cohort\",\"kind\":\"object\",\"type\":\"Cohort\",\"relationName\":\"CohortStudents\"},{\"name\":\"cohortId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"invite\",\"kind\":\"object\",\"type\":\"Invite\",\"relationName\":\"InviteToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"users\"},\"Group\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cohortId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cohort\",\"kind\":\"object\",\"type\":\"Cohort\",\"relationName\":\"CohortToGroup\"},{\"name\":\"supervisorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supervisor\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SupervisedGroups\"},{\"name\":\"students\",\"kind\":\"object\",\"type\":\"GroupStudent\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"groups\"},\"Cohort\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"slug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"startDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"endDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"entryLevel\",\"kind\":\"enum\",\"type\":\"CohortLevels\"},{\"name\":\"groups\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"CohortToGroup\"},{\"name\":\"students\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CohortStudents\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"CohortStatus\"},{\"name\":\"label\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"currentLevel\",\"kind\":\"enum\",\"type\":\"CohortLevels\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"cohorts\"},\"GroupStudent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"groupId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"studentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"group\",\"kind\":\"object\",\"type\":\"Group\",\"relationName\":\"GroupToGroupStudent\"},{\"name\":\"student\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"StudentGroups\"},{\"name\":\"joinedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"leftAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"group_students\"},\"Invite\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"InviteToUser\"},{\"name\":\"selector\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"validatorHash\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"validator_hash\"},{\"name\":\"attempts\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"usedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"used_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"invites\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.compilerWasm = {
       getRuntime: async () => require('./query_compiler_bg.js'),

@@ -1,7 +1,7 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { AccessTokenPayload, Role } from '@/types/types';
+import { AccessTokenPayload, Role, UserStatus } from '@/types/types';
 
 const secretKey = process.env.SESSION_SECRET;
 if (!secretKey) {
@@ -12,9 +12,13 @@ const encodedKey = new TextEncoder().encode(secretKey);
 // Access token lives 15 minutes; adjust if needed.
 const ACCESS_TOKEN_EXP_MINUTES = 60;
 
-export async function setAccessToken(userId: string, role: Role) {
+export async function setAccessToken(
+  userId: string,
+  role: Role,
+  status: UserStatus
+) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
-  const token = await signAccessToken({ userId, role, expiresAt });
+  const token = await signAccessToken({ userId, role, status, expiresAt });
   (await cookies()).set('accessToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
