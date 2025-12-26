@@ -7,7 +7,7 @@ import { WeekNavigator } from './components/week-navigator';
 import { CurriculumTable } from './components/curriculum-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Video, Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 import { Separator } from '@/components/ui/separator';
 import { AddItemDialog } from './add-item-dialogue';
 

@@ -1,7 +1,7 @@
-import { loginSchema } from '@/lib/auth-schemas';
-import { comparePasswords } from '@/lib/hash';
-import prisma from '@/lib/prisma';
-import { setAccessToken } from '@/lib/tokens';
+import { loginSchema } from '@/lib/shared/auth-schemas';
+import { comparePasswords } from '@/lib/server/hash';
+import prisma from '@/lib/server/prisma';
+import { setAccessToken } from '@/lib/server/tokens';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 import { Check, Copy } from 'lucide-react';
 
 interface CopyValueProps {

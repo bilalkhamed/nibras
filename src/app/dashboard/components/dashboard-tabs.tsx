@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import labels from '@/lib/labels.json';
 import { Users, BookOpen, BarChart3, Layers } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 
 interface TabItem {
   key: string;

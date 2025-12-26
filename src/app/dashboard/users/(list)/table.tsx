@@ -28,7 +28,7 @@ import {
   User,
   UserStatus,
 } from '@/types/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 import clsx from 'clsx';
 import { InviteRegenModal } from './invite-regen-modal';
 

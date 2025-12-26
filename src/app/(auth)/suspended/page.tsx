@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import getAuthSession from '@/lib/auth-session';
+import getAuthSession from '@/lib/server/auth-session';
 import { TriangleAlertIcon } from 'lucide-react';
 import LogoutButton from './logout';
 import { redirect } from 'next/navigation';

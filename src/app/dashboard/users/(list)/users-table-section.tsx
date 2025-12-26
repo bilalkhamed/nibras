@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { UsersTable } from './table';
-import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
-import prisma from '@/lib/prisma';
+import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
+import prisma from '@/lib/server/prisma';
 import { CountryCode } from '@/types/types';
 
 export default async function UsersTableSection() {

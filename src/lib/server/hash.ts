@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { generateSixCharCode } from './utils';
+import { generateSixCharCode } from '../shared/utils';
 
 const HMAC_SECRET = process.env.HMAC_SECRET || 'default_secret';
 

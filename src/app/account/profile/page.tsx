@@ -2,7 +2,7 @@ import type { User } from '@/types/types';
 import UserInfoSection from './user-info-section';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { XIcon } from 'lucide-react';
-import getAuthSession from '@/lib/auth-session';
+import getAuthSession from '@/lib/server/auth-session';
 import Link from 'next/link';
 import GroupInfoSection from './group-info-section';
 import { Suspense } from 'react';

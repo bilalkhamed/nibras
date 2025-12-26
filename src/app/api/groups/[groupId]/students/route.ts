@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
+import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
 import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/server/prisma';
 
 export async function POST(
   request: NextRequest,

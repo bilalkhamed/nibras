@@ -1,5 +1,5 @@
-import { verifyHmacSha256 } from '@/lib/hash';
-import prisma from '@/lib/prisma';
+import { verifyHmacSha256 } from '@/lib/server/hash';
+import prisma from '@/lib/server/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateInvite } from '../validate-invite';
 

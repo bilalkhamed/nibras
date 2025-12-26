@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, UserRound, XCircleIcon } from 'lucide-react';
 import { Group } from '@/types/types';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 type GroupListProps = {
   groups: Group[];

@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 import { useState } from 'react';
-import { signupSchema } from '@/lib/auth-schemas';
+import { signupSchema } from '@/lib/shared/auth-schemas';
 import { useRouter } from 'next/navigation';
 import { FormField, PasswordField } from '@/components/forms/form-fields';
 

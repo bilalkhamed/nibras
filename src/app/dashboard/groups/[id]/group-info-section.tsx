@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { User, Edit, Archive, Trash2, ExternalLink } from 'lucide-react';
-import { InfoField } from '@/components/info-field';
+import { InfoField } from '@/components/common/info-field';
 import {
   Tooltip,
   TooltipContent,

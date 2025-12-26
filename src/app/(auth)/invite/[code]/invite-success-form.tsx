@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Controller, useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InvitedUserData, invitedUserSchema } from '@/lib/auth-schemas';
+import { InvitedUserData, invitedUserSchema } from '@/lib/shared/auth-schemas';
 import { FormField, PasswordField } from '@/components/forms/form-fields';
 import { Loader2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';

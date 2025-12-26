@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import SearchSelect from '@/components/search-select';
+import SearchSelect from '@/components/common/search-select';
 import { Plus, Loader2, CheckIcon, Loader2Icon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertTitle } from '@/components/ui/alert';

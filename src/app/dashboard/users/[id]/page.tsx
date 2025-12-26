@@ -2,13 +2,13 @@ import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CopyValue } from '@/components/dashboard/users/copy-value';
-import { InfoField } from '@/components/info-field';
+import { CopyValue } from '@/components/common/copy-value';
+import { InfoField } from '@/components/common/info-field';
 import { Snowflake, Trash2, KeyRound, Pencil } from 'lucide-react';
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/server/prisma';
 import labels from '@/lib/labels.json';
 import { Group, STUDENT_ROLE, SUPERVISOR_ROLE, User } from '@/types/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/shared/utils';
 import { Prisma } from '@prisma/client';
 
 type UserDetailPageProps = {

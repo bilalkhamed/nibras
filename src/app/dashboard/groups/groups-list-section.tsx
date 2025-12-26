@@ -1,5 +1,5 @@
-import { GroupList } from '@/components/group-list';
-import prisma from '@/lib/prisma';
+import { GroupList } from '@/components/common/group-list';
+import prisma from '@/lib/server/prisma';
 
 export default async function GroupsListSection() {
   const groups = await prisma.group.findMany({

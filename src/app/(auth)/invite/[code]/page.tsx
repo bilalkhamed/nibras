@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 import labels from '@/lib/labels.json';
 import { InvalidInvite } from './invalid-invite';
 import { InviteSuccessForm } from './invite-success-form';
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/server/prisma';
 
 async function validateInviteCode(code: string): Promise<{
   valid: boolean;

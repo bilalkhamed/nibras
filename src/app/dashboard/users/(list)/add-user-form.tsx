@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import SearchSelect from '@/components/search-select';
+import SearchSelect from '@/components/common/search-select';
 import { useEffect, useState } from 'react';
 import { Cohort, STUDENT_ROLE } from '@/types/types';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -22,7 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createUserSchema as formSchema,
   CreateUserData as FormData,
-} from '@/lib/auth-schemas';
+} from '@/lib/shared/auth-schemas';
 import { Loader2Icon } from 'lucide-react';
 import { InviteCodeModal } from './invite-code-modal';
 import { toast } from 'sonner';

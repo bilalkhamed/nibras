@@ -1,11 +1,11 @@
-import { InvitedUserData, invitedUserSchema } from '@/lib/auth-schemas';
+import { InvitedUserData, invitedUserSchema } from '@/lib/shared/auth-schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateInvite } from '../validate-invite';
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
-import { hashPassword } from '@/lib/hash';
+import prisma from '@/lib/server/prisma';
+import { hashPassword } from '@/lib/server/hash';
 import { ACTIVE_STATUS } from '@/types/types';
-import { setAccessToken } from '@/lib/tokens';
+import { setAccessToken } from '@/lib/server/tokens';
 
 export async function POST(request: NextRequest) {
   let body: InvitedUserData & { inviteCode: string };

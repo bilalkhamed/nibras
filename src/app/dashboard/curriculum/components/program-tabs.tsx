@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import labels from '@/lib/labels.json';
 import { ElementType } from 'react';
 import { BookOpen, Video, Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 
 type Program = {
   value: string;

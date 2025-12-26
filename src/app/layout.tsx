@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import './globals.css';
-import { Navbar } from '@/components/layout/Navbar';
+import { Navbar } from '@/components/layout/navbar';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { getCurrentUser } from '@/lib/current-user';
+import { getCurrentUser } from '@/lib/server/current-user';
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],

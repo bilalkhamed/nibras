@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/shared/utils';
 import StudentActions from './student-actions';
 
 export interface GroupStudent {

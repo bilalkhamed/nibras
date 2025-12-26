@@ -1,4 +1,4 @@
-import { deleteAccessToken } from '@/lib/tokens';
+import { deleteAccessToken } from '@/lib/server/tokens';
 
 export async function POST() {
   await deleteAccessToken();

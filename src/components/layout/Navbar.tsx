@@ -11,9 +11,9 @@ import {
   UserRound,
 } from 'lucide-react';
 import labels from '@/lib/labels.json';
-import config from '@/lib/site.config';
+import config from '@/lib/shared/site.config';
 import { Button } from '../ui/button';
-import { ThemeSwitch } from '../ThemeSwitch';
+import { ThemeSwitch } from '../common/theme-switch';
 import { User } from '@/types/types';
 
 interface NavbarProps {

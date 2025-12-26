@@ -1,5 +1,5 @@
-import getAuthSession from '@/lib/auth-session';
-import prisma from '@/lib/prisma';
+import getAuthSession from '@/lib/server/auth-session';
+import prisma from '@/lib/server/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(

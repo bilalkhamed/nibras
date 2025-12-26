@@ -8,9 +8,9 @@ import {
   ShieldCheckIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { InfoField } from '@/components/info-field';
-import { formatRole } from '@/lib/utils';
-import { getCurrentUser } from '@/lib/current-user';
+import { InfoField } from '@/components/common/info-field';
+import { formatRole } from '@/lib/shared/utils';
+import { getCurrentUser } from '@/lib/server/current-user';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import labels from '@/lib/labels.json';
 

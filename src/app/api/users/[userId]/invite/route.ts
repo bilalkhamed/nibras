@@ -1,6 +1,6 @@
-import getAuthSession from '@/lib/auth-session';
-import { generateInvite, verifyHmacSha256 } from '@/lib/hash';
-import prisma from '@/lib/prisma';
+import getAuthSession from '@/lib/server/auth-session';
+import { generateInvite, verifyHmacSha256 } from '@/lib/server/hash';
+import prisma from '@/lib/server/prisma';
 import { ADMIN_ROLE, INVITED_STATUS } from '@/types/types';
 import { NextRequest, NextResponse } from 'next/server';
 

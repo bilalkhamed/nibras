@@ -4,7 +4,7 @@ import { TableSkeleton } from '@/components/skeletons';
 import GroupInfoSection from './group-info-section';
 import GroupStudentsTable, { GroupStudent } from './group-students-table';
 import AddStudentDialog from './add-student-dialog';
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/server/prisma';
 import { notFound } from 'next/navigation';
 import { Toaster } from '@/components/ui/sonner';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';

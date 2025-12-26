@@ -11,11 +11,11 @@ import {
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { InfoField } from '@/components/info-field';
-import prisma from '@/lib/prisma';
+import { InfoField } from '@/components/common/info-field';
+import prisma from '@/lib/server/prisma';
 import { AccessTokenPayload } from '@/types/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/shared/utils';
 
 type Props = {
   auth: AccessTokenPayload;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken, ACCESS_TOKEN_COOKIE } from './lib/tokens';
+import { verifyAccessToken, ACCESS_TOKEN_COOKIE } from './lib/server/tokens';
 import {
   ACTIVE_STATUS,
   INVITED_STATUS,

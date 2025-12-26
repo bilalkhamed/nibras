@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { loginSchema } from '@/lib/auth-schemas';
+import { loginSchema } from '@/lib/shared/auth-schemas';
 
 type LoginValues = {
   email: string;

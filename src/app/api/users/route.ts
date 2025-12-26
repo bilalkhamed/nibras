@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CreateUserData, createUserSchema } from '@/lib/auth-schemas';
+import { CreateUserData, createUserSchema } from '@/lib/shared/auth-schemas';
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
-import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/tokens';
+import prisma from '@/lib/server/prisma';
+import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
 import { ADMIN_ROLE, INVITED_STATUS, Role, STUDENT_ROLE } from '@/types/types';
 import { Prisma } from '@prisma/client';
-import { generateInvite } from '@/lib/hash';
+import { generateInvite } from '@/lib/server/hash';
 
 // Create a new user
 export async function POST(request: NextRequest) {

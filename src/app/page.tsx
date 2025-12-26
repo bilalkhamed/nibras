@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BookOpen, Video, Heart, Sparkles } from 'lucide-react';
 import labels from '@/lib/labels.json';
-import { Footer } from '@/components/layout/Footer';
+import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {

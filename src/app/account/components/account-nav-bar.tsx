@@ -5,7 +5,7 @@ import {
   User as UserIcon,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
