@@ -77,3 +77,11 @@ export type Cohort = {
   name: string;
   currentLevel?: CohortLevels;
 };
+
+export type NavItem = {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  auth?: boolean; // requires logged-in user
+  role?: 'admin'; // restrict to role
+};

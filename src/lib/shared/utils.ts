@@ -1,3 +1,4 @@
+import { NavItem, User } from '@/types/types';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -29,5 +30,13 @@ export function formatDate(value: string | Date) {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+  });
+}
+
+export function getVisibleNavItems(items: NavItem[], user: User | null) {
+  return items.filter((item) => {
+    if (item.auth && !user) return false;
+    if (item.role && user?.role !== item.role) return false;
+    return true;
   });
 }
