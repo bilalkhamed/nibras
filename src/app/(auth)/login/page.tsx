@@ -22,7 +22,6 @@ import { ErrorMessage } from '@/components/forms/error-message';
 
 export default function LoginPage() {
   const {
-    register,
     handleSubmit,
     setError,
     control,
@@ -47,7 +46,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = '/account';
+        window.location.href = '/dashboard';
       } else if (res.status === 401) {
         setError('root', {
           message: 'البريد الإلكتروني أو كلمة السر غير صحيحة',

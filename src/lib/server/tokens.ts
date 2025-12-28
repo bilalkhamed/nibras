@@ -15,10 +15,19 @@ const ACCESS_TOKEN_EXP_MINUTES = 60;
 export async function setAccessToken(
   userId: string,
   role: Role,
-  status: UserStatus
+  status: UserStatus,
+  firstName: string,
+  lastName: string
 ) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
-  const token = await signAccessToken({ userId, role, status, expiresAt });
+  const token = await signAccessToken({
+    userId,
+    role,
+    status,
+    firstName,
+    lastName,
+    expiresAt,
+  });
   (await cookies()).set('accessToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

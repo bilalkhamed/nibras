@@ -1,9 +1,9 @@
 import {
   Role,
   UserStatus,
-  CohortLevels,
   CohortStatus,
   User as PrismaUser,
+  Level,
 } from '@prisma/client';
 import labels from '@/lib/labels.json';
 
@@ -16,13 +16,15 @@ export const SUSPENDED_STATUS = UserStatus.suspended;
 export const DELETED_STATUS = UserStatus.deleted;
 export const INVITED_STATUS = UserStatus.invited;
 
-export { Role, UserStatus, CohortLevels, CohortStatus };
+export { Role, UserStatus, CohortStatus };
 
 export type AccessTokenPayload = {
   userId: string;
   role: Role;
   expiresAt: Date;
   status: UserStatus;
+  firstName: string;
+  lastName: string;
 };
 
 export type CountryCode = keyof typeof labels.countries;
@@ -64,7 +66,7 @@ export interface Group {
     lastName: string;
   };
   cohort: {
-    currentLevel: CohortLevels;
+    currentLevel: Level;
     name: string;
   };
   _count: {
@@ -75,7 +77,7 @@ export interface Group {
 export type Cohort = {
   id: string;
   name: string;
-  currentLevel?: CohortLevels;
+  currentLevel?: string;
 };
 
 export type NavItem = {
@@ -84,4 +86,12 @@ export type NavItem = {
   icon: React.ElementType;
   auth?: boolean; // requires logged-in user
   role?: 'admin'; // restrict to role
+};
+
+export type SidebarNavItem = {
+  label: string;
+  href: string;
+  icon?: React.ElementType;
+  items?: Omit<SidebarNavItem, 'items' | 'icon' | 'isActive'>[];
+  isActive?: boolean;
 };

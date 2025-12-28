@@ -164,6 +164,7 @@ model Program {
   id          String  @id @default(cuid(2))
   name        String
   description String?
+  slug        String? @unique
 
   assignments Assignment[]
 

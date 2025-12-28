@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
       role: true,
       status: true,
       hashedPassword: true,
+      firstName: true,
+      lastName: true,
     },
   });
 
@@ -54,7 +56,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await setAccessToken(foundUser.id, foundUser.role, foundUser.status);
+  await setAccessToken(
+    foundUser.id,
+    foundUser.role,
+    foundUser.status,
+    foundUser.firstName,
+    foundUser.lastName
+  );
   return NextResponse.json({ success: true }, { status: 200 });
 }
 

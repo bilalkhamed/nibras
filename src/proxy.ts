@@ -21,7 +21,10 @@ type RouteRule = {
 };
 
 const routeRules: RouteRule[] = [
-  { matcher: /^\/dashboard(\/.*)?$/, allowedRoles: ['admin'] },
+  {
+    matcher: /^\/dashboard(\/.*)?$/,
+    allowedRoles: ['admin', 'supervisor', 'student'],
+  },
   {
     matcher: /^\/account(\/.*)?$/,
     allowedRoles: ['admin', 'supervisor', 'student'],
