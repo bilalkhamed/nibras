@@ -26,6 +26,7 @@ import {
 import { Loader2Icon } from 'lucide-react';
 import { InviteCodeModal } from './invite-code-modal';
 import { toast } from 'sonner';
+import { ErrorMessage } from '@/components/forms/error-message';
 
 export function AddUserForm() {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
@@ -269,9 +270,4 @@ export function AddUserForm() {
       />
     </>
   );
-}
-
-function ErrorMessage({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-destructive">{message}</p>;
 }

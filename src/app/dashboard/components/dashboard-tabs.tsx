@@ -74,7 +74,7 @@ export function DashboardTabs() {
   return (
     <div
       className={cn(
-        'relative z-40 border-b border-border',
+        'relative z-40 border-b border-border overflow-x-auto',
         sticky
           ? 'sticky top-0 animate-in fade-in slide-in-from-top bg-muted/70 backdrop-blur-sm shadow-md'
           : 'bg-muted/60 backdrop-blur-sm'

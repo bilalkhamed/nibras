@@ -15,6 +15,7 @@ import { InvitedUserData, invitedUserSchema } from '@/lib/shared/auth-schemas';
 import { FormField, PasswordField } from '@/components/forms/form-fields';
 import { Loader2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ErrorMessage } from '@/components/forms/error-message';
 
 export function InviteSuccessForm({
   user,
@@ -146,9 +147,4 @@ export function InviteSuccessForm({
       </form>
     </Card>
   );
-}
-
-function ErrorMessage({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-destructive">{message}</p>;
 }

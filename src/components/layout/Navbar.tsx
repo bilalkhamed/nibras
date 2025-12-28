@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Sparkles, Menu } from 'lucide-react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Sparkles, Menu } from "lucide-react";
 
-import labels from '@/lib/labels.json';
-import { navItems, hideNavbarOnRoutes } from '@/lib/shared/site.config';
-import { getVisibleNavItems } from '@/lib/shared/utils';
+import labels from "@/lib/labels.json";
+import { navItems, hideNavbarOnRoutes } from "@/lib/shared/site.config";
+import { getVisibleNavItems } from "@/lib/shared/utils";
 
-import { Button } from '../ui/button';
-import { ThemeSwitch } from '../common/theme-switch';
+import { Button } from "../ui/button";
+import { ThemeSwitch } from "../common/theme-switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from "../ui/dropdown-menu";
 
-import { User } from '@/types/types';
+import { User } from "@/types/types";
 
 interface NavbarProps {
   extraRight?: React.ReactNode;
@@ -52,7 +52,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                    className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
                   >
                     <Icon className="h-4 w-4" />
                     {item.label}
@@ -99,7 +99,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
                 <DropdownMenuContent
                   align="end"
                   className="inline-block bg-card/70 backdrop-blur-xl border border-border rounded-md py-1"
-                  style={{ minWidth: 'auto' }}
+                  style={{ minWidth: "auto" }}
                 >
                   {items.map((item) => {
                     const Icon = item.icon;
