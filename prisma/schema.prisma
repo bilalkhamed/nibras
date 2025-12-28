@@ -26,13 +26,6 @@ enum CohortStatus {
   archived
 }
 
-enum CohortLevels {
-  level1
-  level2
-  level3
-  level4
-}
-
 model User {
   id             String     @id @default(cuid(2))
   firstName      String
@@ -88,17 +81,19 @@ model Group {
 }
 
 model Cohort {
-  id           String       @id @default(cuid(2))
-  name         String
-  slug         String       @unique
-  startDate    DateTime
-  endDate      DateTime?
-  entryLevel   CohortLevels @default(level1)
-  groups       Group[]
-  students     User[]       @relation("CohortStudents")
-  status       CohortStatus @default(active)
-  label        String
-  currentLevel CohortLevels @default(level1)
+  id             String       @id @default(cuid(2))
+  name           String
+  slug           String       @unique
+  startDate      DateTime
+  endDate        DateTime?
+  entryLevelId   String
+  entryLevel     Level        @relation("CohortEntryLevel", fields: [entryLevelId], references: [id])
+  groups         Group[]
+  students       User[]       @relation("CohortStudents")
+  status         CohortStatus @default(active)
+  label          String
+  currentLevelId String
+  currentLevel   Level        @relation("CohortCurrentLevel", fields: [currentLevelId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -144,4 +139,97 @@ model Invite {
 
   @@index([selector])
   @@map("invites")
+}
+
+// New
+
+model Level {
+  id          String  @id @default(cuid(2))
+  number      Int     @unique
+  title       String
+  description String?
+
+  cohortsAsEntryLevel   Cohort[] @relation("CohortEntryLevel")
+  cohortsAsCurrentLevel Cohort[] @relation("CohortCurrentLevel")
+
+  assignments Assignment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("levels")
+}
+
+model Program {
+  id          String  @id @default(cuid(2))
+  name        String
+  description String?
+
+  assignments Assignment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("programs")
+}
+
+model Week {
+  id     String @id @default(cuid(2))
+  number Int    @unique
+  title  String
+
+  assignments Assignment[]
+
+  calendarWeeks CalendarWeek[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("weeks")
+}
+
+model CalendarWeek {
+  id        String   @id @default(cuid(2))
+  startDate DateTime
+  endDate   DateTime
+
+  weekId String
+  week   Week   @relation(fields: [weekId], references: [id])
+
+  academicYear Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([weekId, academicYear])
+  @@index([academicYear, startDate, endDate])
+  @@map("calendar_weeks")
+}
+
+enum AssignmentTypes {
+  lecture
+  exercise
+  quiz
+  reading
+}
+
+model Assignment {
+  id          String  @id @default(cuid(2))
+  name        String
+  description String?
+  programId   String
+  program     Program @relation(fields: [programId], references: [id])
+  weekId      String
+  week        Week    @relation(fields: [weekId], references: [id])
+  levelId     String
+  level       Level   @relation(fields: [levelId], references: [id])
+
+  type AssignmentTypes @default(reading)
+  url  String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([programId, weekId, levelId])
+  @@map("assignments")
 }

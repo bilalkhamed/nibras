@@ -6,19 +6,19 @@ export async function POST() {
   try {
     const t0 = performance.now();
 
-    const rows = Array.from(countries.entries()).map(
-      ([name, code]) => Prisma.sql`(${name}, ${code})`
-    );
-
-    const result = await prisma.$executeRaw(Prisma.sql`UPDATE "users" as u
-    SET country = c.code
-    FROM (VALUES ${Prisma.join(rows)}) AS c(name, code)
-    WHERE u.country = c.name`);
+    const levels = await prisma.level.createMany({
+      data: [
+        { number: 1, title: 'المستوى الأول' },
+        { number: 2, title: 'المستوى الثاني' },
+        { number: 3, title: 'المستوى الثالث' },
+        { number: 4, title: 'المستوى الرابع' },
+      ],
+    });
 
     const t1 = performance.now();
 
     return NextResponse.json({
-      message: `Updated ${result} users' countries in ${(t1 - t0).toFixed(
+      message: `Created ${levels.count} in ${(t1 - t0).toFixed(
         2
       )} milliseconds.`,
     });
@@ -30,17 +30,22 @@ export async function POST() {
   }
 }
 
-const countries = new Map([
-  ['jordan', 'JO'],
-  ['iraq', 'IQ'],
-  ['lebanon', 'LB'],
-  ['tunisia', 'TN'],
-  ['yemen', 'YE'],
-  ['saudi arabia', 'SA'],
-  ['syria', 'SY'],
-  ['morocco', 'MA'],
-  ['algeria', 'DZ'],
-  ['palestine', 'PS'],
-  ['egypt', 'EG'],
-  ['united arab emirates', 'AE'],
-]);
+export async function GET(req: NextRequest) {
+  const t0 = performance.now();
+
+  const cohorts = await prisma.cohort.findMany({
+    include: {
+      currentLevel: true,
+      entryLevel: true,
+    },
+  });
+
+  const t1 = performance.now();
+
+  return NextResponse.json({
+    data: cohorts,
+    message: `Fetched ${cohorts.length} cohorts in ${(t1 - t0).toFixed(
+      2
+    )} milliseconds.`,
+  });
+}
