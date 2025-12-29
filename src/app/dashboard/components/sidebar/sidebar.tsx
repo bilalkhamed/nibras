@@ -34,7 +34,7 @@ export function DashboardSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={'/'}>
+              <Link href={'/dashboard'}>
                 <div className=" text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <img src="/logo.svg" alt="Logo" className="h-12 w-12" />
                 </div>
