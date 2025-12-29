@@ -7,10 +7,9 @@ import CreateGroupDialog from './create-group-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import getAuthSession from '@/lib/server/auth-session';
-import { redirect } from 'next/navigation';
-import { ADMIN_ROLE, STUDENT_ROLE } from '@/types/types';
-
-const cohorts = ['دفعة 2025', 'دفعة 2024', 'دفعة 2023'];
+import { notFound, redirect } from 'next/navigation';
+import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import { requireRoles } from '@/lib/server/require-roles';
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
@@ -18,13 +17,10 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 });
 
 export default async function GroupsPage() {
-  const auth = await getAuthSession();
-  if (!auth) {
-    redirect('/login');
-  }
+  const auth = await requireRoles(ADMIN_ROLE, SUPERVISOR_ROLE);
 
-  if (auth.role === STUDENT_ROLE) {
-    redirect('/dashboard');
+  if (!auth) {
+    notFound();
   }
 
   return (
