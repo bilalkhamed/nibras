@@ -148,6 +148,7 @@ model Level {
   number      Int     @unique
   title       String
   description String?
+  slug        String  @unique
 
   cohortsAsEntryLevel   Cohort[] @relation("CohortEntryLevel")
   cohortsAsCurrentLevel Cohort[] @relation("CohortCurrentLevel")
@@ -164,7 +165,7 @@ model Program {
   id          String  @id @default(cuid(2))
   name        String
   description String?
-  slug        String? @unique
+  slug        String  @unique
 
   assignments Assignment[]
 
