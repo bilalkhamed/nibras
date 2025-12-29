@@ -4,6 +4,7 @@ import {
   CohortStatus,
   User as PrismaUser,
   Level,
+  AssignmentTypes,
 } from '@prisma/client';
 import labels from '@/lib/labels.json';
 
@@ -16,7 +17,7 @@ export const SUSPENDED_STATUS = UserStatus.suspended;
 export const DELETED_STATUS = UserStatus.deleted;
 export const INVITED_STATUS = UserStatus.invited;
 
-export { Role, UserStatus, CohortStatus };
+export { Role, UserStatus, CohortStatus, AssignmentTypes };
 
 export type AccessTokenPayload = {
   userId: string;

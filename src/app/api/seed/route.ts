@@ -6,19 +6,48 @@ export async function POST() {
   try {
     const t0 = performance.now();
 
-    const levels = await prisma.level.createMany({
-      data: [
-        { number: 1, title: 'المستوى الأول' },
-        { number: 2, title: 'المستوى الثاني' },
-        { number: 3, title: 'المستوى الثالث' },
-        { number: 4, title: 'المستوى الرابع' },
-      ],
+    const weeksData: Prisma.WeekCreateManyInput[] = [
+      {
+        number: 1,
+        title: 'الأسبوع الأول',
+      },
+      {
+        number: 2,
+        title: 'الأسبوع الثاني',
+      },
+      {
+        number: 3,
+        title: 'الأسبوع الثالث',
+      },
+      {
+        number: 4,
+        title: 'الأسبوع الرابع',
+      },
+      {
+        number: 5,
+        title: 'الأسبوع الخامس',
+      },
+      {
+        number: 6,
+        title: 'الأسبوع السادس',
+      },
+      {
+        number: 7,
+        title: 'الأسبوع السابع',
+      },
+      {
+        number: 8,
+        title: 'الأسبوع الثامن',
+      },
+    ];
+    const weeks = await prisma.week.createMany({
+      data: weeksData,
     });
 
     const t1 = performance.now();
 
     return NextResponse.json({
-      message: `Created ${levels.count} in ${(t1 - t0).toFixed(
+      message: `Created ${weeks.count} in ${(t1 - t0).toFixed(
         2
       )} milliseconds.`,
     });

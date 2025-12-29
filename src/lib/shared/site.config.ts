@@ -55,7 +55,7 @@ export const sidebarNavItems: {
       href: '/dashboard/programs',
       items: [
         { label: 'البرنامج القرائي', href: '/dashboard/programs/reading' },
-        { label: 'البرنامج التربوي', href: '/dashboard/programs/educational' },
+        { label: 'البرنامج التربوي', href: '/dashboard/programs/lectures' },
         { label: 'ليطمئن قلبي', href: '/dashboard/programs/heart' },
       ],
     },
