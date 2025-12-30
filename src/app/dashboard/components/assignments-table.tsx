@@ -27,7 +27,7 @@ interface AssignmentsTableProps {
 }
 
 const ASSIGNMENT_TYPE_COLORS: Record<AssignmentTypes, string> = {
-  lecture: 'bg-accent text-accent-foreground',
+  lecture: 'bg-accent text-accent-foreground text-accent-soft',
   exercise: 'bg-primary text-primary-foreground',
   quiz: 'bg-secondary text-secondary-foreground',
   reading: 'bg-muted text-muted-foreground',

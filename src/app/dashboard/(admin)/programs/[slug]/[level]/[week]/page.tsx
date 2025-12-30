@@ -1,5 +1,5 @@
 import prisma from '@/lib/server/prisma';
-import { AssignmentsTable } from './assignments-table';
+import { AssignmentsTable } from '@/app/dashboard/components/assignments-table';
 import { AddAssignmentDialog } from './add-assignment-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
