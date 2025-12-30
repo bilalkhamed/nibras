@@ -44,25 +44,37 @@ export async function POST(request: NextRequest) {
   const hashedPassword = await hashPassword(data.password);
 
   try {
-    await prisma.$transaction([
-      prisma.user.update({
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      await tx.invite.update({
+        where: { userId: user.id },
+        data: {
+          usedAt: new Date(),
+          attempts: { increment: 1 },
+        },
+      });
+      return await tx.user.update({
         where: { id: user.id },
         data: {
           email: data.email,
           hashedPassword,
           status: ACTIVE_STATUS,
         },
-      }),
-      prisma.invite.update({
-        where: { userId: user.id },
-        data: {
-          usedAt: new Date(),
-          attempts: { increment: 1 },
+        select: {
+          id: true,
+          role: true,
+          firstName: true,
+          lastName: true,
         },
-      }),
-    ]);
+      });
+    });
 
-    await setAccessToken(user.id, user.role, ACTIVE_STATUS);
+    await setAccessToken(
+      updatedUser.id,
+      updatedUser.role,
+      ACTIVE_STATUS,
+      updatedUser.firstName,
+      updatedUser.lastName
+    );
 
     return NextResponse.json(
       { message: 'Invite completed successfully' },

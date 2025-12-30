@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Link from 'next/link';
-import { CohortLevels } from '@/types/types';
 import labels from '@/lib/labels.json';
 
 interface GroupInfoSectionProps {
@@ -30,7 +29,7 @@ interface GroupInfoSectionProps {
   cohort: {
     id: string;
     name: string;
-    currentLevel: CohortLevels;
+    currentLevel: { id: string; title: string };
   };
 }
 
@@ -82,9 +81,7 @@ export default function GroupInfoSection({
               <InfoField label="اسم المجموعة" value={groupName} />
               <InfoField
                 label="الدفعة"
-                value={`${cohort.name} - ${
-                  labels.dashboard.curriculum.levels[cohort.currentLevel]
-                }`}
+                value={`${cohort.name} - ${cohort.currentLevel.title}`}
               />
               <InfoField label="عدد الطالبات" value={`${studentCount} طالبة`} />
             </div>

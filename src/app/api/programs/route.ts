@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: name.trim(),
         description: description?.trim() || null,
+        slug: name,
       },
     });
 

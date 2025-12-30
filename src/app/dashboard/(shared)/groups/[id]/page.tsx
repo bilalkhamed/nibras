@@ -59,7 +59,13 @@ export default async function GroupDetailPage({
         select: { id: true, firstName: true, middleName: true, lastName: true },
       },
       cohort: {
-        select: { id: true, name: true, currentLevel: true },
+        select: {
+          id: true,
+          name: true,
+          currentLevel: {
+            select: { id: true, title: true },
+          },
+        },
       },
       students: {
         where: { isActive: true },
