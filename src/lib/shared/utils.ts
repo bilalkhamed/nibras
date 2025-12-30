@@ -40,3 +40,14 @@ export function getVisibleNavItems(items: NavItem[], user: User | null) {
     return true;
   });
 }
+
+export function toArabicNumerals(input: string | number) {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return input
+    .toString()
+    .split('')
+    .map((char) =>
+      /\d/.test(char) ? arabicNumerals[parseInt(char, 10)] : char
+    )
+    .join('');
+}
