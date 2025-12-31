@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import GroupsListSection from './groups-list-section';
 import { Suspense } from 'react';
-import { GroupsListSkeleton } from '@/components/skeletons';
+import { CardsListSkeleton } from '@/components/skeletons';
 import CreateGroupDialog from './create-group-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
@@ -48,7 +48,7 @@ export default async function GroupsPage() {
         </CardContent>
       </Card> */}
 
-      <Suspense fallback={<GroupsListSkeleton />}>
+      <Suspense fallback={<CardsListSkeleton />}>
         <GroupsListSection auth={auth} />
       </Suspense>
 

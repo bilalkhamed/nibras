@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function GroupsListSkeleton() {
+export function CardsListSkeleton({ numberOfCards = 6 }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {[...Array(6)].map((_, index) => (
+      {[...Array(numberOfCards)].map((_, index) => (
         <Card key={index} className="border-border bg-card/80 shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
