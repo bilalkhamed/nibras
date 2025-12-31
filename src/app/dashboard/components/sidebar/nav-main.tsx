@@ -18,12 +18,14 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { SidebarNavItem } from '@/types/types';
+import { Role, SidebarNavItem } from '@/types/types';
 import { getActiveSidebarItem } from './page-title';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { sidebarNavItems } from '@/lib/shared/site.config';
 
-export function NavMain({ items }: { items: SidebarNavItem[] }) {
+export function NavMain({ role }: { role: Role }) {
+  const items = sidebarNavItems[role];
   const pathname = usePathname();
   const activeItem = getActiveSidebarItem(pathname);
   return (

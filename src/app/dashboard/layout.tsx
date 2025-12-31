@@ -8,19 +8,18 @@ import { DashboardSidebar } from './components/sidebar/sidebar';
 import getAuthSession from '@/lib/server/auth-session';
 import { redirect } from 'next/navigation';
 import { DashboardTitle } from './components/sidebar/page-title';
+import { Suspense } from 'react';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const auth = await getAuthSession();
-  if (!auth) {
-    redirect('/login');
-  }
   return (
     <SidebarProvider>
-      <DashboardSidebar auth={auth} />
+      <Suspense fallback={<div>Loading sidebar...</div>}>
+        <DashboardSidebar />
+      </Suspense>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">

@@ -4,6 +4,8 @@ import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { getCurrentUser } from '@/lib/server/current-user';
+import { Suspense } from 'react';
+import { NavbarWrapper } from '@/components/layout/navbar-wrapper';
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
@@ -21,8 +23,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
-
   return (
     <html
       lang="ar"
@@ -34,7 +34,9 @@ export default async function RootLayout({
         className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar user={user} />
+          <Suspense>
+            <NavbarWrapper />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>

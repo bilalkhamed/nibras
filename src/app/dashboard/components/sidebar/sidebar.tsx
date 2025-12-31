@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import { NavMain } from './nav-main';
@@ -17,19 +15,17 @@ import {
 import { sidebarNavItems } from '@/lib/shared/site.config';
 import Link from 'next/link';
 import { AccessTokenPayload } from '@/types/types';
+import getAuthSession from '@/lib/server/auth-session';
 
-export function DashboardSidebar({
-  auth,
-  ...props
-}: { auth: AccessTokenPayload } & React.ComponentProps<typeof Sidebar>) {
+export async function DashboardSidebar({}: React.ComponentProps<
+  typeof Sidebar
+>) {
+  const auth = await getAuthSession();
+  if (!auth) {
+    return null;
+  }
   return (
-    <Sidebar
-      variant="sidebar"
-      {...props}
-      dir="rtl"
-      side="right"
-      collapsible="icon"
-    >
+    <Sidebar variant="sidebar" dir="rtl" side="right" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -45,7 +41,7 @@ export function DashboardSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sidebarNavItems[auth.role]} />
+        <NavMain role={auth.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
