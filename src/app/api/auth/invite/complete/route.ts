@@ -64,6 +64,11 @@ export async function POST(request: NextRequest) {
           role: true,
           firstName: true,
           lastName: true,
+          cohort: {
+            select: {
+              currentLevelId: true,
+            },
+          },
         },
       });
     });
@@ -73,7 +78,8 @@ export async function POST(request: NextRequest) {
       updatedUser.role,
       ACTIVE_STATUS,
       updatedUser.firstName,
-      updatedUser.lastName
+      updatedUser.lastName,
+      updatedUser.cohort?.currentLevelId || null
     );
 
     return NextResponse.json(

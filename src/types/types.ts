@@ -26,6 +26,7 @@ export type AccessTokenPayload = {
   status: UserStatus;
   firstName: string;
   lastName: string;
+  currentLevelId: string | null;
 };
 
 export type CountryCode = keyof typeof labels.countries;
