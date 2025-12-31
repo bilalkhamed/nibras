@@ -10,20 +10,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AssignmentTypes } from '@prisma/client';
+import { Assignment, AssignmentTypes } from '@prisma/client';
 import clsx from 'clsx';
 import { ExternalLink } from 'lucide-react';
 
-interface Assignment {
-  id: string;
-  name: string;
-  description: string | null;
-  type: AssignmentTypes;
-  url: string | null;
-}
-
 interface AssignmentsTableProps {
   assignments: Assignment[];
+  actionButtons?: (assignment: Assignment) => React.ReactNode;
 }
 
 const ASSIGNMENT_TYPE_COLORS: Record<AssignmentTypes, string> = {
@@ -40,7 +33,10 @@ const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   reading: 'قراءة',
 };
 
-export function AssignmentsTable({ assignments }: AssignmentsTableProps) {
+export function AssignmentsTable({
+  assignments,
+  actionButtons,
+}: AssignmentsTableProps) {
   return (
     <>
       <div className="space-y-4">
@@ -61,6 +57,11 @@ export function AssignmentsTable({ assignments }: AssignmentsTableProps) {
                 <TableHead className="text-right font-semibold">
                   الرابط
                 </TableHead>
+                {actionButtons && (
+                  <TableHead className="text-right font-semibold">
+                    الإجراءات
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody className="">
@@ -105,6 +106,7 @@ export function AssignmentsTable({ assignments }: AssignmentsTableProps) {
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
+                  {actionButtons && <TableCell>{actionButtons(a)}</TableCell>}
                 </TableRow>
               ))}
             </TableBody>
