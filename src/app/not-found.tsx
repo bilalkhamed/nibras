@@ -5,7 +5,7 @@ import { Home, LogIn, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { BackButton } from '@/components/common/back-button';
 import { Suspense } from 'react';
 
-export default async function NotFound() {
+export default function NotFound() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-background via-muted to-background px-4 py-8">
       {/* Decorative background elements */}
