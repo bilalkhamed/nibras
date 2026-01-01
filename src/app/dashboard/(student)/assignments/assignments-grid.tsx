@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import type { Assignment, Program, StudentAssignment } from '@prisma/client';
 import { ProgramFilter } from './program-filter';
 import { Toggle } from '@/components/ui/toggle';
-import { BookmarkIcon, CheckCircleIcon, CheckLineIcon } from 'lucide-react';
+import { CheckCircleIcon, CheckLineIcon } from 'lucide-react';
+import confetti from 'canvas-confetti';
+
 import {
   Tooltip,
   TooltipContent,
@@ -203,6 +205,20 @@ function CompleteButton({
     }
   };
 
+  const handleOnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!optimisticCompleted) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+      confetti({
+        particleCount: 60,
+        spread: 50,
+        decay: 0.85,
+        origin: { x, y },
+      });
+    }
+  };
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -210,6 +226,7 @@ function CompleteButton({
           <Toggle
             // 7. Use the Optimistic State for rendering
             pressed={optimisticCompleted}
+            onClick={handleOnClick}
             variant={'outline'}
             size={'lg'}
             className={cn(
