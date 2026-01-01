@@ -1,5 +1,3 @@
-'use cache';
-
 import prisma from './prisma';
 import { getProgramBySlug } from './programs';
 
@@ -8,6 +6,7 @@ export async function getWeekAssignments(
   weekId: string,
   programSlug?: string
 ) {
+  'use cache';
   const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
 
   const assignments = await prisma.assignment.findMany({
@@ -19,10 +18,22 @@ export async function getWeekAssignments(
     orderBy: {
       createdAt: 'asc',
     },
-    include: {
-      program: true,
-    },
   });
 
   return assignments;
+}
+
+export async function getStudentAssignments(
+  studentId: string,
+  assignmentIds: string[]
+) {
+  const studentAssignments = await prisma.studentAssignment.findMany({
+    where: {
+      studentId: studentId,
+      assignmentId: {
+        in: assignmentIds,
+      },
+    },
+  });
+  return studentAssignments;
 }

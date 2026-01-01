@@ -1,5 +1,5 @@
-import { UsersTableSkeleton } from '@/components/skeletons';
+import { InfoSectionSkeleton } from '@/components/skeletons';
 
 export default function Loading() {
-  return <UsersTableSkeleton />;
+  return <InfoSectionSkeleton />;
 }

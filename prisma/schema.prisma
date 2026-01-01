@@ -47,6 +47,9 @@ model User {
 
   invite Invite?
 
+  studentAssignments StudentAssignment[]
+  markedAssignments  StudentAssignment[] @relation("markedBy")
+
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
@@ -229,9 +232,34 @@ model Assignment {
   type AssignmentTypes @default(reading)
   url  String?
 
+  studentAssignments StudentAssignment[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([programId, weekId, levelId])
   @@map("assignments")
+}
+
+model StudentAssignment {
+  id           String @id @default(cuid(2))
+  studentId    String
+  assignmentId String
+
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  markedById String?
+  markedBy   User?   @relation(fields: [markedById], references: [id], onDelete: SetNull, name: "markedBy")
+
+  @@unique([studentId, assignmentId])
+  @@index([assignmentId, isCompleted])
+  @@index([studentId, isCompleted])
+  @@map("student_assignments")
 }

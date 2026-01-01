@@ -7,7 +7,7 @@ type Program = { id: string; name: string };
 type Props = {
   programs: Program[];
   programFilter: string;
-  onFilterChange: (id: string) => void;
+  onFilterChange?: (id: string) => void;
 };
 
 export function ProgramFilter({
@@ -24,7 +24,7 @@ export function ProgramFilter({
         <Button
           size="sm"
           variant={programFilter === 'all' ? 'primary' : 'outline'}
-          onClick={() => onFilterChange('all')}
+          onClick={() => onFilterChange && onFilterChange('all')}
         >
           الكل
         </Button>
@@ -33,7 +33,7 @@ export function ProgramFilter({
             key={program.id}
             size="sm"
             variant={programFilter === program.id ? 'primary' : 'outline'}
-            onClick={() => onFilterChange(program.id)}
+            onClick={() => onFilterChange && onFilterChange(program.id)}
           >
             {program.name}
           </Button>

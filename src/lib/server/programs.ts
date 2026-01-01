@@ -9,3 +9,7 @@ export async function getProgramBySlug(slug: string) {
     },
   });
 }
+
+export async function getAllPrograms() {
+  return await prisma.program.findMany();
+}

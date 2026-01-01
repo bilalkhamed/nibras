@@ -5,8 +5,16 @@ import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Assignment, Program } from '@prisma/client';
 import { AssignmentsGrid } from './assignments-grid';
-import { getWeekAssignments } from '@/lib/server/assignments';
+import {
+  getStudentAssignments,
+  getWeekAssignments,
+} from '@/lib/server/assignments';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { WeekHero } from './week-hero';
+import { ProgramFilter } from './program-filter';
+import { getAllPrograms } from '@/lib/server/programs';
+import { Suspense } from 'react';
+import { CardsListSkeleton } from '@/components/skeletons';
 
 export default async function StudentAssignmentsPage({
   children,
@@ -26,7 +34,10 @@ export default async function StudentAssignmentsPage({
     return <NoData />;
   }
 
-  const assignments = await getWeekAssignments(levelId, currentWeek.week.id);
+  const [assignments, programs] = await Promise.all([
+    getWeekAssignments(levelId, currentWeek.week.id),
+    getAllPrograms(),
+  ]);
 
   const totalAssignments = assignments.length;
   const primaryMessage =
@@ -47,13 +58,52 @@ export default async function StudentAssignmentsPage({
     : 'لم يحدد بعد';
 
   return (
+    <div className="space-y-6">
+      <WeekHero
+        heroTitle={heroTitle}
+        primaryMessage={primaryMessage}
+        deadlineLabel={deadlineLabel}
+        streakText={streakText}
+      />
+      <Suspense fallback={<LoadingSkeleton programs={programs} />}>
+        <StudentAssignmentWrapper
+          programs={programs}
+          assignments={assignments}
+          userId={auth.userId}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+async function StudentAssignmentWrapper({
+  programs,
+  assignments,
+  userId,
+}: {
+  programs: Program[];
+  assignments: Assignment[];
+  userId: string;
+}) {
+  const studentAssignments = await getStudentAssignments(
+    userId,
+    assignments.map((a) => a.id)
+  );
+  return (
     <AssignmentsGrid
       assignments={assignments}
-      heroTitle={heroTitle}
-      primaryMessage={primaryMessage}
-      streakText={streakText}
-      deadlineLabel={deadlineLabel}
+      studentAssignments={studentAssignments}
+      programs={programs}
     />
+  );
+}
+
+function LoadingSkeleton({ programs }: { programs: Program[] }) {
+  return (
+    <div className="space-y-6">
+      <ProgramFilter programs={programs} programFilter={'all'} />
+      <CardsListSkeleton numberOfCards={3} />
+    </div>
   );
 }
 
