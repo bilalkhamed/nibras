@@ -1,3 +1,5 @@
+// 'use cache';
+
 import prisma from '@/lib/server/prisma';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,19 +13,14 @@ import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import CreateProgramDialog from './create-program-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
+import { Suspense } from 'react';
+import { CardsListSkeleton } from '@/components/skeletons';
+import { connection } from 'next/server';
+import { getAllPrograms } from '@/lib/server/programs';
 
 export default async function ProgramsPage() {
-  const programs = await prisma.program.findMany({
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      slug: true,
-    },
-  });
-
   return (
-    <div className="space-y-6">
+    <div className="space y-6">
       <CustomToaster />
       {/* Header */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -36,6 +33,24 @@ export default async function ProgramsPage() {
         <CreateProgramDialog />
       </div>
 
+      <Suspense fallback={<CardsListSkeleton numberOfCards={3} />}>
+        <Wrapper />
+      </Suspense>
+    </div>
+  );
+}
+
+async function Wrapper() {
+  // await connection();
+  const programs: {
+    id: string;
+    name: string;
+    description: string | null;
+    slug: string;
+  }[] = await getAllPrograms();
+
+  return (
+    <div className="mt-5">
       {/* Programs Grid */}
       {programs.length === 0 ? (
         <Card className="border-dashed">

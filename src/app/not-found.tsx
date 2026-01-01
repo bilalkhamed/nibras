@@ -28,68 +28,23 @@ export default function NotFound() {
         </div>
 
         {/* Action Buttons */}
-        <Suspense>
-          <ActionButtons />
-        </Suspense>
+        <div className="space-y-3 pt-4">
+          <Button asChild variant="outline" size="lg" className="w-full">
+            <Link href="/" className="flex items-center justify-center gap-2">
+              <Home className="h-5 w-5" />
+              الرئيسية
+            </Link>
+          </Button>
+
+          <div className="text-sm pt-2 my-2">
+            <BackButton />
+          </div>
+        </div>
 
         {/* Reassuring message */}
         <div className="rounded-lg bg-primary/5 backdrop-blur-sm border border-primary/20 p-4 text-sm text-muted-foreground">
           <p>إذا كنتِ تعتقدين أن هذا خطأ، يرجى التواصل مع الدعم الفني.</p>
         </div>
-      </div>
-    </div>
-  );
-}
-
-async function ActionButtons() {
-  const auth = await getAuthSession();
-  const isLoggedIn = !!auth;
-
-  return (
-    <div className="space-y-3 pt-4">
-      {isLoggedIn ? (
-        <>
-          {/* Logged In: Dashboard + Home */}
-          <Button asChild size="lg" className="w-full">
-            <Link
-              href="/dashboard"
-              className="flex items-center justify-center gap-2"
-            >
-              <LayoutDashboard className="h-5 w-5" />
-              العودة إلى لوحة التحكم
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="w-full">
-            <Link href="/" className="flex items-center justify-center gap-2">
-              <Home className="h-5 w-5" />
-              الرئيسية
-            </Link>
-          </Button>
-        </>
-      ) : (
-        <>
-          {/* Not Logged In: Login + Home */}
-          <Button asChild size="lg" className="w-full">
-            <Link
-              href="/login"
-              className="flex items-center justify-center gap-2"
-            >
-              <LogIn className="h-5 w-5" />
-              تسجيل الدخول
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="w-full">
-            <Link href="/" className="flex items-center justify-center gap-2">
-              <Home className="h-5 w-5" />
-              الرئيسية
-            </Link>
-          </Button>
-        </>
-      )}
-
-      {/* Back Button */}
-      <div className="text-sm pt-2 my-2">
-        <BackButton />
       </div>
     </div>
   );

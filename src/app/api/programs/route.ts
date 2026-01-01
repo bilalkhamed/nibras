@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/server/prisma';
 import getAuthSession from '@/lib/server/auth-session';
 import { ADMIN_ROLE } from '@/types/types';
+import { revalidateTag } from 'next/cache';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    revalidateTag('programs', 'max');
     return NextResponse.json(program, { status: 201 });
   } catch (error) {
     console.error('Error creating program:', error);
