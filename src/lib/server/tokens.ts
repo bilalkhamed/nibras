@@ -18,7 +18,8 @@ export async function setAccessToken(
   status: UserStatus,
   firstName: string,
   lastName: string,
-  currentLevelId: string | null
+  currentLevelId: string | null,
+  activeGroupId: string | null
 ) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
   const token = await signAccessToken({
@@ -29,6 +30,7 @@ export async function setAccessToken(
     lastName,
     expiresAt,
     currentLevelId,
+    activeGroupId,
   });
   (await cookies()).set('accessToken', token, {
     httpOnly: true,

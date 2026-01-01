@@ -69,6 +69,11 @@ export async function POST(request: NextRequest) {
               currentLevelId: true,
             },
           },
+          groupsAsStudent: {
+            where: {
+              isActive: true,
+            },
+          },
         },
       });
     });
@@ -79,7 +84,10 @@ export async function POST(request: NextRequest) {
       ACTIVE_STATUS,
       updatedUser.firstName,
       updatedUser.lastName,
-      updatedUser.cohort?.currentLevelId || null
+      updatedUser.cohort?.currentLevelId || null,
+      updatedUser.groupsAsStudent.length > 0
+        ? updatedUser.groupsAsStudent[0].groupId
+        : null
     );
 
     return NextResponse.json(

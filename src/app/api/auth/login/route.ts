@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
       hashedPassword: true,
       firstName: true,
       lastName: true,
+      groupsAsStudent: {
+        where: { isActive: true },
+      },
       cohort: {
         select: {
           currentLevelId: true,
@@ -67,7 +70,10 @@ export async function POST(req: NextRequest) {
     foundUser.status,
     foundUser.firstName,
     foundUser.lastName,
-    foundUser.cohort?.currentLevelId || null
+    foundUser.cohort?.currentLevelId || null,
+    foundUser.groupsAsStudent.length > 0
+      ? foundUser.groupsAsStudent[0].groupId
+      : null
   );
   return NextResponse.json({ success: true }, { status: 200 });
 }
