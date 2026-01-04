@@ -1,4 +1,4 @@
-import { getCurrentWeek } from '@/lib/server/current-week';
+import { getCurrentWeek } from '@/lib/server/weeks';
 import type { getGroupById } from '@/lib/server/groups';
 
 type Props = {

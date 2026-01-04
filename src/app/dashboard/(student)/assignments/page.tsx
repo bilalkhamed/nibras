@@ -1,4 +1,4 @@
-import { getCurrentWeek } from '@/lib/server/current-week';
+import { getCurrentWeek } from '@/lib/server/weeks';
 import prisma from '@/lib/server/prisma';
 import { requireRoles } from '@/lib/server/require-roles';
 import { STUDENT_ROLE } from '@/types/types';

@@ -4,7 +4,7 @@ import {
   getManyStudentAssignments,
   getWeekAssignments,
 } from '@/lib/server/assignments';
-import { getCurrentWeek } from '@/lib/server/current-week';
+import { getCurrentWeek } from '@/lib/server/weeks';
 import { getGroupById } from '@/lib/server/groups';
 import { notFound } from 'next/navigation';
 import { StudentProgressTable } from './student-progress-table';

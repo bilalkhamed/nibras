@@ -7,7 +7,7 @@ import { GroupInfoSection } from './group-info-section';
 import { SupervisorSection } from './supervisor-section';
 import { GroupStudentsSection } from './group-students-section';
 import { getGroupById } from '@/lib/server/groups';
-import { getCurrentWeek } from '@/lib/server/current-week';
+import { getCurrentWeek } from '@/lib/server/weeks';
 
 export default async function StudentGroupPage() {
   const auth = await requireRoles(STUDENT_ROLE);
