@@ -8,6 +8,7 @@ import {
   ListOrdered,
   UsersRound,
   ChartColumn,
+  FolderClock,
 } from 'lucide-react';
 
 export const navItems: NavItem[] = [
@@ -70,6 +71,7 @@ export const sidebarNavItems: {
   student: [
     { label: 'مجموعتي', href: '/dashboard/my-group', icon: UsersRound },
     { label: 'مهامي', href: '/dashboard/assignments', icon: BookOpen },
+    { label: 'مساري', href: '/dashboard/history', icon: FolderClock },
   ],
 };
 
