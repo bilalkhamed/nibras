@@ -4,29 +4,65 @@ import {
   getManyStudentAssignments,
   getWeekAssignments,
 } from '@/lib/server/assignments';
-import { getCurrentWeek } from '@/lib/server/weeks';
+import {
+  getCurrentWeek,
+  getWeekByNumber,
+  getWeeksTillDate,
+} from '@/lib/server/weeks';
 import { getGroupById } from '@/lib/server/groups';
 import { notFound } from 'next/navigation';
 import { StudentProgressTable } from './student-progress-table';
+import { WeekNavigator } from '@/components/common/week-navigator';
 
 type Params = Promise<{ id: string }>;
+type SearchParams = Promise<{ week?: string }> | { week?: string };
 
-export default function GroupProgressPage({ params }: { params: Params }) {
+export default function GroupProgressPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams?: SearchParams;
+}) {
   return (
-    <Suspense fallback={<InfoSectionSkeleton />}>
-      <StudentsAssignmentsList params={params} />
-    </Suspense>
+    <div className="space-y-6">
+      <Suspense fallback={<WeekNavigator weeks={[]} />}>
+        <WeekNavigatorContainer />
+      </Suspense>
+
+      <Suspense fallback={<InfoSectionSkeleton />}>
+        <StudentsAssignmentsList params={params} searchParams={searchParams} />
+      </Suspense>
+    </div>
   );
 }
 
-async function StudentsAssignmentsList({ params }: { params: Params }) {
+async function StudentsAssignmentsList({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams?: SearchParams;
+}) {
   const { id } = await params;
+  const { week } = (await searchParams) || {};
 
   const group = await getGroupById(id);
   if (!group) notFound();
   const currentWeek = await getCurrentWeek();
   if (!currentWeek) notFound(); // TODO: handle error properly
-  const weekId = currentWeek.week?.id;
+
+  const parsedWeek = Number(week);
+  const isInvalidWeek = Number.isNaN(parsedWeek) || parsedWeek < 1;
+  const isFutureWeek = !isInvalidWeek && parsedWeek > currentWeek.week.number;
+
+  const targetWeekNumber =
+    isInvalidWeek || isFutureWeek ? currentWeek.week.number : parsedWeek;
+
+  const targetWeek = await getWeekByNumber(targetWeekNumber);
+  const selectedWeek = targetWeek ?? currentWeek;
+
+  const weekId = selectedWeek.week?.id;
   if (!weekId) notFound();
 
   const assignments = await getWeekAssignments(
@@ -80,7 +116,7 @@ async function StudentsAssignmentsList({ params }: { params: Params }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <span className="rounded-full bg-muted px-3 py-1 text-foreground font-medium">
-          الأسبوع الحالي: {currentWeek.week?.title || 'الأسبوع الحالي'}
+          الأسبوع: {selectedWeek.week?.title || 'الأسبوع الحالي'}
         </span>
       </div>
 
@@ -99,5 +135,22 @@ async function StudentsAssignmentsList({ params }: { params: Params }) {
         />
       )}
     </div>
+  );
+}
+
+async function WeekNavigatorContainer() {
+  const [weeks, currentWeek] = await Promise.all([
+    getWeeksTillDate(),
+    getCurrentWeek(),
+  ]);
+  const mappedWeeks = weeks
+    .map((w) => ({ id: w.week.id, number: w.week.number, title: w.week.title }))
+    .sort((a, b) => a.number - b.number);
+
+  return (
+    <WeekNavigator
+      weeks={mappedWeeks}
+      currentWeekNumber={currentWeek?.week.number}
+    />
   );
 }

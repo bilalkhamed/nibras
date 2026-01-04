@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { getWeeksTillDate } from '@/lib/server/weeks';
-import { WeekNavigator } from './week-navigator';
+import { WeekNavigator } from '@/components/common/week-navigator';
 
 export default function HistoryLayout({
   children,

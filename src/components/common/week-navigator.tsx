@@ -20,15 +20,19 @@ import {
 
 interface WeekNavigatorProps {
   weeks: { id: string; number: number; title: string }[];
+  currentWeekNumber?: number;
 }
 
-export function WeekNavigator({ weeks }: WeekNavigatorProps) {
+export function WeekNavigator({
+  weeks,
+  currentWeekNumber,
+}: WeekNavigatorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const weekFromParams = searchParams.get('week');
-  const defaultWeek = weeks[0]?.number ?? 1;
+  const defaultWeek = currentWeekNumber ?? weeks[0]?.number ?? 1;
 
   const [activeWeek, setActiveWeek] = useState<number>(defaultWeek);
 
@@ -56,7 +60,7 @@ export function WeekNavigator({ weeks }: WeekNavigatorProps) {
     }
   };
 
-  const isFirst = activeWeek <= (weeks[0]?.number ?? 1);
+  const isFirst = activeWeek <= (weeks[0]?.number ?? defaultWeek);
   const isLast = activeWeek >= (weeks[weeks.length - 1]?.number ?? activeWeek);
 
   const weekOptions = useMemo(() => weeks.map((w) => w.number), [weeks]);
