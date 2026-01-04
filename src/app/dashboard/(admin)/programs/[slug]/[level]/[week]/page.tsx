@@ -1,8 +1,8 @@
 import prisma from '@/lib/server/prisma';
-import { AssignmentsTable } from '@/app/dashboard/components/assignments-table';
 import { AddAssignmentDialog } from './add-assignment-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
+import { AssignmentsTableWithActions } from './assignments-table-with-actions';
 
 export default async function ProgramWeekPage({
   params,
@@ -39,7 +39,7 @@ export default async function ProgramWeekPage({
             programSlug={slug}
           />
         </div>
-        <AssignmentsTable assignments={assignments} />
+        <AssignmentsTableWithActions assignments={assignments} />
       </div>
       <CustomToaster />
     </>

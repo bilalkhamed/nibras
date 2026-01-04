@@ -2,6 +2,9 @@
 
 import prisma from './prisma'; // Adjust path
 import getAuthSession from './auth-session'; // Your auth helper
+import { ADMIN_ROLE } from '@/types/types';
+import { AssignmentTypes } from '@prisma/client';
+import { refresh, revalidatePath } from 'next/cache';
 
 export async function toggleAssignmentCompletion(
   assignmentId: string, // Receive assignmentId, NOT the row ID
@@ -42,5 +45,65 @@ export async function toggleAssignmentCompletion(
   } catch (error) {
     console.error('Toggle Error:', error);
     return { success: false, error: 'Failed to update status' };
+  }
+}
+
+export async function deleteAssignment(assignmentId: string) {
+  const session = await getAuthSession();
+  if (!session?.userId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  if (session.role !== ADMIN_ROLE) {
+    return { success: false, error: 'Forbidden: Admin access required' };
+  }
+
+  try {
+    await prisma.assignment.delete({
+      where: { id: assignmentId },
+    });
+
+    revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
+    return { success: true };
+  } catch (error) {
+    console.error('Delete Assignment Error:', error);
+    return { success: false, error: 'Failed to delete assignment' };
+  }
+}
+
+export async function updateAssignment(
+  assignmentId: string,
+  data: {
+    name: string;
+    description: string | null;
+    type: AssignmentTypes;
+    url: string | null;
+  }
+) {
+  const session = await getAuthSession();
+  if (!session?.userId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  if (session.role !== ADMIN_ROLE) {
+    return { success: false, error: 'Forbidden: Admin access required' };
+  }
+
+  try {
+    await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        url: data.url,
+      },
+    });
+
+    revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
+    return { success: true };
+  } catch (error) {
+    console.error('Update Assignment Error:', error);
+    return { success: false, error: 'Failed to update assignment' };
   }
 }
