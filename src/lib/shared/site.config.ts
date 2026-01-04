@@ -36,6 +36,16 @@ export const navItems: NavItem[] = [
   },
 ];
 
+const programs: SidebarNavItem = {
+  label: 'البرامج',
+  href: '/dashboard/programs',
+  items: [
+    { label: 'البرنامج القرائي', href: '/dashboard/programs/reading' },
+    { label: 'البرنامج التربوي', href: '/dashboard/programs/lectures' },
+    { label: 'ليطمئن قلبي', href: '/dashboard/programs/heart' },
+  ],
+};
+
 export const sidebarNavItems: {
   admin: SidebarNavItem[];
   supervisor: SidebarNavItem[];
@@ -50,20 +60,12 @@ export const sidebarNavItems: {
     },
     { label: 'المجموعات', href: '/dashboard/groups', icon: UsersRound },
     { label: 'المستويات', href: '/dashboard/levels', icon: ListOrdered },
-    {
-      label: 'البرامج',
-      href: '/dashboard/programs',
-      items: [
-        { label: 'البرنامج القرائي', href: '/dashboard/programs/reading' },
-        { label: 'البرنامج التربوي', href: '/dashboard/programs/lectures' },
-        { label: 'ليطمئن قلبي', href: '/dashboard/programs/heart' },
-      ],
-    },
+    programs,
     { label: 'التقارير', href: '/dashboard/reports', icon: ChartColumn },
   ],
   supervisor: [
     { label: 'مجموعاتي', href: '/dashboard/groups', icon: UsersRound },
-    { label: 'التقارير', href: '/dashboard/my-reports', icon: ChartColumn },
+    programs,
   ],
   student: [
     { label: 'مجموعتي', href: '/dashboard/my-group', icon: UsersRound },

@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/shared/utils';
 import StudentActions from './student-actions';
+import { ADMIN_ROLE } from '@/types/types';
 
 export interface GroupStudent {
   student: {
@@ -22,11 +23,13 @@ export interface GroupStudent {
 interface GroupStudentsTableProps {
   groupStudents: GroupStudent[];
   groupId: string;
+  userRole: string;
 }
 
 export default function GroupStudentsTable({
   groupStudents,
   groupId,
+  userRole,
 }: GroupStudentsTableProps) {
   return (
     <div className="border border-border rounded-lg overflow-hidden">
@@ -35,7 +38,9 @@ export default function GroupStudentsTable({
           <TableRow className="border-b border-border">
             <TableHead className="text-right">الاسم</TableHead>
             <TableHead className="text-right">تاريخ الانضمام</TableHead>
-            <TableHead className=" text-center">الإجراءات</TableHead>
+            {userRole === ADMIN_ROLE && (
+              <TableHead className=" text-center">الإجراءات</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -51,9 +56,11 @@ export default function GroupStudentsTable({
               <TableCell className="text-right text-sm">
                 {formatDate(joinedAt)}
               </TableCell>
-              <TableCell className="text-right">
-                <StudentActions groupId={groupId} studentId={student.id} />
-              </TableCell>
+              {userRole === ADMIN_ROLE && (
+                <TableCell className="text-right">
+                  <StudentActions groupId={groupId} studentId={student.id} />
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Users, UserRound, XCircleIcon } from 'lucide-react';
 import { Group } from '@/types/types';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Separator } from '../ui/separator';
 
 type GroupListProps = {
   groups: Group[];
@@ -54,9 +55,15 @@ export function GroupList({ groups, hrefBase }: GroupListProps) {
                   {Object.values(group.supervisor).splice(1).join(' ')}
                 </span>
               </div>
-              <Button asChild className="w-full" variant="outline">
-                <Link href={href}>فتح صفحة المجموعة</Link>
-              </Button>
+              <Separator />
+              <div className="flex gap-2">
+                <Button asChild className="w-full" variant="primary">
+                  <Link href={`${href}/progress`}>متابعة التقدم</Link>
+                </Button>
+                <Button asChild className="w-full" variant="outline">
+                  <Link href={`${href}/info`}>معلومات المجموعة</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );

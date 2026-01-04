@@ -37,3 +37,20 @@ export async function getStudentAssignments(
   });
   return studentAssignments;
 }
+
+export async function getManyStudentAssignments(
+  studentIds: string[],
+  assignmentIds: string[]
+) {
+  const studentAssignments = await prisma.studentAssignment.findMany({
+    where: {
+      studentId: {
+        in: studentIds,
+      },
+      assignmentId: {
+        in: assignmentIds,
+      },
+    },
+  });
+  return studentAssignments;
+}

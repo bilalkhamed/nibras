@@ -25,23 +25,25 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ar"
-      dir="rtl"
-      suppressHydrationWarning
-      data-scroll-behavior="smooth"
-    >
-      <body
-        className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
+    <Suspense>
+      <html
+        lang="ar"
+        dir="rtl"
+        suppressHydrationWarning
+        data-scroll-behavior="smooth"
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Suspense>
-            <NavbarWrapper />
-          </Suspense>
-          {children}
-        </ThemeProvider>
-        <CustomToaster />
-      </body>
-    </html>
+        <body
+          className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
+        >
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Suspense>
+              <NavbarWrapper />
+            </Suspense>
+            {children}
+          </ThemeProvider>
+          <CustomToaster />
+        </body>
+      </html>
+    </Suspense>
   );
 }
