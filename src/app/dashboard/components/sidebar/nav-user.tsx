@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  BadgeCheck,
-  Bell,
-  BellIcon,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  LogOutIcon,
-  Sparkles,
-  User2Icon,
-} from 'lucide-react';
+import { BellIcon, ChevronsUpDown, LogOutIcon, User2Icon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -18,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -33,7 +22,7 @@ import { Role } from '@/types/types';
 import labels from '@/lib/labels.json';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ThemeSwitch } from '@/components/common/theme-switch';
+import { SidebarThemeSwitch } from './sidebar-theme-switch';
 
 export function NavUser({
   user,
@@ -95,9 +84,8 @@ export function NavUser({
                 <BellIcon />
                 الإشعارات
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <ThemeSwitch />
-              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <SidebarThemeSwitch />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
