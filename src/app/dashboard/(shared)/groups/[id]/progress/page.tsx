@@ -114,10 +114,14 @@ async function StudentsAssignmentsList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <span className="rounded-full bg-muted px-3 py-1 text-foreground font-medium">
-          الأسبوع: {selectedWeek.week?.title || 'الأسبوع الحالي'}
-        </span>
+      <div className="p-4 text-center">
+        <h2 className="text-xl font-semibold mb-2">
+          {selectedWeek.week?.title || 'الأسبوع الحالي'}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {selectedWeek.startDate.toLocaleDateString('ar-SA')} -{' '}
+          {selectedWeek.endDate.toLocaleDateString('ar-SA')}
+        </p>
       </div>
 
       {group.students.length === 0 ? (
