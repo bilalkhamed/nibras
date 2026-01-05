@@ -229,8 +229,8 @@ model Assignment {
   levelId     String
   level       Level   @relation(fields: [levelId], references: [id])
 
-  type AssignmentTypes @default(reading)
-  url  String?
+  type        AssignmentTypes        @default(reading)
+  attachments AssignmentAttachment[]
 
   studentAssignments StudentAssignment[]
 
@@ -239,6 +239,29 @@ model Assignment {
 
   @@index([programId, weekId, levelId])
   @@map("assignments")
+}
+
+enum AttachmentType {
+  FILE
+  LINK
+}
+
+model AssignmentAttachment {
+  id           String     @id @default(cuid(2))
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  type AttachmentType @default(FILE)
+  name String?
+
+  url     String?
+  fileKey String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([assignmentId])
+  @@map("assignments_attachments")
 }
 
 model StudentAssignment {
