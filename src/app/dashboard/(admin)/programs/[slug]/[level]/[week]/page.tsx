@@ -1,5 +1,5 @@
 import prisma from '@/lib/server/prisma';
-import { AddAssignmentDialog } from './add-assignment-dialog';
+import { AddAssignmentSheet } from './add-assignment-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
 import { AssignmentsTableWithActions } from './assignments-table-with-actions';
@@ -33,7 +33,7 @@ export default async function ProgramWeekPage({
           <h3 className="text-xl font-bold text-foreground">
             {weekData?.title}
           </h3>
-          <AddAssignmentDialog
+          <AddAssignmentSheet
             levelSlug={level}
             weekId={weekData.id}
             programSlug={slug}

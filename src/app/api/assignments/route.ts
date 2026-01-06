@@ -1,7 +1,12 @@
 import getAuthSession from '@/lib/server/auth-session';
 import prisma from '@/lib/server/prisma';
 import { ADMIN_ROLE, AssignmentTypes } from '@/types/types';
-import { Assignment } from '@prisma/client';
+import {
+  Assignment,
+  AssignmentAttachment,
+  AttachmentType,
+  Prisma,
+} from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -13,7 +18,8 @@ const requestSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     type: z.enum(AssignmentTypes),
-    url: z.url().optional(),
+    links: z.array(z.url()).optional(),
+    fileKeys: z.array(z.string()).optional(),
   }),
 });
 
@@ -28,17 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 
-  let body: {
-    levelSlug: string;
-    weekId: string;
-    programSlug: string;
-    assignment: {
-      name: string;
-      description?: string;
-      type: string;
-      url?: string;
-    };
-  };
+  let body: z.infer<typeof requestSchema>;
 
   try {
     body = await req.json();
@@ -56,6 +52,23 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const attachments: Prisma.AssignmentAttachmentCreateManyAssignmentInputEnvelope =
+      {
+        data: {
+          ...(data.assignment.links
+            ? data.assignment.links.map((link) => ({
+                type: AttachmentType.LINK,
+                url: link,
+              }))
+            : []),
+          ...(data.assignment.fileKeys
+            ? data.assignment.fileKeys.map((key) => ({
+                type: AttachmentType.FILE,
+                fileKey: key,
+              }))
+            : []),
+        },
+      };
     const createdAssignment = await prisma.$transaction(async (tx) => {
       const level = await tx.level.findUnique({
         where: { slug: data.levelSlug },
@@ -92,10 +105,14 @@ export async function POST(req: NextRequest) {
           name: data.assignment.name,
           description: data.assignment.description || null,
           type: data.assignment.type as any,
-          url: data.assignment.url || null,
           levelId: level.id,
           weekId: data.weekId,
           programId: program.id,
+          attachments: {
+            createMany: {
+              data: attachments.data,
+            },
+          },
         },
       });
     });

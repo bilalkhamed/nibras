@@ -3,8 +3,9 @@
 import prisma from './prisma'; // Adjust path
 import getAuthSession from './auth-session'; // Your auth helper
 import { ADMIN_ROLE } from '@/types/types';
-import { AssignmentTypes } from '@prisma/client';
+import { AssignmentTypes, AttachmentType, Prisma } from '@prisma/client';
 import { refresh, revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 export async function toggleAssignmentCompletion(
   assignmentId: string, // Receive assignmentId, NOT the row ID
@@ -96,7 +97,7 @@ export async function updateAssignment(
         name: data.name,
         description: data.description,
         type: data.type,
-        url: data.url,
+        // url: data.url,
       },
     });
 
@@ -105,5 +106,114 @@ export async function updateAssignment(
   } catch (error) {
     console.error('Update Assignment Error:', error);
     return { success: false, error: 'Failed to update assignment' };
+  }
+}
+
+const createAssignmentSchema = z.object({
+  levelSlug: z.string().min(1),
+  weekId: z.string().min(1),
+  programSlug: z.string().min(1),
+  assignment: z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+    type: z.enum(AssignmentTypes),
+    links: z
+      .array(
+        z.object({
+          url: z.string().url(),
+        })
+      )
+      .optional(),
+    filesKeys: z.array(z.string()).optional(),
+  }),
+});
+
+export async function createAssignment(
+  input: z.infer<typeof createAssignmentSchema>
+) {
+  const session = await getAuthSession();
+
+  if (!session?.userId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  if (session.role !== ADMIN_ROLE) {
+    return { success: false, error: 'Forbidden: Admin access required' };
+  }
+
+  const { success, data, error } = createAssignmentSchema.safeParse(input);
+
+  if (!success) {
+    return {
+      success: false,
+      error: 'Invalid input',
+      validationErrors: error,
+    };
+  }
+
+  try {
+    const attachmentsData: Prisma.AssignmentAttachmentCreateManyAssignmentInput[] =
+      [
+        ...(data.assignment.links?.map((link) => ({
+          type: AttachmentType.LINK as AttachmentType,
+          url: link.url,
+        })) || []),
+        ...(data.assignment.filesKeys?.map((key) => ({
+          type: AttachmentType.FILE as AttachmentType,
+          fileKey: key,
+        })) || []),
+      ];
+
+    const createdAssignment = await prisma.$transaction(async (tx) => {
+      const level = await tx.level.findUnique({
+        where: { slug: data.levelSlug },
+      });
+
+      if (!level) {
+        throw new Error('Level not found');
+      }
+
+      const week = await tx.week.findUnique({
+        where: { id: data.weekId },
+      });
+
+      if (!week) {
+        throw new Error('Week not found');
+      }
+
+      const program = await tx.program.findUnique({
+        where: { slug: data.programSlug },
+      });
+
+      if (!program) {
+        throw new Error('Program not found');
+      }
+
+      return await tx.assignment.create({
+        data: {
+          name: data.assignment.name,
+          description: data.assignment.description || null,
+          type: data.assignment.type as AssignmentTypes,
+          levelId: level.id,
+          weekId: data.weekId,
+          programId: program.id,
+          attachments: {
+            createMany: {
+              data: attachmentsData,
+            },
+          },
+        },
+      });
+    });
+
+    revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
+    return { success: true, assignment: createdAssignment };
+  } catch (error) {
+    console.error('Create Assignment Error:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to create assignment',
+    };
   }
 }
