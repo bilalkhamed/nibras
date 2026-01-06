@@ -8,7 +8,9 @@ import { EditAssignmentButton } from './edit-assignment-button';
 export function AssignmentsTableWithActions({
   assignments,
 }: {
-  assignments: (Assignment & { attachments: AssignmentAttachment[] })[];
+  assignments: (Assignment & {
+    attachments: (AssignmentAttachment & { tempUrl: string | null })[];
+  })[];
 }) {
   return (
     <AssignmentsTable

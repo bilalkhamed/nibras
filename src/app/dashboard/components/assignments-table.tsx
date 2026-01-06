@@ -19,7 +19,9 @@ import {
 import clsx from 'clsx';
 import { AttachmentsCell } from './attachments-cell';
 interface AssignmentsTableProps {
-  assignments: (Assignment & { attachments: AssignmentAttachment[] })[];
+  assignments: (Assignment & {
+    attachments: (AssignmentAttachment & { tempUrl: string | null })[];
+  })[];
   actionButtons?: (assignment: Assignment) => React.ReactNode;
 }
 

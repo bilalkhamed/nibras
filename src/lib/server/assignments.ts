@@ -18,6 +18,9 @@ export async function getWeekAssignments(
     orderBy: {
       createdAt: 'asc',
     },
+    include: {
+      attachments: true,
+    },
   });
 
   return assignments;

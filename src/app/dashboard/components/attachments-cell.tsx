@@ -12,7 +12,7 @@ import { forwardRef, useEffect, useState } from 'react';
 export function AttachmentsCell({
   attachments,
 }: {
-  attachments: AssignmentAttachment[];
+  attachments: (AssignmentAttachment & { tempUrl: string | null })[];
 }) {
   if (attachments.length === 0) {
     return <span className="text-sm text-muted-foreground">-</span>;
@@ -23,19 +23,15 @@ export function AttachmentsCell({
       {attachments.map((attachment) => (
         <Tooltip key={attachment.id}>
           <TooltipTrigger asChild>
-            {attachment.type === AttachmentType.LINK ? (
-              <Link href={attachment.url!} target="_blank">
-                <Button variant="ghost" size="icon">
-                  <ExternalLinkIcon className="w-4 h-4" />
-                </Button>
-              </Link>
-            ) : (
-              <FileLink fileKey={attachment.fileKey!}>
-                <Button variant="ghost" size="icon">
-                  <FileIcon className="w-4 h-4" />
-                </Button>
-              </FileLink>
-            )}
+            <Link href={attachment.tempUrl!} target="_blank">
+              <Button variant="ghost" size="icon">
+                {attachment.type === AttachmentType.LINK ? (
+                  <ExternalLinkIcon className="h-4 w-4" />
+                ) : (
+                  <FileIcon className="h-4 w-4" />
+                )}
+              </Button>
+            </Link>
           </TooltipTrigger>
           <TooltipContent>
             {attachment.type === AttachmentType.LINK ? (
@@ -49,44 +45,3 @@ export function AttachmentsCell({
     </div>
   );
 }
-
-const FileLink = forwardRef<
-  HTMLAnchorElement,
-  { fileKey: string; children: React.ReactNode }
->(({ fileKey, children, ...props }, ref) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchUrl() {
-      const response = await fetch(`/api/s3/view`, {
-        method: 'POST',
-        body: JSON.stringify({ key: fileKey }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUrl(data.url);
-      } else {
-        setUrl(null);
-      }
-    }
-
-    fetchUrl();
-  }, [fileKey]);
-
-  if (!url) {
-    return (
-      <Link ref={ref} href={''} onClick={(e) => e.preventDefault()} {...props}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <Link ref={ref} href={url} target="_blank" {...props}>
-      {children}
-    </Link>
-  );
-});
-
-FileLink.displayName = 'FileLink';
