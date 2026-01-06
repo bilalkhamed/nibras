@@ -10,12 +10,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Assignment, AssignmentTypes } from '@prisma/client';
+import {
+  Assignment,
+  AssignmentAttachment,
+  AssignmentTypes,
+  AttachmentType,
+} from '@prisma/client';
 import clsx from 'clsx';
-import { ExternalLink } from 'lucide-react';
-
+import { AttachmentsCell } from './attachments-cell';
 interface AssignmentsTableProps {
-  assignments: Assignment[];
+  assignments: (Assignment & { attachments: AssignmentAttachment[] })[];
   actionButtons?: (assignment: Assignment) => React.ReactNode;
 }
 
@@ -55,7 +59,7 @@ export function AssignmentsTable({
                   {labels.dashboard.curriculum.type}
                 </TableHead>
                 <TableHead className="text-right font-semibold">
-                  الرابط
+                  المرفقات
                 </TableHead>
                 {actionButtons && (
                   <TableHead className="text-right font-semibold">
@@ -90,21 +94,7 @@ export function AssignmentsTable({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {a.url ? (
-                      <a
-                        href={a.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-primary hover:underline"
-                      >
-                        <span className="text-xs truncate max-w-xs">
-                          {new URL(a.url).hostname}
-                        </span>
-                        <ExternalLink className="h-4 w-4 shrink-0" />
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
+                    <AttachmentsCell attachments={a.attachments} />
                   </TableCell>
                   {actionButtons && <TableCell>{actionButtons(a)}</TableCell>}
                 </TableRow>

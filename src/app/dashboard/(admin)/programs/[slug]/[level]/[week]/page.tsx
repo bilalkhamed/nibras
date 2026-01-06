@@ -17,6 +17,9 @@ export default async function ProgramWeekPage({
       week: { number: Number(week.replace('week-', '')) },
       program: { slug },
     },
+    include: {
+      attachments: true,
+    },
   });
 
   const weekData = await prisma.week.findUnique({

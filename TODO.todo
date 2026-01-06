@@ -40,5 +40,7 @@ Fix: Track failed attempts, lock account temporarily
 
 - [ ] Handle all "Unexpected end of JSON input"
 
-## UI FIXES/IMPROVEMENTS:
+## UI/UX FIXES/IMPROVEMENTS:
   - [] Fix scroll issue with search select
+  - [] Preserve state in add-assignment modal
+  - [] Disable the submit button while files are uploading in the add-assignment modal
