@@ -12,9 +12,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
-import { sidebarNavItems } from '@/lib/shared/site.config';
 import Link from 'next/link';
-import { AccessTokenPayload } from '@/types/types';
 import getAuthSession from '@/lib/server/auth-session';
 
 export async function DashboardSidebar({}: React.ComponentProps<

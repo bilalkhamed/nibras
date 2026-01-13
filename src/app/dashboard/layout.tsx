@@ -5,8 +5,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { DashboardSidebar } from './components/sidebar/sidebar';
-import getAuthSession from '@/lib/server/auth-session';
-import { redirect } from 'next/navigation';
 import { DashboardTitle } from './components/sidebar/page-title';
 import { Suspense } from 'react';
 

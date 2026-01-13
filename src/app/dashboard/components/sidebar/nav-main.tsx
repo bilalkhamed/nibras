@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRight, type LucideIcon } from 'lucide-react';
+import { ChevronLeftIcon } from 'lucide-react';
 
 import {
   Collapsible,
@@ -18,7 +18,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Role, SidebarNavItem } from '@/types/types';
+import { Role } from '@/types/types';
 import { getActiveSidebarItem } from './page-title';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';

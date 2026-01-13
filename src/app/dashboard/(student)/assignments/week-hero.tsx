@@ -12,7 +12,7 @@ export function WeekHero({
   streakText,
 }: Props) {
   return (
-    <section className="rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-secondary/5 p-6 shadow-md dark:from-primary/10 dark:via-background dark:to-secondary/10 dark:border-primary/30">
+    <section className="rounded-3xl border border-primary/20 bg-linear-to-r from-primary/5 via-background to-secondary/5 p-6 shadow-md dark:from-primary/10 dark:via-background dark:to-secondary/10 dark:border-primary/30">
       <p className="text-sm font-semibold text-primary dark:text-secondary-foreground">
         هذا الأسبوع
       </p>

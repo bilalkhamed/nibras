@@ -1,14 +1,6 @@
-import {
-  Users,
-  AlertCircle,
-  CheckCircle2,
-  MessageSquare,
-  FileText,
-  UserPlus,
-} from 'lucide-react';
+import { Users, AlertCircle, CheckCircle2, FileText } from 'lucide-react';
 import { StatCard } from './shared/stat-card';
 import { ActivityCard, ActivityItem } from './shared/activity-card';
-import { QuickActionCard } from './shared/quick-action-card';
 import prisma from '@/lib/server/prisma';
 import getAuthSession from '@/lib/server/auth-session';
 

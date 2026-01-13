@@ -2,7 +2,6 @@ import { BookOpen, Clock, CheckCircle2, TrendingUp } from 'lucide-react';
 import { StatCard } from './shared/stat-card';
 import { ActivityCard, ActivityItem } from './shared/activity-card';
 import { ProgressCard } from './shared/progress-card';
-import { QuickActionCard } from './shared/quick-action-card';
 import prisma from '@/lib/server/prisma';
 import getAuthSession from '@/lib/server/auth-session';
 import labels from '@/lib/labels.json';

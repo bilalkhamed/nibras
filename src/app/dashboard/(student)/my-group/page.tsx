@@ -2,7 +2,6 @@ import { requireRoles } from '@/lib/server/require-roles';
 import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import prisma from '@/lib/server/prisma';
 import { GroupInfoSection } from './group-info-section';
 import { SupervisorSection } from './supervisor-section';
 import { GroupStudentsSection } from './group-students-section';
@@ -15,7 +14,6 @@ export default async function StudentGroupPage() {
     return notFound();
   }
 
-  const t0 = performance.now();
   // Get student's group
   const { activeGroupId } = auth;
 
@@ -36,8 +34,6 @@ export default async function StudentGroupPage() {
     isMe: gs.student.id === auth.userId,
   }));
 
-  const t1 = performance.now();
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -46,9 +42,6 @@ export default async function StudentGroupPage() {
         <h1 className="mt-2 text-3xl font-black text-foreground">
           {group.name}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          معاً نتعلم ونتطور ✨
-        </p>
       </div>
 
       {/* Group Info */}

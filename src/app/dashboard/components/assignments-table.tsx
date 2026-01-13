@@ -10,11 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import {
-  Assignment,
-  AssignmentAttachment,
-  AssignmentTypes,
-} from '@prisma/client';
+import { AssignmentTypes } from '@prisma/client';
 import clsx from 'clsx';
 import { AttachmentsCell } from './attachments-cell';
 import { AssignmentWithAttachments } from '@/types/types';

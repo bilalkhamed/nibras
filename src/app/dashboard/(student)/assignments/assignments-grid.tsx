@@ -1,7 +1,6 @@
 'use client';
 
 import { startTransition, useMemo, useOptimistic, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import type { Assignment, Program, StudentAssignment } from '@prisma/client';
 import { ProgramFilter } from './program-filter';
 import { Toggle } from '@/components/ui/toggle';
@@ -289,19 +288,6 @@ function typeBadge(type: Assignment['type']) {
         style: 'bg-muted text-muted-foreground border-border',
       };
   }
-}
-
-function OpenUrlButton({ url }: { url: string }) {
-  const [isCopied, setIsCopied] = useState(false);
-  const handleClick = () => {
-    window.open(url, '_blank');
-  };
-
-  return (
-    <Button variant="outline" size={'md'} onClick={handleClick}>
-      الرابط
-    </Button>
-  );
 }
 
 function EmptyState() {

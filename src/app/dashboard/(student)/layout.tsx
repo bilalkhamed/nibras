@@ -1,11 +1,6 @@
 import { AuthGuard } from '@/components/auth/auth-gaurd';
-import { getCurrentWeek } from '@/lib/server/weeks';
-import prisma from '@/lib/server/prisma';
-import { requireRoles } from '@/lib/server/require-roles';
-import { Role, STUDENT_ROLE } from '@/types/types';
-import { notFound } from 'next/navigation';
+import { STUDENT_ROLE } from '@/types/types';
 import { Suspense } from 'react';
-import { id } from 'zod/v4/locales';
 
 export default async function StudentDashboardLayout({
   children,

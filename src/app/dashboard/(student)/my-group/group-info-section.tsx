@@ -8,11 +8,6 @@ type Props = {
 
 export function GroupInfoSection({ group, currentWeek }: Props) {
   const { cohort } = group;
-  const formatDate = (date: Date) =>
-    new Date(date).toLocaleDateString('ar-SA', {
-      year: 'numeric',
-      month: 'long',
-    });
 
   return (
     <section className="rounded-2xl border border-primary/15 bg-card p-6 shadow-sm dark:border-primary/25 dark:bg-[#15101f]">
