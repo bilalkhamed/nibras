@@ -6,7 +6,7 @@ export async function getWeekAssignments(
   weekId: string,
   programSlug?: string
 ) {
-  'use cache';
+  // 'use cache';
   const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
 
   const assignments = await prisma.assignment.findMany({

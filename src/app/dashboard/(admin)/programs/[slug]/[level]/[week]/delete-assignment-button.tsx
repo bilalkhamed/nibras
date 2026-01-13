@@ -44,7 +44,7 @@ export function DeleteAssignmentButton({
           duration: 3000,
         });
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء حذف المهمة. الرجاء المحاولة مرة أخرى.', {
         duration: 3000,
       });

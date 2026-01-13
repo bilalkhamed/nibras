@@ -14,15 +14,13 @@ import {
   Assignment,
   AssignmentAttachment,
   AssignmentTypes,
-  AttachmentType,
 } from '@prisma/client';
 import clsx from 'clsx';
 import { AttachmentsCell } from './attachments-cell';
+import { AssignmentWithAttachments } from '@/types/types';
 interface AssignmentsTableProps {
-  assignments: (Assignment & {
-    attachments: (AssignmentAttachment & { tempUrl: string | null })[];
-  })[];
-  actionButtons?: (assignment: Assignment) => React.ReactNode;
+  assignments: AssignmentWithAttachments[];
+  actionButtons?: (assignment: AssignmentWithAttachments) => React.ReactNode;
 }
 
 const ASSIGNMENT_TYPE_COLORS: Record<AssignmentTypes, string> = {

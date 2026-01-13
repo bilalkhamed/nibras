@@ -5,6 +5,8 @@ import {
   User as PrismaUser,
   Level,
   AssignmentTypes,
+  Assignment,
+  AssignmentAttachment,
 } from '@prisma/client';
 import labels from '@/lib/labels.json';
 
@@ -97,4 +99,8 @@ export type SidebarNavItem = {
   icon?: React.ElementType;
   items?: Omit<SidebarNavItem, 'items' | 'icon' | 'isActive'>[];
   isActive?: boolean;
+};
+
+export type AssignmentWithAttachments = Assignment & {
+  attachments: (AssignmentAttachment & { tempUrl: string | null })[];
 };

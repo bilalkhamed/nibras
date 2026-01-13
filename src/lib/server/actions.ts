@@ -1,27 +1,24 @@
-'use server'; // Don't forget this!
+'use server';
 
-import prisma from './prisma'; // Adjust path
-import getAuthSession from './auth-session'; // Your auth helper
+import prisma from './prisma';
+import getAuthSession from './auth-session';
 import { ADMIN_ROLE } from '@/types/types';
 import { AssignmentTypes, AttachmentType, Prisma } from '@prisma/client';
-import { refresh, revalidatePath } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 export async function toggleAssignmentCompletion(
-  assignmentId: string, // Receive assignmentId, NOT the row ID
+  assignmentId: string,
   isCompleted: boolean
 ) {
-  // 1. SECURITY: Get the User ID from the session, not the client
   const session = await getAuthSession();
   if (!session?.userId) {
     return { success: false, error: 'Unauthorized' };
   }
 
   try {
-    // 2. LOGIC: Use 'upsert' to handle both "Create" and "Update"
     await prisma.studentAssignment.upsert({
       where: {
-        // Use the composite unique key we defined in schema
         studentId_assignmentId: {
           studentId: session.userId,
           assignmentId: assignmentId,
@@ -30,17 +27,14 @@ export async function toggleAssignmentCompletion(
       create: {
         studentId: session.userId,
         assignmentId: assignmentId,
-        isCompleted: isCompleted, // Remove if you deleted this field
+        isCompleted: isCompleted,
         completedAt: isCompleted ? new Date() : null,
       },
       update: {
-        isCompleted: isCompleted, // Remove if you deleted this field
+        isCompleted: isCompleted,
         completedAt: isCompleted ? new Date() : null,
       },
     });
-
-    // 3. CACHE: Update the "Instant Shell"
-    // This makes the checkbox stick on the next reload
 
     return { success: true };
   } catch (error) {
@@ -78,7 +72,7 @@ export async function updateAssignment(
     name: string;
     description: string | null;
     type: AssignmentTypes;
-    url: string | null;
+    links?: { id?: string; url: string; type: typeof AttachmentType.LINK }[];
   }
 ) {
   const session = await getAuthSession();
@@ -91,21 +85,64 @@ export async function updateAssignment(
   }
 
   try {
+    if (data.links) {
+      const existingLinks = await prisma.assignmentAttachment.findMany({
+        where: {
+          assignmentId: assignmentId,
+          type: AttachmentType.LINK,
+        },
+      });
+
+      const linksToDelete = existingLinks.filter(
+        (link) => !data.links?.some((l) => l.id === link.id)
+      );
+
+      const linksToAdd = data.links.filter((link) => !link.id);
+
+      const linksToUpdate = data.links.filter((link) => {
+        if (!link.id) return false;
+
+        const original = existingLinks.find((db) => db.id === link.id);
+
+        return original && original.url !== link.url;
+      });
+
+      await prisma.$transaction([
+        prisma.assignmentAttachment.deleteMany({
+          where: {
+            id: { in: linksToDelete.map((link) => link.id) },
+            assignmentId: assignmentId,
+          },
+        }),
+        ...linksToUpdate.map((link) =>
+          prisma.assignmentAttachment.update({
+            where: { id: link.id!, assignmentId: assignmentId },
+            data: { url: link.url },
+          })
+        ),
+        prisma.assignmentAttachment.createMany({
+          data: linksToAdd.map((link) => ({
+            assignmentId: assignmentId,
+            type: AttachmentType.LINK,
+            url: link.url,
+          })),
+        }),
+      ]);
+    }
+
     await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
         name: data.name,
         description: data.description,
         type: data.type,
-        // url: data.url,
       },
     });
-
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
   } catch (error) {
     console.error('Update Assignment Error:', error);
-    return { success: false, error: 'Failed to update assignment' };
+    return { success: false };
   }
 }
 
@@ -115,16 +152,17 @@ const createAssignmentSchema = z.object({
   programSlug: z.string().min(1),
   assignment: z.object({
     name: z.string().min(1),
-    description: z.string().optional(),
+    description: z.string().nullable(),
     type: z.enum(AssignmentTypes),
     links: z
       .array(
         z.object({
-          url: z.string().url(),
+          url: z.url(),
+          id: z.string().optional(),
+          type: z.literal(AttachmentType.LINK),
         })
       )
       .optional(),
-    filesKeys: z.array(z.string()).optional(),
   }),
 });
 
@@ -152,19 +190,14 @@ export async function createAssignment(
   }
 
   try {
-    const attachmentsData: Prisma.AssignmentAttachmentCreateManyAssignmentInput[] =
-      [
-        ...(data.assignment.links?.map((link) => ({
-          type: AttachmentType.LINK as AttachmentType,
-          url: link.url,
-        })) || []),
-        ...(data.assignment.filesKeys?.map((key) => ({
-          type: AttachmentType.FILE as AttachmentType,
-          fileKey: key,
-        })) || []),
-      ];
+    const attachmentsData = [
+      ...(data.assignment.links || []).map((link) => ({
+        type: AttachmentType.LINK,
+        url: link.url,
+      })),
+    ];
 
-    const createdAssignment = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const level = await tx.level.findUnique({
         where: { slug: data.levelSlug },
       });
@@ -189,7 +222,7 @@ export async function createAssignment(
         throw new Error('Program not found');
       }
 
-      return await tx.assignment.create({
+      await tx.assignment.create({
         data: {
           name: data.assignment.name,
           description: data.assignment.description || null,
@@ -207,7 +240,7 @@ export async function createAssignment(
     });
 
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
-    return { success: true, assignment: createdAssignment };
+    return { success: true };
   } catch (error) {
     console.error('Create Assignment Error:', error);
     return {

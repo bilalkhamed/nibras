@@ -1,15 +1,13 @@
-import prisma from '@/lib/server/prisma';
-import { AddAssignmentSheet } from './add-assignment-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
 import { AssignmentsTableWithActions } from './assignments-table-with-actions';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { getProgramBySlug } from '@/lib/server/programs';
 import { getWeekAssignments } from '@/lib/server/assignments';
 import { getLevelBySlug } from '@/lib/server/levels';
 import { getWeekByNumber } from '@/lib/server/weeks';
+import { CreateAssignmentSheet } from './create-assignment-sheet';
 
 export default async function ProgramWeekPage({
   params,
@@ -42,12 +40,10 @@ export default async function ProgramWeekPage({
       const attachmentsWithUrls = await Promise.all(
         assignment.attachments.map(async (att) => {
           if (att.type === 'FILE' && att.fileKey) {
-            // Generates the URL instantly on the server
             const command = new GetObjectCommand({
               Bucket: process.env.S3_BUCKET_NAME,
               Key: att.fileKey,
             });
-            // Attach a temporary property
             return {
               ...att,
               tempUrl: await getSignedUrl(S3, command, { expiresIn: 3600 }),
@@ -67,7 +63,7 @@ export default async function ProgramWeekPage({
           <h3 className="text-xl font-bold text-foreground">
             {weekData?.week.title}
           </h3>
-          <AddAssignmentSheet
+          <CreateAssignmentSheet
             levelSlug={level}
             weekId={weekData.week.id}
             programSlug={slug}
