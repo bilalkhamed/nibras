@@ -1,6 +1,7 @@
-import prisma from '@/lib/server/prisma';
 import { notFound } from 'next/navigation';
 import { LevelTabs } from './level-tabs';
+import { getProgramBySlug } from '@/lib/server/programs';
+import { getAllLevels } from '@/lib/server/levels';
 
 interface ProgramDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -13,20 +14,13 @@ export default async function ProgramDetailPage({
 }: ProgramDetailPageProps) {
   const { slug } = await params;
 
-  const program = await prisma.program.findUnique({
-    where: { slug },
-  });
+  const program = await getProgramBySlug(slug);
 
   if (!program) {
     notFound();
   }
 
-  const levels = await prisma.level.findMany({
-    select: {
-      title: true,
-      slug: true,
-    },
-  });
+  const levels = await getAllLevels();
 
   return (
     <div className="space-y-6">
