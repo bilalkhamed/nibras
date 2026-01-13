@@ -60,9 +60,7 @@ export const sidebarNavItems: {
       isActive: true,
     },
     { label: 'المجموعات', href: '/dashboard/groups', icon: UsersRound },
-    { label: 'المستويات', href: '/dashboard/levels', icon: ListOrdered },
     programs,
-    { label: 'التقارير', href: '/dashboard/reports', icon: ChartColumn },
   ],
   supervisor: [
     { label: 'مجموعاتي', href: '/dashboard/groups', icon: UsersRound },
