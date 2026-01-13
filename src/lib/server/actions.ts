@@ -4,7 +4,7 @@ import prisma from './prisma';
 import getAuthSession from './auth-session';
 import { ADMIN_ROLE } from '@/types/types';
 import { AssignmentTypes, AttachmentType, Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 
 export async function toggleAssignmentCompletion(
@@ -164,7 +164,7 @@ export async function updateAssignment(
       ]);
     }
 
-    await prisma.assignment.update({
+    const updated = await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
         name: data.name,
@@ -172,6 +172,11 @@ export async function updateAssignment(
         type: data.type,
       },
     });
+
+    revalidateTag(
+      `assignments-level-${updated.levelId}-week-${updated.weekId}-program-${updated.programId}`,
+      'max'
+    );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
   } catch (error) {
@@ -236,7 +241,7 @@ export async function createAssignment(
       })),
     ];
 
-    await prisma.$transaction(async (tx) => {
+    const newAssignment = await prisma.$transaction(async (tx) => {
       const level = await tx.level.findUnique({
         where: { slug: data.levelSlug },
       });
@@ -261,7 +266,7 @@ export async function createAssignment(
         throw new Error('Program not found');
       }
 
-      await tx.assignment.create({
+      return await tx.assignment.create({
         data: {
           name: data.assignment.name,
           description: data.assignment.description || null,
@@ -278,6 +283,10 @@ export async function createAssignment(
       });
     });
 
+    revalidateTag(
+      `assignments-level-${newAssignment.levelId}-week-${newAssignment.weekId}-program-${newAssignment.programId}`,
+      'max'
+    );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
   } catch (error) {

@@ -1,3 +1,4 @@
+import { cacheTag } from 'next/cache';
 import prisma from './prisma';
 import { getProgramBySlug } from './programs';
 
@@ -6,8 +7,15 @@ export async function getWeekAssignments(
   weekId: string,
   programSlug?: string
 ) {
-  // 'use cache';
+  'use cache';
   const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
+  if (!program) {
+    return [];
+  }
+
+  cacheTag(
+    `assignments-level-${levelId}-week-${weekId}-program-${program?.id}`
+  );
 
   const assignments = await prisma.assignment.findMany({
     where: {
