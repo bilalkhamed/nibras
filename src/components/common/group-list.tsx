@@ -31,37 +31,56 @@ export function GroupList({ groups, hrefBase }: GroupListProps) {
       {groups.map((group) => {
         const href = `${hrefBase}${group.id}`;
         return (
-          <Card key={group.id} className="border-border bg-card/80 shadow-sm">
-            <CardHeader className="pb-3">
+          <Card
+            key={group.id}
+            className="group relative border-primary/15 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30"
+          >
+            <CardHeader className="pb-4">
               <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg text-foreground">
+                <div className="space-y-1.5 flex-1">
+                  <CardTitle className="text-lg font-bold text-foreground">
                     {group.name}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    الدفعة: {group.cohort.name}
+                    {group.cohort.name}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-                  <Users className="h-4 w-4" />
+                <div className="flex items-center gap-1.5 rounded-full bg-primary-soft border border-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+                  <Users className="h-3.5 w-3.5" />
                   <span>{group._count.students}</span>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserRound className="h-4 w-4" />
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary-soft border border-secondary/15">
+                  <UserRound className="h-4 w-4 text-secondary-foreground" />
+                </div>
                 <span className="text-foreground font-medium">
                   {Object.values(group.supervisor).splice(1).join(' ')}
                 </span>
               </div>
-              <Separator />
+              <Separator className="my-3" />
               <div className="flex gap-2">
-                <Button asChild className="w-full" variant="primary">
-                  <Link href={`${href}/progress`}>متابعة التقدم</Link>
+                <Button
+                  asChild
+                  className="flex-1 rounded-full"
+                  variant="outline"
+                  size="sm"
+                >
+                  <Link href={`${href}/progress`}>
+                    <span className="font-medium">متابعة التقدم</span>
+                  </Link>
                 </Button>
-                <Button asChild className="w-full" variant="outline">
-                  <Link href={`${href}/info`}>معلومات المجموعة</Link>
+                <Button
+                  asChild
+                  className="flex-1 rounded-full"
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Link href={`${href}/info`}>
+                    <span className="font-medium">معلومات</span>
+                  </Link>
                 </Button>
               </div>
             </CardContent>
