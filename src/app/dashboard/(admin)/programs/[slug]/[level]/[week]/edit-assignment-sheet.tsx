@@ -44,7 +44,18 @@ export function EditAssignmentSheet({
 
   const onSubmit = async (data: AssignmentFormData) => {
     try {
-      const res = await updateAssignment(assignmentId, data);
+      console.log('submitting', data);
+      const fileKeys = data.files ? data.files.map((file) => file.key) : [];
+      if (data.newFileKeys) {
+        data.newFileKeys.forEach((key) => {
+          fileKeys.push(key);
+        });
+      }
+
+      const res = await updateAssignment(assignmentId, {
+        ...data,
+        fileKeys,
+      });
       if (res.success) {
         toast.success('تم تحديث المهمة بنجاح.');
         setOpen(false);

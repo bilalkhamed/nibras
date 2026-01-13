@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
 
     const { fileName, contentType, size } = data;
 
-    const uniqueKey = `${crypto.randomUUID()}-${fileName}`;
+    const SEPARATOR = '__uuid_end__';
+    const uniqueKey = `${crypto.randomUUID()}${SEPARATOR}${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,

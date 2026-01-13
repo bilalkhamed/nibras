@@ -37,7 +37,7 @@ export function AttachmentsCell({
             {attachment.type === AttachmentType.LINK ? (
               <span>{attachment.url}</span>
             ) : (
-              <span>{attachment.fileKey?.split('-').pop()}</span>
+              <span>{attachment.fileKey?.split('__uuid_end__').pop()}</span>
             )}
           </TooltipContent>
         </Tooltip>

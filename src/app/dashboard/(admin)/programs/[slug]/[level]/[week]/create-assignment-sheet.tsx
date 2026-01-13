@@ -38,11 +38,16 @@ export function CreateAssignmentSheet({
 
   const onSubmit = async (data: AssignmentFormData) => {
     try {
+      console.log('creating assignment with data:', {
+        ...data,
+        fileKeys: data.newFileKeys,
+      });
+      // return;
       const res = await createAssignment({
         weekId,
         levelSlug,
         programSlug,
-        assignment: data,
+        assignment: { ...data, fileKeys: data.newFileKeys },
       });
       if (res.success) {
         toast.success(`تم إنشاء المهمة ${data.name} بنجاح.`);

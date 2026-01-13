@@ -73,6 +73,7 @@ export async function updateAssignment(
     description: string | null;
     type: AssignmentTypes;
     links?: { id?: string; url: string; type: typeof AttachmentType.LINK }[];
+    fileKeys: string[];
   }
 ) {
   const session = await getAuthSession();
@@ -85,13 +86,16 @@ export async function updateAssignment(
   }
 
   try {
+    const existingAttachments = await prisma.assignmentAttachment.findMany({
+      where: {
+        assignmentId: assignmentId,
+      },
+    });
+
     if (data.links) {
-      const existingLinks = await prisma.assignmentAttachment.findMany({
-        where: {
-          assignmentId: assignmentId,
-          type: AttachmentType.LINK,
-        },
-      });
+      const existingLinks = existingAttachments.filter(
+        (att) => att.type === AttachmentType.LINK
+      );
 
       const linksToDelete = existingLinks.filter(
         (link) => !data.links?.some((l) => l.id === link.id)
@@ -130,6 +134,36 @@ export async function updateAssignment(
       ]);
     }
 
+    if (data.fileKeys) {
+      const existingFiles = existingAttachments.filter(
+        (att) => att.type === AttachmentType.FILE
+      );
+
+      const filesToDelete = existingFiles.filter(
+        (file) => !data.fileKeys.includes(file.fileKey!)
+      );
+
+      const filesToAdd = data.fileKeys.filter(
+        (key) => !existingFiles.some((file) => file.fileKey === key)
+      );
+
+      await prisma.$transaction([
+        prisma.assignmentAttachment.deleteMany({
+          where: {
+            id: { in: filesToDelete.map((file) => file.id) },
+            assignmentId: assignmentId,
+          },
+        }),
+        prisma.assignmentAttachment.createMany({
+          data: filesToAdd.map((key) => ({
+            assignmentId: assignmentId,
+            type: AttachmentType.FILE,
+            fileKey: key,
+          })),
+        }),
+      ]);
+    }
+
     await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
@@ -154,6 +188,7 @@ const createAssignmentSchema = z.object({
     name: z.string().min(1),
     description: z.string().nullable(),
     type: z.enum(AssignmentTypes),
+    fileKeys: z.array(z.string()).optional(),
     links: z
       .array(
         z.object({
@@ -194,6 +229,10 @@ export async function createAssignment(
       ...(data.assignment.links || []).map((link) => ({
         type: AttachmentType.LINK,
         url: link.url,
+      })),
+      ...(data.assignment.fileKeys || []).map((key) => ({
+        type: AttachmentType.FILE,
+        fileKey: key,
       })),
     ];
 

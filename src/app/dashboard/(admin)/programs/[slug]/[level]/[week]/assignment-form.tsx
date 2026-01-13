@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import LinkManager from './link-manager';
+import { AttachedFile, FileUploader } from './file-uploader';
+import { FilesCardsList } from './files-cards-list';
 
 export const linkSchema = z.object({
   id: z.string().optional(),
@@ -35,12 +37,13 @@ export const linkSchema = z.object({
 
 export type Link = z.infer<typeof linkSchema>;
 
-// Schema for the form (just the basic fields, attachments handled separately)
 const assignmentFormSchema = z.object({
   name: z.string().min(1, 'يرجى إدخال اسم المهمة'),
   description: z.string().nullable(),
   type: z.enum(AssignmentTypes, 'يرجى اختيار نوع المهمة'),
   links: linkSchema.array().optional(),
+  files: z.array(z.any()).optional(),
+  newFileKeys: z.array(z.string()).optional(),
 });
 
 export type AssignmentFormData = z.infer<typeof assignmentFormSchema>;
@@ -53,6 +56,7 @@ type AssignmentFormContentProps = {
     description: string | null;
     type: AssignmentTypes;
     links?: Link[];
+    files?: AttachedFile[];
   };
   onCancel: () => void;
   onSubmit: (data: AssignmentFormData) => Promise<void>;
@@ -69,6 +73,9 @@ export function AssignmentFormContent({
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<AssignmentFormData>({
     mode: 'onTouched',
@@ -79,16 +86,26 @@ export function AssignmentFormContent({
           description: defaultValues.description || '',
           type: defaultValues.type,
           links: defaultValues.links || [],
+          files: defaultValues.files || [],
+          newFileKeys: [],
         }
-      : undefined,
+      : {
+          newFileKeys: [],
+        },
   });
 
+  useEffect(() => {
+    register('files');
+    register('newFileKeys');
+  }, [register]);
   const handleFormSubmit: SubmitHandler<AssignmentFormData> = useCallback(
     async (data) => {
       await onSubmit(data);
     },
     [onSubmit]
   );
+
+  const files = watch('files');
 
   return (
     <form
@@ -164,6 +181,30 @@ export function AssignmentFormContent({
           </div>
         </div>
         <LinkManager control={control} errors={errors.links} />
+        <div className="px-3 mt-3">
+          <FileUploader
+            onFileUpload={(fileKey) => {
+              const current = getValues('newFileKeys') || [];
+              setValue('newFileKeys', [...current, fileKey]);
+            }}
+            onFileDelete={(fileKey) => {
+              const current = getValues('newFileKeys') || [];
+              setValue(
+                'newFileKeys',
+                current.filter((key) => key !== fileKey)
+              );
+            }}
+          />
+        </div>
+        <FilesCardsList
+          files={files || []}
+          onFileDelete={(fileKey) => {
+            const updatedFiles = (files || []).filter(
+              (file) => file.key !== fileKey
+            );
+            setValue('files', updatedFiles);
+          }}
+        />
       </ScrollArea>
 
       <SheetFooter className="gap-2 px-3 py-3 shrink-0 border-t flex flex-row">

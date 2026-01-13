@@ -25,6 +25,25 @@ export function AssignmentsTableWithActions({
           name: assignment.name,
           description: assignment.description,
           type: assignment.type,
+          files: assignment.attachments
+            .filter(
+              (
+                att
+              ): att is AssignmentAttachment & {
+                type: typeof AttachmentType.FILE;
+                key: string;
+                name: string;
+                tempUrl: string;
+                fileKey: string;
+              } => att.type === AttachmentType.FILE
+            )
+            .map((file) => ({
+              id: file.id,
+              key: file.fileKey,
+              name: file.name,
+              type: file.type,
+              tempUrl: file.tempUrl,
+            })),
           links: assignment.attachments
             .filter(
               (

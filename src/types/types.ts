@@ -102,5 +102,5 @@ export type SidebarNavItem = {
 };
 
 export type AssignmentWithAttachments = Assignment & {
-  attachments: (AssignmentAttachment & { tempUrl: string | null })[];
+  attachments: (AssignmentAttachment & { tempUrl: string })[];
 };

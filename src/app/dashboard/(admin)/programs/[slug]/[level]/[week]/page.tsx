@@ -49,7 +49,7 @@ export default async function ProgramWeekPage({
               tempUrl: await getSignedUrl(S3, command, { expiresIn: 3600 }),
             };
           }
-          return { ...att, tempUrl: att.url }; // Fallback for links
+          return { ...att, tempUrl: att.url! }; // Fallback for links
         })
       );
       return { ...assignment, attachments: attachmentsWithUrls };
