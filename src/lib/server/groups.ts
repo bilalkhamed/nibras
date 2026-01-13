@@ -2,10 +2,7 @@
 
 import prisma from './prisma';
 
-let counter = 0;
-
 export async function getGroupById(groupId: string) {
-  console.log('Fetching group with ID:', groupId);
   const group = await prisma.group.findUnique({
     where: { id: groupId },
     include: {
@@ -39,6 +36,42 @@ export async function getGroupById(groupId: string) {
       },
     },
   });
-  console.log(`Fetched group #${++counter}:`, group!.name);
   return group;
+}
+
+export async function getGroups(supervisorId?: string) {
+  return await prisma.group.findMany({
+    where: {
+      supervisorId: supervisorId,
+    },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      updatedAt: true,
+      cohort: {
+        select: {
+          currentLevel: true,
+          name: true,
+        },
+      },
+      supervisor: {
+        select: {
+          id: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        },
+      },
+      _count: {
+        select: {
+          students: {
+            where: {
+              isActive: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
