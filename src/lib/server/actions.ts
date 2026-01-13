@@ -54,10 +54,18 @@ export async function deleteAssignment(assignmentId: string) {
   }
 
   try {
-    await prisma.assignment.delete({
+    const deleted = await prisma.assignment.delete({
       where: { id: assignmentId },
     });
 
+    revalidateTag(
+      `assignments-level-${deleted.levelId}-week-${deleted.weekId}-program-${deleted.programId}`,
+      'max'
+    );
+    revalidateTag(
+      `assignments-level-${deleted.levelId}-week-${deleted.weekId}`,
+      'max'
+    );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
   } catch (error) {
