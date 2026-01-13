@@ -9,13 +9,12 @@ export async function getWeekAssignments(
 ) {
   'use cache';
   const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
-  if (!program) {
-    return [];
-  }
 
-  cacheTag(
-    `assignments-level-${levelId}-week-${weekId}-program-${program?.id}`
-  );
+  const tags = [
+    `assignments-level-${levelId}-week-${weekId}-program-${program?.id}`,
+  ];
+  if (!program) tags.push(`assignments-level-${levelId}-week-${weekId}`);
+  cacheTag(...tags);
 
   const assignments = await prisma.assignment.findMany({
     where: {

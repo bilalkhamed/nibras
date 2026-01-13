@@ -177,6 +177,10 @@ export async function updateAssignment(
       `assignments-level-${updated.levelId}-week-${updated.weekId}-program-${updated.programId}`,
       'max'
     );
+    revalidateTag(
+      `assignments-level-${updated.levelId}-week-${updated.weekId}`,
+      'max'
+    );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
   } catch (error) {
@@ -285,6 +289,10 @@ export async function createAssignment(
 
     revalidateTag(
       `assignments-level-${newAssignment.levelId}-week-${newAssignment.weekId}-program-${newAssignment.programId}`,
+      'max'
+    );
+    revalidateTag(
+      `assignments-level-${newAssignment.levelId}-week-${newAssignment.weekId}`,
       'max'
     );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
