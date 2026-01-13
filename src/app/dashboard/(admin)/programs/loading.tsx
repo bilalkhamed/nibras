@@ -5,7 +5,7 @@ export default function ProgramsLoading() {
   return (
     <>
       <Skeleton className="h-8 w-1/4 mb-4 mt-4" />
-      <CardsListSkeleton />;
+      <CardsListSkeleton />
     </>
   );
 }
