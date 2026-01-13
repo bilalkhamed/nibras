@@ -42,7 +42,7 @@ const programs: SidebarNavItem = {
   href: '/dashboard/programs',
   items: [
     { label: 'البرنامج القرائي', href: '/dashboard/programs/reading' },
-    { label: 'البرنامج التربوي', href: '/dashboard/programs/lectures' },
+    { label: 'عرفتك ربي', href: '/dashboard/programs/lectures' },
     { label: 'ليطمئن قلبي', href: '/dashboard/programs/heart' },
   ],
 };
@@ -66,7 +66,6 @@ export const sidebarNavItems: {
   ],
   supervisor: [
     { label: 'مجموعاتي', href: '/dashboard/groups', icon: UsersRound },
-    programs,
   ],
   student: [
     { label: 'مجموعتي', href: '/dashboard/my-group', icon: UsersRound },
