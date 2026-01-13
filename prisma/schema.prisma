@@ -254,7 +254,7 @@ model AssignmentAttachment {
   type AttachmentType @default(FILE)
   name String?
 
-  url     String? @unique
+  url     String?
   fileKey String? @unique
 
   createdAt DateTime @default(now()) @map("created_at")
