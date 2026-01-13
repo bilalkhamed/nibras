@@ -17,7 +17,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink } from 'lucide-react';
 import { AssignmentTypes } from '@prisma/client';
 import {
   Tooltip,
@@ -25,22 +24,18 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { BookOpen, PlayCircle, ClipboardList, HelpCircle } from 'lucide-react';
-import clsx from 'clsx';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AssignmentsTableSkeleton } from '@/components/skeletons';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3 } from '@/lib/server/s3-client';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { AttachmentsCell } from '../../components/attachments-cell';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
   exercise: 'تمرين',
   quiz: 'اختبار',
   reading: 'قراءة',
-};
-
-const ASSIGNMENT_TYPE_COLORS: Record<AssignmentTypes, string> = {
-  lecture: 'bg-accent text-accent-foreground text-accent-soft',
-  exercise: 'bg-primary text-primary-foreground',
-  quiz: 'bg-secondary text-secondary-foreground',
-  reading: 'bg-muted text-muted-foreground',
 };
 
 const ASSIGNMENT_TYPE_ICONS: Record<AssignmentTypes, React.ReactElement> = {
@@ -148,6 +143,27 @@ async function AssignmentsList({
 
   const assignments = await getWeekAssignments(auth.currentLevelId!, weekId);
 
+  const assignmentsWithUrls = await Promise.all(
+    assignments.map(async (assignment) => {
+      const attachmentsWithUrls = await Promise.all(
+        assignment.attachments.map(async (att) => {
+          if (att.type === 'FILE' && att.fileKey) {
+            const command = new GetObjectCommand({
+              Bucket: process.env.S3_BUCKET_NAME,
+              Key: att.fileKey,
+            });
+            return {
+              ...att,
+              tempUrl: await getSignedUrl(S3, command, { expiresIn: 3600 }),
+            };
+          }
+          return { ...att, tempUrl: att.url! }; // Fallback for links
+        })
+      );
+      return { ...assignment, attachments: attachmentsWithUrls };
+    })
+  );
+
   const programs = await getAllPrograms();
   const programById = programs.reduce<Record<string, string>>(
     (acc, program) => {
@@ -182,10 +198,13 @@ async function AssignmentsList({
               <TableHead className="text-right font-semibold">
                 التقييم
               </TableHead>
+              <TableHead className="text-right font-semibold">
+                المرفقات
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {assignments.map((assignment) => {
+            {assignmentsWithUrls.map((assignment) => {
               const isCompleted = assignmentStatusMap[assignment.id] || false;
               const statusLabel = isCompleted
                 ? 'مكتمل'
@@ -221,21 +240,7 @@ async function AssignmentsList({
                           {ASSIGNMENT_TYPE_LABELS[assignment.type]}
                         </TooltipContent>
                       </Tooltip>
-                      {assignment.url ? (
-                        <a
-                          href={assignment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
-                        >
-                          <span>{assignment.name}</span>
-                          <ExternalLink className="h-4 w-4" aria-hidden />
-                        </a>
-                      ) : (
-                        <span className="text-foreground">
-                          {assignment.name}
-                        </span>
-                      )}
+                      <span>{assignment.name}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-foreground/80">
@@ -246,6 +251,9 @@ async function AssignmentsList({
                   </TableCell>
                   <TableCell className="text-foreground/80 text-sm">
                     {gradeLabel}
+                  </TableCell>
+                  <TableCell>
+                    <AttachmentsCell attachments={assignment.attachments} />
                   </TableCell>
                 </TableRow>
               );

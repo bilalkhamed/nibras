@@ -7,7 +7,6 @@ import {
 import { AssignmentAttachment, AttachmentType } from '@prisma/client';
 import { ExternalLinkIcon, FileIcon } from 'lucide-react';
 import Link from 'next/link';
-import { forwardRef, useEffect, useState } from 'react';
 
 export function AttachmentsCell({
   attachments,

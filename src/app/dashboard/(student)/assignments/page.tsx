@@ -1,7 +1,7 @@
 import { getCurrentWeek } from '@/lib/server/weeks';
 import prisma from '@/lib/server/prisma';
 import { requireRoles } from '@/lib/server/require-roles';
-import { STUDENT_ROLE } from '@/types/types';
+import { AssignmentWithAttachments, STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Assignment, Program } from '@prisma/client';
 import { AssignmentsGrid } from './assignments-grid';
@@ -15,6 +15,9 @@ import { ProgramFilter } from './program-filter';
 import { getAllPrograms } from '@/lib/server/programs';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3 } from '@/lib/server/s3-client';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export default async function StudentAssignmentsPage({
   children,
@@ -38,6 +41,27 @@ export default async function StudentAssignmentsPage({
     getWeekAssignments(levelId, currentWeek.week.id),
     getAllPrograms(),
   ]);
+
+  const assignmentsWithUrls = await Promise.all(
+    assignments.map(async (assignment) => {
+      const attachmentsWithUrls = await Promise.all(
+        assignment.attachments.map(async (att) => {
+          if (att.type === 'FILE' && att.fileKey) {
+            const command = new GetObjectCommand({
+              Bucket: process.env.S3_BUCKET_NAME,
+              Key: att.fileKey,
+            });
+            return {
+              ...att,
+              tempUrl: await getSignedUrl(S3, command, { expiresIn: 3600 }),
+            };
+          }
+          return { ...att, tempUrl: att.url! }; // Fallback for links
+        })
+      );
+      return { ...assignment, attachments: attachmentsWithUrls };
+    })
+  );
 
   const totalAssignments = assignments.length;
   const primaryMessage =
@@ -68,7 +92,7 @@ export default async function StudentAssignmentsPage({
       <Suspense fallback={<LoadingSkeleton programs={programs} />}>
         <StudentAssignmentWrapper
           programs={programs}
-          assignments={assignments}
+          assignments={assignmentsWithUrls}
           userId={auth.userId}
         />
       </Suspense>
@@ -82,13 +106,14 @@ async function StudentAssignmentWrapper({
   userId,
 }: {
   programs: Program[];
-  assignments: Assignment[];
+  assignments: AssignmentWithAttachments[];
   userId: string;
 }) {
   const studentAssignments = await getStudentAssignments(
     userId,
     assignments.map((a) => a.id)
   );
+
   return (
     <AssignmentsGrid
       assignments={assignments}

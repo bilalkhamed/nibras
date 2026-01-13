@@ -18,9 +18,11 @@ import { cn } from '@/lib/shared/utils';
 import { toggleAssignmentCompletion } from '@/lib/server/actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { AssignmentWithAttachments } from '@/types/types';
+import { AttachmentsPreview } from './attachments-preview';
 
 type Props = {
-  assignments: Assignment[];
+  assignments: AssignmentWithAttachments[];
   programs: Program[];
   studentAssignments: StudentAssignment[];
 };
@@ -68,7 +70,7 @@ export function AssignmentsGrid({
     return filtered.sort(
       (a, b) => Number(a.isCompleted) - Number(b.isCompleted)
     );
-  }, [assignmentsByProgram, studentAssignments, statusFilter]);
+  }, [assignmentsByProgram, studentAssignments, statusFilter, programs]);
 
   return (
     <div className="space-y-6">
@@ -133,11 +135,13 @@ function AssignmentCard({
   assignment,
   isCompleted,
 }: {
-  assignment: Assignment & { program: Program } & { isCompleted: boolean };
+  assignment: AssignmentWithAttachments & { program: Program } & {
+    isCompleted: boolean;
+  };
   isCompleted: boolean;
 }) {
   const badge = typeBadge(assignment.type);
-  const hasLink = Boolean(assignment.url);
+  const hasAttachments = assignment.attachments.length > 0;
 
   return (
     <article className="group rounded-2xl border border-primary/15 bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -162,7 +166,9 @@ function AssignmentCard({
       <div className="mt-4 flex items-center gap-3">
         <CompleteButton assignment={assignment} isCompleted={isCompleted} />
 
-        {hasLink && <OpenUrlButton url={assignment.url!} />}
+        {hasAttachments && (
+          <AttachmentsPreview attachments={assignment.attachments} />
+        )}
       </div>
     </article>
   );
