@@ -7,7 +7,7 @@ import { InfoField } from '@/components/common/info-field';
 import { Snowflake, Trash2, KeyRound, Pencil } from 'lucide-react';
 import prisma from '@/lib/server/prisma';
 import labels from '@/lib/labels.json';
-import { Group, STUDENT_ROLE, SUPERVISOR_ROLE, User } from '@/types/types';
+import { STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { formatDate } from '@/lib/shared/utils';
 import { Prisma } from '@prisma/client';
 

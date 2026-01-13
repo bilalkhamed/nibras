@@ -76,7 +76,7 @@ export default function CreateProgramDialog({
       toast.success('تم إنشاء البرنامج بنجاح!', {
         duration: 2000,
       });
-    } catch (err) {
+    } catch {
       toast.error('حدث خطأ أثناء إنشاء البرنامج. الرجاء المحاولة مرة أخرى.', {
         duration: 2000,
       });

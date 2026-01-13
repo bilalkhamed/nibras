@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import labels from '@/lib/labels.json';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,6 @@ import {
   User,
   UserStatus,
 } from '@/types/types';
-import { cn } from '@/lib/shared/utils';
 import clsx from 'clsx';
 import { InviteRegenModal } from './invite-regen-modal';
 

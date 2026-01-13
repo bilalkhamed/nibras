@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -49,8 +48,8 @@ export function InviteRegenModal({
 
   useEffect(() => {
     if (!open || !user.id) return;
-    setLoading(true);
     const fetchInviteCode = async () => {
+      setLoading(true);
       try {
         const res = await fetch(`/api/users/${user.id}/invite`, {
           method: 'POST',
@@ -66,14 +65,14 @@ export function InviteRegenModal({
         setInviteCode(data.inviteCode);
         setLoading(false);
         setError(null);
-      } catch (err) {
+      } catch {
         setError('حدث خطأ أثناء إنشاء رمز الدعوة.');
         setLoading(false);
       }
     };
 
     fetchInviteCode();
-  }, [user.id]);
+  }, [user.id, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

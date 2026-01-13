@@ -2,8 +2,8 @@
 
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import labels from '@/lib/labels.json';
-import { useCallback, useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -17,7 +17,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import path from 'path';
 
 interface WeekNavigatorProps {
   weeks: { id: string; number: number; title: string }[];
@@ -57,7 +56,7 @@ export function WeekNavigator({ weeks }: WeekNavigatorProps) {
     } else {
       setActiveWeek(Number(activeWeekString.replace('week-', '')));
     }
-  }, [pathname, weeks, router]);
+  }, [pathname, weeks, router, activeWeekString]);
 
   return (
     <div className="flex justify-center">

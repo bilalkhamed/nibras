@@ -9,12 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  CheckCircle2Icon,
-  CheckCircleIcon,
-  CheckIcon,
-  CopyIcon,
-} from 'lucide-react';
+import { CheckCircle2Icon, CheckIcon, CopyIcon } from 'lucide-react';
 
 interface InviteCodeModalProps {
   open: boolean;

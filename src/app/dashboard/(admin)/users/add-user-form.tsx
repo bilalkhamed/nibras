@@ -186,7 +186,7 @@ export function AddUserForm() {
                 <Controller
                   name="country"
                   control={control}
-                  render={({ field: { onChange, onBlur, value } }) => (
+                  render={({ field: { onChange, value } }) => (
                     <SearchSelect
                       options={Object.entries(labels.countries).map(
                         ([key, value]) => ({

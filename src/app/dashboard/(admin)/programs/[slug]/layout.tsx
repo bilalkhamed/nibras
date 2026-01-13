@@ -1,9 +1,5 @@
 import prisma from '@/lib/server/prisma';
 import { notFound } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
 import { LevelTabs } from './level-tabs';
 
 interface ProgramDetailPageProps {

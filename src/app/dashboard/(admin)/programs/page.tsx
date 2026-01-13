@@ -1,6 +1,4 @@
 // 'use cache';
-
-import prisma from '@/lib/server/prisma';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,7 +13,6 @@ import CreateProgramDialog from './create-program-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
-import { connection } from 'next/server';
 import { getAllPrograms } from '@/lib/server/programs';
 
 export default async function ProgramsPage() {

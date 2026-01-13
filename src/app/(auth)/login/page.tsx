@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Loader2Icon, Sparkles } from 'lucide-react';
-import { z } from 'zod';
 import labels from '@/lib/labels.json';
 import {
   Card,
@@ -13,14 +12,15 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { loginSchema, LoginValues } from '@/lib/shared/auth-schemas';
 import { FormField } from '@/components/forms/form-fields';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const {
     handleSubmit,
     setError,
@@ -46,7 +46,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = '/dashboard';
+        router.push('/dashboard');
       } else if (res.status === 401) {
         setError('root', {
           message: 'البريد الإلكتروني أو كلمة السر غير صحيحة',
@@ -56,14 +56,12 @@ export default function LoginPage() {
           message: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
         });
       }
-    } catch (error) {
+    } catch {
       setError('root', {
         message: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
       });
     }
   };
-
-  console.log(errors);
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center p-4">
