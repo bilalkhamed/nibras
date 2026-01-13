@@ -68,11 +68,32 @@ export function GroupInfoSection({ group, currentWeek }: Props) {
       </div>
 
       {/* Motivational Message */}
-      <div className="mt-4 rounded-xl border border-primary/20 bg-gradient-to-r from-primary-soft/30 to-secondary-soft/30 p-4 text-center dark:from-[#2a2035]/50 dark:to-[#1b1524]/50">
+      <div className="mt-4 rounded-xl border border-primary/20 bg-linear-to-r from-primary-soft/30 to-secondary-soft/30 p-4 text-center dark:from-[#2a2035]/50 dark:to-[#1b1524]/50">
         <p className="text-sm font-semibold text-foreground">
-          🌟 أنتِ جزء من فريق رائع! استمري في التألق 🌟
+          {getRandomMotivationalMessage()}
         </p>
       </div>
     </section>
   );
+}
+
+const motivationalMessages = [
+  '🌟 أنتِ جزء من فريق رائع! استمري في التألق 🌟',
+  '🚀 معاً نحو آفاق جديدة من التعلم والنجاح! 🚀',
+  '🎯 كل يوم هو فرصة جديدة للتقدم! لننطلق معاً! 🎯',
+  '💡 التعلم رحلة مستمرة، وأنتِ في مقدمتها! 💡',
+  '📚 معاً نبني مستقبل مشرق بالعلم والمعرفة! 📚',
+  '🔥 لا شيء يمكن أن يوقفكِ عندما تكونين مصممة على النجاح! 🔥',
+  '🌈 كل تحدي هو فرصة جديدة للتألق! لنواجهها معاً! 🌈',
+  '💪 قوتنا في تعاوننا! معاً نحقق المستحيل! 💪',
+  '✨ استمري في السعي نحو التميز، فأنتِ قادرة على ذلك! ✨',
+  '🎉 كل إنجاز صغير يقربنا من هدفنا الكبير! لنحتفل معاً! 🎉',
+  '🌻 ازرعي بذور المعرفة، واحصدي ثمار النجاح! 🌻',
+  '🚴‍♀️ معاً نقطع مسافات طويلة في رحلة التعلم! 🚴‍♀️',
+  '🌟 أنتِ نجم في سماء التعلم! استمري في التألق! 🌟',
+];
+
+function getRandomMotivationalMessage() {
+  const index = Math.floor(Math.random() * motivationalMessages.length);
+  return motivationalMessages[index];
 }
