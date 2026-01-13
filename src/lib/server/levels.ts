@@ -8,3 +8,10 @@ export async function getLevelBySlug(slug: string) {
   });
   return level;
 }
+
+export async function getAllLevels() {
+  const levels = await prisma.level.findMany({
+    orderBy: { number: 'asc' },
+  });
+  return levels;
+}
