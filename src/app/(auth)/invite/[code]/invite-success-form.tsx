@@ -56,7 +56,7 @@ export function InviteSuccessForm({
     }
 
     localStorage.setItem('name', user.firstName);
-    router.push('/account/onboarding');
+    router.push('/dashboard');
   };
 
   return (
