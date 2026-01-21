@@ -27,9 +27,12 @@ import { Loader2Icon } from 'lucide-react';
 import { InviteCodeModal } from './invite-code-modal';
 import { toast } from 'sonner';
 import { ErrorMessage } from '@/components/forms/error-message';
+import { useRouter } from 'next/navigation';
 
 export function AddUserForm() {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [inviteCode, setInviteCode] = useState<string>('');
+  const router = useRouter();
   useEffect(() => {
     const fetchCohorts = async () => {
       const response = await fetch('/api/cohorts');
@@ -44,7 +47,7 @@ export function AddUserForm() {
     register,
     handleSubmit,
     control,
-    getValues,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -73,9 +76,13 @@ export function AddUserForm() {
       return;
     }
 
+    setInviteCode(result.inviteCode);
     setModalOpen(true);
+    router.refresh();
     console.log(data, errors);
   };
+
+  const firstName = watch('firstName');
 
   return (
     <>
@@ -254,18 +261,14 @@ export function AddUserForm() {
                   labels.dashboard.users.create
                 )}
               </Button>
-              <br />
-              <Button variant="outline" size={'md'}>
-                {labels.dashboard.users.importCsv}
-              </Button>
             </div>
           </form>
         </CardContent>
       </Card>
       <InviteCodeModal
-        inviteCode="7SMMHS.02b7105ed6fe31389531a7d8921f3660da31c623fde2f9a263dd55c6f5a35e84"
+        inviteCode={inviteCode}
         open={modalOpen}
-        userName={getValues('firstName') || 'المستخدم الجديد'}
+        userName={firstName || 'المستخدم الجديد'}
         onOpenChange={setModalOpen}
       />
     </>
