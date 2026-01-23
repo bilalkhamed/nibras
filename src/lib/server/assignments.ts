@@ -1,12 +1,30 @@
 import { cacheTag } from 'next/cache';
 import prisma from './prisma';
 import { getProgramBySlug } from './programs';
+import { Assignment, AssignmentAttachment } from '@prisma/client';
+
+type BaseOptions = {
+  levelId: string;
+  weekId: string;
+  programSlug?: string;
+};
 
 export async function getWeekAssignments(
-  levelId: string,
-  weekId: string,
-  programSlug?: string
-) {
+  options: BaseOptions & { withAttachments: false },
+): Promise<Assignment[]>;
+
+export async function getWeekAssignments(
+  options: BaseOptions & { withAttachments?: true },
+): Promise<(Assignment & { attachments: AssignmentAttachment[] })[]>;
+
+export async function getWeekAssignments({
+  levelId,
+  weekId,
+  programSlug,
+  withAttachments = true,
+}: BaseOptions & { withAttachments?: boolean }): Promise<
+  (Assignment & { attachments: AssignmentAttachment[] })[]
+> {
   'use cache';
   const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
 
@@ -26,7 +44,7 @@ export async function getWeekAssignments(
       createdAt: 'asc',
     },
     include: {
-      attachments: true,
+      attachments: withAttachments,
     },
   });
 
@@ -35,7 +53,7 @@ export async function getWeekAssignments(
 
 export async function getStudentAssignments(
   studentId: string,
-  assignmentIds: string[]
+  assignmentIds: string[],
 ) {
   const studentAssignments = await prisma.studentAssignment.findMany({
     where: {
@@ -50,7 +68,7 @@ export async function getStudentAssignments(
 
 export async function getManyStudentAssignments(
   studentIds: string[],
-  assignmentIds: string[]
+  assignmentIds: string[],
 ) {
   const studentAssignments = await prisma.studentAssignment.findMany({
     where: {
@@ -59,6 +77,15 @@ export async function getManyStudentAssignments(
       },
       assignmentId: {
         in: assignmentIds,
+      },
+    },
+    include: {
+      markedBy: {
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        },
       },
     },
   });
