@@ -4,12 +4,21 @@ import { AccessTokenPayload, ADMIN_ROLE } from '@/types/types';
 
 export default async function GroupsListSection({
   auth,
+  searchParams,
 }: {
   auth: AccessTokenPayload;
+  searchParams: Promise<{ cohortId?: string }>;
 }) {
-  const groups = await getGroups(
-    auth.role === ADMIN_ROLE ? undefined : auth.userId
-  );
+  const { cohortId } = await searchParams;
+
+  if (!cohortId) {
+    return;
+  }
+
+  const groups = await getGroups({
+    supervisorId: auth.role === ADMIN_ROLE ? undefined : auth.userId,
+    cohortId: cohortId,
+  });
 
   return <GroupList groups={groups} hrefBase="/dashboard/groups/" />;
 }

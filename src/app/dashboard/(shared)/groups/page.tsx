@@ -4,8 +4,16 @@ import { CardsListSkeleton } from '@/components/skeletons';
 import CreateGroupDialog from './create-group-dialog';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
+import { CohortNavigator } from './cohort-navigator';
+import { CohortNavigatorWrapper } from './cohort-navigator-wrapper';
 
-export default async function GroupsPage() {
+export default async function GroupsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cohortId?: string }>;
+}) {
+  const { cohortId } = await searchParams;
+
   return (
     <Suspense fallback={<CardsListSkeleton />}>
       <AuthGuard roles={[ADMIN_ROLE, SUPERVISOR_ROLE]}>
@@ -16,8 +24,11 @@ export default async function GroupsPage() {
               {auth.role === ADMIN_ROLE && <CreateGroupDialog />}
             </div>
 
-            <Suspense fallback={<CardsListSkeleton />}>
-              <GroupsListSection auth={auth} />
+            <Suspense fallback={<CohortNavigator cohorts={[]} />}>
+              <CohortNavigatorWrapper />
+            </Suspense>
+            <Suspense key={cohortId} fallback={<CardsListSkeleton />}>
+              <GroupsListSection auth={auth} searchParams={searchParams} />
             </Suspense>
           </div>
         )}

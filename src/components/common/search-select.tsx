@@ -33,6 +33,10 @@ interface SearchSelectProps {
   emptyMessage?: string;
   disabled?: boolean;
   name?: string;
+  classNames?: {
+    container?: string;
+    button?: string;
+  };
   onBlur?: () => void;
 }
 
@@ -45,6 +49,7 @@ export default function SearchSelect({
   emptyMessage = 'لم يتم العثور على نتائج.',
   disabled = false,
   name,
+  classNames,
   onBlur,
 }: SearchSelectProps) {
   const [open, setOpen] = useState(false);
@@ -53,7 +58,7 @@ export default function SearchSelect({
     options.find((opt) => opt.id === value)?.label || placeholder;
 
   return (
-    <div dir="rtl">
+    <div dir="rtl" className={classNames?.container}>
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -69,7 +74,10 @@ export default function SearchSelect({
             role="combobox"
             aria-expanded={open}
             disabled={disabled}
-            className="h-9 w-full justify-between rounded-xl bg-card border-border text-foreground"
+            className={cn(
+              'h-9 w-full justify-between rounded-xl bg-card border-border text-foreground',
+              classNames?.button,
+            )}
           >
             {selectedLabel}
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
@@ -106,7 +114,7 @@ export default function SearchSelect({
                     <Check
                       className={cn(
                         'mr-auto h-4 w-4 text-primary',
-                        value === option.id ? 'opacity-100' : 'opacity-0'
+                        value === option.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                   </CommandItem>
