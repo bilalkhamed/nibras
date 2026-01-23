@@ -2,44 +2,62 @@
 
 import prisma from './prisma';
 import getAuthSession from './auth-session';
-import { ADMIN_ROLE } from '@/types/types';
-import { AssignmentTypes, AttachmentType, Prisma } from '@prisma/client';
+import { ADMIN_ROLE, STUDENT_ROLE } from '@/types/types';
+import { AssignmentTypes, AttachmentType } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 
 export async function toggleAssignmentCompletion(
   assignmentId: string,
-  isCompleted: boolean
+  isCompleted: boolean,
+  studentId?: string,
 ) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   const session = await getAuthSession();
   if (!session?.userId) {
     return { success: false, error: 'Unauthorized' };
+  }
+
+  if (!studentId && session.role === STUDENT_ROLE) {
+    studentId = session.userId;
+  }
+
+  if (!studentId) {
+    return { success: false, error: 'Student ID is required' };
   }
 
   try {
     await prisma.studentAssignment.upsert({
       where: {
         studentId_assignmentId: {
-          studentId: session.userId,
+          studentId,
           assignmentId: assignmentId,
         },
       },
       create: {
-        studentId: session.userId,
+        studentId,
         assignmentId: assignmentId,
         isCompleted: isCompleted,
         completedAt: isCompleted ? new Date() : null,
+        markedById: session.userId,
       },
       update: {
         isCompleted: isCompleted,
         completedAt: isCompleted ? new Date() : null,
+        markedById: session.userId,
       },
     });
+
+    if (session.role === STUDENT_ROLE) {
+      revalidatePath('/dashboard/assignments', 'page');
+    } else {
+      revalidatePath('/dashboard/groups/[id]/progress', 'page');
+    }
 
     return { success: true };
   } catch (error) {
     console.error('Toggle Error:', error);
-    return { success: false, error: 'Failed to update status' };
+    return { success: false, error };
   }
 }
 
@@ -60,11 +78,11 @@ export async function deleteAssignment(assignmentId: string) {
 
     revalidateTag(
       `assignments-level-${deleted.levelId}-week-${deleted.weekId}-program-${deleted.programId}`,
-      'max'
+      'max',
     );
     revalidateTag(
       `assignments-level-${deleted.levelId}-week-${deleted.weekId}`,
-      'max'
+      'max',
     );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
@@ -82,7 +100,7 @@ export async function updateAssignment(
     type: AssignmentTypes;
     links?: { id?: string; url: string; type: typeof AttachmentType.LINK }[];
     fileKeys: string[];
-  }
+  },
 ) {
   const session = await getAuthSession();
   if (!session?.userId) {
@@ -102,11 +120,11 @@ export async function updateAssignment(
 
     if (data.links) {
       const existingLinks = existingAttachments.filter(
-        (att) => att.type === AttachmentType.LINK
+        (att) => att.type === AttachmentType.LINK,
       );
 
       const linksToDelete = existingLinks.filter(
-        (link) => !data.links?.some((l) => l.id === link.id)
+        (link) => !data.links?.some((l) => l.id === link.id),
       );
 
       const linksToAdd = data.links.filter((link) => !link.id);
@@ -130,7 +148,7 @@ export async function updateAssignment(
           prisma.assignmentAttachment.update({
             where: { id: link.id!, assignmentId: assignmentId },
             data: { url: link.url },
-          })
+          }),
         ),
         prisma.assignmentAttachment.createMany({
           data: linksToAdd.map((link) => ({
@@ -144,15 +162,15 @@ export async function updateAssignment(
 
     if (data.fileKeys) {
       const existingFiles = existingAttachments.filter(
-        (att) => att.type === AttachmentType.FILE
+        (att) => att.type === AttachmentType.FILE,
       );
 
       const filesToDelete = existingFiles.filter(
-        (file) => !data.fileKeys.includes(file.fileKey!)
+        (file) => !data.fileKeys.includes(file.fileKey!),
       );
 
       const filesToAdd = data.fileKeys.filter(
-        (key) => !existingFiles.some((file) => file.fileKey === key)
+        (key) => !existingFiles.some((file) => file.fileKey === key),
       );
 
       await prisma.$transaction([
@@ -183,11 +201,11 @@ export async function updateAssignment(
 
     revalidateTag(
       `assignments-level-${updated.levelId}-week-${updated.weekId}-program-${updated.programId}`,
-      'max'
+      'max',
     );
     revalidateTag(
       `assignments-level-${updated.levelId}-week-${updated.weekId}`,
-      'max'
+      'max',
     );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };
@@ -212,14 +230,14 @@ const createAssignmentSchema = z.object({
           url: z.url(),
           id: z.string().optional(),
           type: z.literal(AttachmentType.LINK),
-        })
+        }),
       )
       .optional(),
   }),
 });
 
 export async function createAssignment(
-  input: z.infer<typeof createAssignmentSchema>
+  input: z.infer<typeof createAssignmentSchema>,
 ) {
   const session = await getAuthSession();
 
@@ -297,11 +315,11 @@ export async function createAssignment(
 
     revalidateTag(
       `assignments-level-${newAssignment.levelId}-week-${newAssignment.weekId}-program-${newAssignment.programId}`,
-      'max'
+      'max',
     );
     revalidateTag(
       `assignments-level-${newAssignment.levelId}-week-${newAssignment.weekId}`,
-      'max'
+      'max',
     );
     revalidatePath('/dashboard/programs/[slug]/[level]/[week]', 'page');
     return { success: true };

@@ -28,7 +28,7 @@ export function formatDate(value: string | Date) {
   const date = value instanceof Date ? value : new Date(value);
   return date.toLocaleDateString('ar-SY', {
     year: 'numeric',
-    month: 'short',
+    month: 'numeric',
     day: 'numeric',
   });
 }
@@ -47,7 +47,7 @@ export function toArabicNumerals(input: string | number) {
     .toString()
     .split('')
     .map((char) =>
-      /\d/.test(char) ? arabicNumerals[parseInt(char, 10)] : char
+      /\d/.test(char) ? arabicNumerals[parseInt(char, 10)] : char,
     )
     .join('');
 }

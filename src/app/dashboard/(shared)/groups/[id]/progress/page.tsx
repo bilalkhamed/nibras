@@ -4,6 +4,7 @@ import {
   getManyStudentAssignments,
   getWeekAssignments,
 } from '@/lib/server/assignments';
+import type { AssignmentStatus, StudentProgress } from '@/types/progress';
 import {
   getCurrentWeek,
   getWeekByNumber,
@@ -11,8 +12,9 @@ import {
 } from '@/lib/server/weeks';
 import { getGroupById } from '@/lib/server/groups';
 import { notFound } from 'next/navigation';
-import { StudentProgressTable } from './student-progress-table';
+import { StudentProgressContainer } from './student-progress-container';
 import { WeekNavigator } from '@/components/common/week-navigator';
+import getAuthSession from '@/lib/server/auth-session';
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<{ week?: string }> | { week?: string };
@@ -47,45 +49,62 @@ async function StudentsAssignmentsList({
   const { id } = await params;
   const { week } = (await searchParams) || {};
 
-  const group = await getGroupById(id);
+  const [group, session] = await Promise.all([
+    getGroupById(id),
+    getAuthSession(),
+  ]);
   if (!group) notFound();
+  const currentUserName = session
+    ? `${session.firstName} ${session.lastName}`
+    : 'مشرف';
   const currentWeek = await getCurrentWeek();
   if (!currentWeek) notFound(); // TODO: handle error properly
+  // FIX: remove current week dependency (to support when there is no current week)
 
   const parsedWeek = Number(week);
+
+  // here we are checking if either the week is invalid OR a future week
   const isInvalidWeek = Number.isNaN(parsedWeek) || parsedWeek < 1;
   const isFutureWeek = !isInvalidWeek && parsedWeek > currentWeek.week.number;
 
+  // if it is , default to current week
   const targetWeekNumber =
     isInvalidWeek || isFutureWeek ? currentWeek.week.number : parsedWeek;
 
+  // fetch the target week from DB
   const targetWeek = await getWeekByNumber(targetWeekNumber);
   const selectedWeek = targetWeek ?? currentWeek;
 
-  const weekId = selectedWeek.week?.id;
-  if (!weekId) notFound();
+  const weekId = selectedWeek.week.id;
 
-  const assignments = await getWeekAssignments(
-    group.cohort.currentLevel.id,
-    weekId
-  );
+  const assignments = await getWeekAssignments({
+    levelId: group.cohort.currentLevelId,
+    weekId: weekId,
+    withAttachments: false,
+  });
+
   const studentAssignments = await getManyStudentAssignments(
     group.students.map((gs) => gs.student.id),
-    assignments.map((as) => as.id)
+    assignments.map((as) => as.id),
   );
 
   const assignmentStatusMap = studentAssignments.reduce<
-    Record<string, Record<string, boolean>>
+    Record<string, Record<string, AssignmentStatus>>
   >((acc, sa) => {
     if (!acc[sa.studentId]) acc[sa.studentId] = {};
-    acc[sa.studentId][sa.assignmentId] = sa.isCompleted;
+    acc[sa.studentId][sa.assignmentId] = {
+      isCompleted: sa.isCompleted,
+      completedAt: sa.completedAt,
+      markedBy: sa.markedBy,
+    };
     return acc;
   }, {});
 
   const studentsProgress = group.students.map((gs) => {
     const completedCount = assignments.reduce((count, assignment) => {
       const isCompleted =
-        assignmentStatusMap[gs.student.id]?.[assignment.id] ?? false;
+        assignmentStatusMap[gs.student.id]?.[assignment.id]?.isCompleted ??
+        false;
       return count + (isCompleted ? 1 : 0);
     }, 0);
 
@@ -109,7 +128,7 @@ async function StudentsAssignmentsList({
       totalAssignments: assignments.length,
       status,
       assignmentStatuses: assignmentStatusMap[gs.student.id] || {},
-    };
+    } satisfies StudentProgress;
   });
 
   return (
@@ -118,7 +137,7 @@ async function StudentsAssignmentsList({
         <h2 className="text-xl font-semibold mb-2">
           {selectedWeek.week?.title || 'الأسبوع الحالي'}
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground" suppressHydrationWarning>
           {selectedWeek.startDate.toLocaleDateString('ar-SA')} -{' '}
           {selectedWeek.endDate.toLocaleDateString('ar-SA')}
         </p>
@@ -133,15 +152,17 @@ async function StudentsAssignmentsList({
           لا توجد مهام لهذا الأسبوع
         </div>
       ) : (
-        <StudentProgressTable
+        <StudentProgressContainer
           assignments={assignments}
           students={studentsProgress}
+          currentUserName={currentUserName}
         />
       )}
     </div>
   );
 }
 
+// just to load weeks then pass to WeekNavigator
 async function WeekNavigatorContainer() {
   const [weeks, currentWeek] = await Promise.all([
     getWeeksTillDate(),

@@ -1,3 +1,5 @@
+'use client';
+
 import type React from 'react';
 import {
   Table,
@@ -7,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Assignment } from '@prisma/client';
 import { AlertTriangle, CheckCircle2, Clock3 } from 'lucide-react';
 import {
@@ -15,51 +16,68 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { toArabicNumerals } from '@/lib/shared/utils';
-
-interface StudentRow {
-  id: string;
-  name: string;
-  completedCount: number;
-  totalAssignments: number;
-  status: 'warning' | 'pending' | 'done';
-  assignmentStatuses: Record<string, boolean>;
-}
+import { toArabicNumerals, cn } from '@/lib/shared/utils';
+import { CompletionBadgeOptimistic } from './completion-badge-optimistic';
+import type { StudentProgress } from '@/types/progress';
+import { useProgressContext } from './progress-context';
 
 interface StudentProgressTableProps {
   assignments: Assignment[];
-  students: StudentRow[];
+  students: StudentProgress[];
 }
 
 const STATUS_ICON: Record<
-  StudentRow['status'],
-  { icon: React.ReactNode; className: string; label: string }
+  StudentProgress['status'],
+  {
+    icon: React.ReactNode;
+    className: string;
+    bgClassName: string;
+    label: string;
+  }
 > = {
   warning: {
     icon: <AlertTriangle className="h-4 w-4" />,
     className: 'text-amber-500',
+    bgClassName: 'bg-amber-50 dark:bg-amber-950/30',
     label: 'لم تُنجز أي مهمة بعد',
   },
   pending: {
     icon: <Clock3 className="h-4 w-4" />,
     className: 'text-blue-500',
+    bgClassName: 'bg-blue-50 dark:bg-blue-950/30',
     label: 'أنجزت [count] من المهام',
   },
   done: {
     icon: <CheckCircle2 className="h-4 w-4" />,
     className: 'text-emerald-500',
+    bgClassName: 'bg-emerald-50 dark:bg-emerald-950/30',
     label: 'أنجزت جميع المهام',
   },
 };
 
 export function StudentProgressTable({
   assignments,
-  students,
+  students: propsStudents,
 }: StudentProgressTableProps) {
+  // Get optimistic students from context
+  const { students: contextStudents } = useProgressContext();
+
+  // Use context students but filter to match the filtered props
+  const propsStudentIds = new Set(propsStudents.map((s) => s.id));
+  const students = contextStudents.filter((s) => propsStudentIds.has(s.id));
+
   const totalAssignments = assignments.length;
 
+  if (students.length === 0) {
+    return (
+      <div className="p-6 text-center text-sm text-muted-foreground rounded-lg border border-dashed">
+        لا توجد نتائج مطابقة للبحث
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl border border-border overflow-hidden bg-card shadow-md">
+    <div className="rounded-xl border border-border overflow-hidden bg-card shadow-md overflow-x-auto">
       <Table>
         <TableHeader className="bg-linear-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
           <TableRow className="hover:bg-transparent">
@@ -88,18 +106,23 @@ export function StudentProgressTable({
             const label = toArabicNumerals(
               statusConfig.label.replace(
                 '[count]',
-                student.completedCount.toString()
-              )
+                student.completedCount.toString(),
+              ),
             );
             return (
               <TableRow
                 key={student.id}
-                className="odd:bg-muted/40 even:bg-card dark:odd:bg-muted/25 dark:even:bg-card hover:bg-accent-soft/70 dark:hover:bg-accent-soft/30 transition-colors"
+                className="odd:bg-muted/40 even:bg-card dark:odd:bg-muted/25 dark:even:bg-card hover:bg-accent/10 dark:hover:bg-accent/5 transition-colors"
               >
                 <TableCell className="text-center">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-muted">
+                      <div
+                        className={cn(
+                          'mx-auto flex h-7 w-7 items-center justify-center rounded-full',
+                          statusConfig.bgClassName,
+                        )}
+                      >
                         <span className={statusConfig.className}>
                           {statusConfig.icon}
                         </span>
@@ -114,27 +137,18 @@ export function StudentProgressTable({
                 <TableCell className="font-medium text-foreground w-48">
                   {student.name}
                 </TableCell>
-                {assignments.map((assignment) => {
-                  const isCompleted =
-                    student.assignmentStatuses[assignment.id] ?? false;
-                  return (
-                    <TableCell key={assignment.id} className="text-center">
-                      <Badge
-                        variant={isCompleted ? 'default' : 'outline'}
-                        className={
-                          isCompleted
-                            ? 'bg-emerald-500 text-emerald-50'
-                            : 'text-muted-foreground px-5'
-                        }
-                      >
-                        {isCompleted ? 'مكتمل' : '-'}
-                      </Badge>
-                    </TableCell>
-                  );
-                })}
+                {assignments.map((assignment) => (
+                  <TableCell key={assignment.id} className="text-center">
+                    <CompletionBadgeOptimistic
+                      assignmentId={assignment.id}
+                      studentId={student.id}
+                      studentName={student.name}
+                    />
+                  </TableCell>
+                ))}
                 <TableCell className="text-center font-semibold text-foreground">
                   {toArabicNumerals(
-                    `${student.completedCount} / ${totalAssignments}`
+                    `${student.completedCount} / ${totalAssignments}`,
                   )}
                 </TableCell>
               </TableRow>
