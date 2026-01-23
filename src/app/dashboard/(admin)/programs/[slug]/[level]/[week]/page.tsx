@@ -29,11 +29,12 @@ export default async function ProgramWeekPage({
     notFound();
   }
 
-  const assignments = await getWeekAssignments(
-    levelData.id,
-    weekData.week.id,
-    slug
-  );
+  const assignments = await getWeekAssignments({
+    levelId: levelData.id,
+    weekId: weekData.week.id,
+    programSlug: slug,
+    withAttachments: true,
+  });
 
   const assignmentsWithUrls = await Promise.all(
     assignments.map(async (assignment) => {
@@ -50,10 +51,10 @@ export default async function ProgramWeekPage({
             };
           }
           return { ...att, tempUrl: att.url! }; // Fallback for links
-        })
+        }),
       );
       return { ...assignment, attachments: attachmentsWithUrls };
-    })
+    }),
   );
 
   return (
