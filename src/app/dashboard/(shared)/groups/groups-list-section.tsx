@@ -11,7 +11,7 @@ export default async function GroupsListSection({
 }) {
   const { cohortId } = await searchParams;
 
-  if (!cohortId) {
+  if (!cohortId && auth.role === ADMIN_ROLE) {
     return;
   }
 

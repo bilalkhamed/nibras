@@ -24,9 +24,11 @@ export default async function GroupsPage({
               {auth.role === ADMIN_ROLE && <CreateGroupDialog />}
             </div>
 
-            <Suspense fallback={<CohortNavigator cohorts={[]} />}>
-              <CohortNavigatorWrapper />
-            </Suspense>
+            {auth.role === ADMIN_ROLE && (
+              <Suspense fallback={<CohortNavigator cohorts={[]} />}>
+                <CohortNavigatorWrapper />
+              </Suspense>
+            )}
             <Suspense key={cohortId} fallback={<CardsListSkeleton />}>
               <GroupsListSection auth={auth} searchParams={searchParams} />
             </Suspense>
