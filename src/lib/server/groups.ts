@@ -39,10 +39,16 @@ export async function getGroupById(groupId: string) {
   return group;
 }
 
-export async function getGroups(supervisorId?: string) {
+type GetGroupsOptions = {
+  supervisorId?: string;
+  cohortId?: string;
+};
+
+export async function getGroups(options: GetGroupsOptions = {}) {
   return await prisma.group.findMany({
     where: {
-      supervisorId: supervisorId,
+      supervisorId: options.supervisorId,
+      cohortId: options.cohortId,
     },
     select: {
       id: true,
@@ -53,6 +59,7 @@ export async function getGroups(supervisorId?: string) {
         select: {
           currentLevel: true,
           name: true,
+          id: true,
         },
       },
       supervisor: {
