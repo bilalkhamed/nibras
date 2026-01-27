@@ -1,18 +1,30 @@
+/**
+ * AttachmentsPreview Component
+ *
+ * Displays a preview of assignment attachments (files and links).
+ * Shows up to 3 attachments with a count for additional items.
+ */
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { AssignmentAttachment, AttachmentType } from '@prisma/client';
+import { AttachmentType } from '@prisma/client';
 import { ExternalLinkIcon, FileTextIcon, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/shared/utils';
+import type { AttachmentWithTempUrl } from '../../types';
 
-export function AttachmentsPreview({
-  attachments,
-}: {
-  attachments: (AssignmentAttachment & { tempUrl: string | null })[];
-}) {
+type AttachmentsPreviewProps = {
+  /** Array of attachments with signed URLs */
+  attachments: AttachmentWithTempUrl[];
+};
+
+/**
+ * Displays a compact preview of assignment attachments
+ */
+export function AttachmentsPreview({ attachments }: AttachmentsPreviewProps) {
   if (attachments.length === 0) {
     return null;
   }
@@ -34,23 +46,27 @@ export function AttachmentsPreview({
   );
 }
 
+/**
+ * Single attachment preview with tooltip
+ */
 function AttachmentPreview({
   attachment,
 }: {
-  attachment: AssignmentAttachment & { tempUrl: string | null };
+  attachment: AttachmentWithTempUrl;
 }) {
   const isLink = attachment.type === AttachmentType.LINK;
   const isPdf = attachment.fileKey?.toLowerCase().endsWith('.pdf');
   const isImage =
     !isPdf && attachment.fileKey?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
 
+  // Extract filename from S3 key (after UUID separator)
   const fileName = attachment.fileKey?.split('__uuid_end__').pop() || 'ملف';
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Link
-          href={attachment.tempUrl!}
+          href={attachment.tempUrl}
           target="_blank"
           className={cn(
             'group relative h-9 w-9 rounded-full overflow-hidden border transition-all',
@@ -59,7 +75,7 @@ function AttachmentPreview({
               ? 'bg-secondary-soft border-secondary/20'
               : isPdf
                 ? 'bg-accent-soft border-accent/20'
-                : 'bg-card border-border'
+                : 'bg-card border-border',
           )}
         >
           {isImage && attachment.tempUrl ? (

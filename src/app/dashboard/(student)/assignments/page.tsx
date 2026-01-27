@@ -1,23 +1,25 @@
 import { getCurrentWeek } from '@/lib/server/weeks';
-import prisma from '@/lib/server/prisma';
 import { requireRoles } from '@/lib/server/require-roles';
-import { AssignmentWithAttachments, STUDENT_ROLE } from '@/types/types';
+import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
-import { Assignment, Program } from '@prisma/client';
-import { AssignmentsGrid } from './assignments-grid';
-import {
-  getStudentAssignments,
-  getWeekAssignments,
-} from '@/features/assignments/db';
+import { Program } from '@prisma/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { WeekHero } from './week-hero';
-import { ProgramFilter } from './program-filter';
 import { getAllPrograms } from '@/lib/server/programs';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  AssignmentsGrid,
+  WeekHero,
+  ProgramFilter,
+} from '@/features/assignments/components';
+import {
+  getWeekAssignments,
+  getStudentAssignments,
+} from '@/features/assignments/service';
+import type { AssignmentWithAttachmentsDTO } from '@/features/assignments/types';
 
 export default async function StudentAssignmentsPage({
   children,
@@ -37,13 +39,22 @@ export default async function StudentAssignmentsPage({
     return <NoData />;
   }
 
-  const [assignments, programs] = await Promise.all([
-    getWeekAssignments(levelId, currentWeek.week.id),
+  const [assignmentsResult, programs] = await Promise.all([
+    getWeekAssignments({
+      levelId,
+      weekId: currentWeek.week.id,
+      withAttachments: true,
+    }),
     getAllPrograms(),
   ]);
 
+  // Handle service errors
+  if (!assignmentsResult.success) {
+    return <NoData />;
+  }
+
   const assignmentsWithUrls = await Promise.all(
-    assignments.map(async (assignment) => {
+    assignmentsResult.data.map(async (assignment) => {
       const attachmentsWithUrls = await Promise.all(
         assignment.attachments.map(async (att) => {
           if (att.type === 'FILE' && att.fileKey) {
@@ -63,7 +74,7 @@ export default async function StudentAssignmentsPage({
     }),
   );
 
-  const totalAssignments = assignments.length;
+  const totalAssignments = assignmentsResult.data.length;
   const primaryMessage =
     totalAssignments > 0
       ? `لديك ${totalAssignments} مهمات هذا الأسبوع`
@@ -106,13 +117,18 @@ async function StudentAssignmentWrapper({
   userId,
 }: {
   programs: Program[];
-  assignments: AssignmentWithAttachments[];
+  assignments: AssignmentWithAttachmentsDTO[];
   userId: string;
 }) {
-  const studentAssignments = await getStudentAssignments(
+  const studentAssignmentsResult = await getStudentAssignments(
     userId,
     assignments.map((a) => a.id),
   );
+
+  // Handle service errors gracefully
+  const studentAssignments = studentAssignmentsResult.success
+    ? studentAssignmentsResult.data
+    : [];
 
   return (
     <AssignmentsGrid

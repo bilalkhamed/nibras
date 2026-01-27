@@ -1,3 +1,10 @@
+/**
+ * DeleteAssignmentButton Component
+ *
+ * Button with confirmation dialog for deleting assignments.
+ * Only accessible by admins.
+ */
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -20,25 +27,30 @@ import {
 import { Trash2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { deleteAssignment } from '@/lib/server/actions';
+import { deleteAssignmentAction } from '../../actions';
 
+type DeleteAssignmentButtonProps = {
+  /** Assignment ID to delete */
+  assignmentId: string;
+};
+
+/**
+ * Delete button with confirmation dialog
+ */
 export function DeleteAssignmentButton({
   assignmentId,
-}: {
-  assignmentId: string;
-}) {
+}: DeleteAssignmentButtonProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await deleteAssignment(assignmentId);
+      const result = await deleteAssignmentAction(assignmentId);
 
       if (result.success) {
         toast.success('تم حذف المهمة بنجاح!', { duration: 2000 });
         setOpen(false);
-        // router.refresh();
       } else {
         toast.error(result.error || 'حدث خطأ أثناء حذف المهمة', {
           duration: 3000,

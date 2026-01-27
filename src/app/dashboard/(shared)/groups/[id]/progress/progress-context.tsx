@@ -17,7 +17,7 @@ import type {
   AssignmentProgress,
   AssignmentProgressStatus,
 } from '@/types/progress';
-import { toggleAssignmentCompletion } from '@/lib/server/actions';
+import { toggleAssignmentCompletionAction } from '@/features/assignments/actions';
 
 type OptimisticAction = {
   studentId: string;
@@ -141,7 +141,11 @@ export function ProgressProvider({
           newCompleted,
         });
 
-        await toggleAssignmentCompletion(assignmentId, newCompleted, studentId);
+        await toggleAssignmentCompletionAction(
+          assignmentId,
+          newCompleted,
+          studentId,
+        );
       });
     },
     [updateOptimisticStudents],

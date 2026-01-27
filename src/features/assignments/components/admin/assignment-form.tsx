@@ -1,3 +1,10 @@
+/**
+ * AssignmentForm Component
+ *
+ * Reusable form for creating and editing assignments.
+ * Includes fields for name, description, type, links, and file uploads.
+ */
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -6,7 +13,6 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
 import { AssignmentTypes } from '@prisma/client';
@@ -25,32 +31,29 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import LinkManager from './link-manager';
-import { AttachedFile, FileUploader } from './file-uploader';
+import { LinkManager } from './link-manager';
+import { FileUploader } from './file-uploader';
 import { FilesCardsList } from './files-cards-list';
+import {
+  type AssignmentFormData,
+  type AttachedFile,
+  type Link,
+  assignmentFormSchema,
+} from '../../types';
 
-export const linkSchema = z.object({
-  id: z.string().optional(),
-  url: z.url('يرجى إدخال رابط صالح'),
-  type: z.literal('LINK'),
-});
+// Re-export for consumers that might need it
+export type { AssignmentFormData, Link } from '../../types';
 
-export type Link = z.infer<typeof linkSchema>;
-
-const assignmentFormSchema = z.object({
-  name: z.string().min(1, 'يرجى إدخال اسم المهمة'),
-  description: z.string().nullable(),
-  type: z.enum(AssignmentTypes, 'يرجى اختيار نوع المهمة'),
-  links: linkSchema.array().optional(),
-  files: z.array(z.any()).optional(),
-  newFileKeys: z.array(z.string()).optional(),
-});
-
-export type AssignmentFormData = z.infer<typeof assignmentFormSchema>;
+// ============================================================================
+// Form Component
+// ============================================================================
 
 type AssignmentFormContentProps = {
+  /** Form title */
   title: string;
+  /** Submit button label */
   submitLabel: string;
+  /** Default values for editing */
   defaultValues?: {
     name: string;
     description: string | null;
@@ -58,10 +61,15 @@ type AssignmentFormContentProps = {
     links?: Link[];
     files?: AttachedFile[];
   };
+  /** Callback when form is cancelled */
   onCancel: () => void;
+  /** Callback when form is submitted */
   onSubmit: (data: AssignmentFormData) => Promise<void>;
 };
 
+/**
+ * Assignment form content used in create/edit sheets
+ */
 export function AssignmentFormContent({
   title,
   submitLabel,
@@ -94,15 +102,17 @@ export function AssignmentFormContent({
         },
   });
 
+  // Register uncontrolled fields
   useEffect(() => {
     register('files');
     register('newFileKeys');
   }, [register]);
+
   const handleFormSubmit: SubmitHandler<AssignmentFormData> = useCallback(
     async (data) => {
       await onSubmit(data);
     },
-    [onSubmit]
+    [onSubmit],
   );
 
   const files = watch('files');
@@ -180,7 +190,11 @@ export function AssignmentFormContent({
             <ErrorMessage message={errors.type?.message} />
           </div>
         </div>
+
+        {/* Links Section */}
         <LinkManager control={control} errors={errors.links} />
+
+        {/* File Upload Section */}
         <div className="px-3 mt-3">
           <FileUploader
             onFileUpload={(fileKey) => {
@@ -191,16 +205,18 @@ export function AssignmentFormContent({
               const current = getValues('newFileKeys') || [];
               setValue(
                 'newFileKeys',
-                current.filter((key) => key !== fileKey)
+                current.filter((key) => key !== fileKey),
               );
             }}
           />
         </div>
+
+        {/* Existing Files Section (for editing) */}
         <FilesCardsList
           files={files || []}
           onFileDelete={(fileKey) => {
             const updatedFiles = (files || []).filter(
-              (file) => file.key !== fileKey
+              (file) => file.key !== fileKey,
             );
             setValue('files', updatedFiles);
           }}

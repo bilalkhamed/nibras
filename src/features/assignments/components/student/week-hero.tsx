@@ -1,7 +1,18 @@
-type Props = {
+/**
+ * WeekHero Component
+ *
+ * Displays the hero section for the weekly assignments page.
+ * Shows the week title, task count, deadline, and streak information.
+ */
+
+type WeekHeroProps = {
+  /** The title of the current week */
   heroTitle: string;
+  /** Primary message showing task count */
   primaryMessage: string;
+  /** Formatted deadline date */
   deadlineLabel: string;
+  /** Streak motivational text */
   streakText: string;
 };
 
@@ -10,7 +21,7 @@ export function WeekHero({
   primaryMessage,
   deadlineLabel,
   streakText,
-}: Props) {
+}: WeekHeroProps) {
   return (
     <section className="rounded-3xl border border-primary/20 bg-linear-to-r from-primary/5 via-background to-secondary/5 p-6 shadow-md dark:from-primary/10 dark:via-background dark:to-secondary/10 dark:border-primary/30">
       <p className="text-sm font-semibold text-primary dark:text-secondary-foreground">

@@ -1,3 +1,10 @@
+/**
+ * AssignmentsGrid Component
+ *
+ * Displays a grid of assignment cards for students.
+ * Handles filtering by program and status, and optimistic updates for completion.
+ */
+
 'use client';
 
 import { startTransition, useMemo, useOptimistic, useState } from 'react';
@@ -14,60 +21,67 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/shared/utils';
-import { toggleAssignmentCompletion } from '@/lib/server/actions';
+import { toggleAssignmentCompletionAction } from '../../actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { AssignmentWithAttachments } from '@/types/types';
 import { AttachmentsPreview } from './attachments-preview';
+import type { AssignmentWithAttachmentsDTO } from '../../types';
 
-type Props = {
-  assignments: AssignmentWithAttachments[];
+type AssignmentsGridProps = {
+  /** Array of assignments with attachments */
+  assignments: AssignmentWithAttachmentsDTO[];
+  /** Available programs for filtering */
   programs: Program[];
+  /** Student's completion records */
   studentAssignments: StudentAssignment[];
 };
 
+/**
+ * Main grid component for displaying student assignments
+ */
 export function AssignmentsGrid({
   assignments,
   programs,
   studentAssignments,
-}: Props) {
+}: AssignmentsGridProps) {
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'completed' | 'pending'
   >('all');
 
+  // Filter by program
   const assignmentsByProgram = useMemo(() => {
     if (programFilter === 'all') return assignments;
     return assignments.filter((item) => item.programId === programFilter);
   }, [assignments, programFilter]);
 
+  // Merge completion status and apply filters
   const processedAssignments = useMemo(() => {
-    // 1. Merge Status
+    // Merge with completion status
     const merged = assignmentsByProgram.map((a) => ({
       ...a,
       program: programs.find((p) => p.id === a.programId)!,
       isCompleted: studentAssignments.some(
-        (p) => p.assignmentId === a.id && p.completedAt !== null // Ensure we check for actual completion
+        (p) => p.assignmentId === a.id && p.completedAt !== null,
       ),
     }));
 
-    // 2. Filter First (Optimization)
+    // Apply status filter
     let filtered = merged;
-    if (statusFilter === 'completed')
+    if (statusFilter === 'completed') {
       filtered = merged.filter((a) => a.isCompleted);
-    if (statusFilter === 'pending')
+    }
+    if (statusFilter === 'pending') {
       filtered = merged.filter((a) => !a.isCompleted);
-
-    // 3. Conditional Sorting
-    // If we are in 'All' view, DON'T sort by status. Keep them in their natural order (e.g. by ID or Date).
-    // This prevents the "Jump".
-    if (statusFilter === 'all') {
-      return filtered; // Or sort by a.createdAt if you want date order
     }
 
-    // Only sort by status if we are NOT in 'All' view (or if you strictly want it)
+    // Only sort by status if not in 'all' view (prevents jumpy behavior)
+    if (statusFilter === 'all') {
+      return filtered;
+    }
+
     return filtered.sort(
-      (a, b) => Number(a.isCompleted) - Number(b.isCompleted)
+      (a, b) => Number(a.isCompleted) - Number(b.isCompleted),
     );
   }, [assignmentsByProgram, studentAssignments, statusFilter, programs]);
 
@@ -78,6 +92,8 @@ export function AssignmentsGrid({
         programFilter={programFilter}
         onFilterChange={setProgramFilter}
       />
+
+      {/* Status filter tabs */}
       <div className="flex justify-end">
         <div className="flex justify-between gap-2 text-sm bg-muted p-1 rounded-lg w-100 md:w-fit">
           <button
@@ -130,15 +146,18 @@ export function AssignmentsGrid({
   );
 }
 
-function AssignmentCard({
-  assignment,
-  isCompleted,
-}: {
-  assignment: AssignmentWithAttachments & { program: Program } & {
+type AssignmentCardProps = {
+  assignment: AssignmentWithAttachmentsDTO & {
+    program: Program;
     isCompleted: boolean;
   };
   isCompleted: boolean;
-}) {
+};
+
+/**
+ * Individual assignment card with completion toggle
+ */
+function AssignmentCard({ assignment, isCompleted }: AssignmentCardProps) {
   const badge = typeBadge(assignment.type);
   const hasAttachments = assignment.attachments.length > 0;
 
@@ -173,7 +192,9 @@ function AssignmentCard({
   );
 }
 
-// AI CODE (mostly):
+/**
+ * Completion toggle button with optimistic updates and confetti
+ */
 function CompleteButton({
   assignment,
   isCompleted,
@@ -183,29 +204,31 @@ function CompleteButton({
 }) {
   const router = useRouter();
 
-  // 2. Setup the Optimistic State
-  // This defaults to 'isCompleted' (server state), but we can override it instantly
+  // Optimistic state for instant UI feedback
   const [optimisticCompleted, toggleOptimistic] = useOptimistic(
     isCompleted,
-    (state, newValue: boolean) => newValue
+    (_state, newValue: boolean) => newValue,
   );
 
   const handleOnPressedChange = async () => {
     const newValue = !optimisticCompleted;
 
-    // 3. Update UI Immediately (Optimistic)
+    // Update UI immediately
     startTransition(() => {
       toggleOptimistic(newValue);
     });
 
-    // 4. Perform the Server Action in the background
-    const result = await toggleAssignmentCompletion(assignment.id, newValue);
+    // Perform the server action
+    const result = await toggleAssignmentCompletionAction(
+      assignment.id,
+      newValue,
+    );
 
     if (result.success) {
-      // 5. Sync the rest of the app (e.g. move item to bottom of list)
+      // Sync the rest of the app
       router.refresh();
     } else {
-      // 6. Handle Failure (Optimistic state automatically reverts when transition ends)
+      // Show error (optimistic state auto-reverts on transition end)
       toast.error('حدث خطأ أثناء تحديث حالة المهمة. يرجى المحاولة مرة أخرى.');
     }
   };
@@ -229,17 +252,15 @@ function CompleteButton({
       <Tooltip>
         <TooltipTrigger asChild>
           <Toggle
-            // 7. Use the Optimistic State for rendering
             pressed={optimisticCompleted}
             onClick={handleOnClick}
             variant={'outline'}
             size={'lg'}
             className={cn(
               'gap-2 transition-all duration-300 rounded-full',
-              // Use optimisticCompleted for styling logic too
               optimisticCompleted
                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700'
-                : 'text-muted-foreground hover:text-foreground'
+                : 'text-muted-foreground hover:text-foreground',
             )}
             onPressedChange={handleOnPressedChange}
           >
@@ -258,6 +279,9 @@ function CompleteButton({
   );
 }
 
+/**
+ * Returns badge styling based on assignment type
+ */
 function typeBadge(type: Assignment['type']) {
   switch (type) {
     case 'reading':
@@ -290,6 +314,9 @@ function typeBadge(type: Assignment['type']) {
   }
 }
 
+/**
+ * Empty state when no assignments match filters
+ */
 function EmptyState() {
   return (
     <article className="rounded-2xl border border-dashed border-primary/30 bg-card p-6 text-center shadow-sm">

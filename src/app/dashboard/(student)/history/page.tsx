@@ -1,7 +1,7 @@
 import {
   getStudentAssignments,
   getWeekAssignments,
-} from '@/features/assignments/db';
+} from '@/features/assignments/service';
 import getAuthSession from '@/lib/server/auth-session';
 import { getAllPrograms } from '@/lib/server/programs';
 import { getCurrentWeek, getWeekByNumber } from '@/lib/server/weeks';
@@ -141,10 +141,19 @@ async function AssignmentsList({
   const auth = await getAuthSession();
   if (!auth) return null;
 
-  const assignments = await getWeekAssignments(auth.currentLevelId!, weekId);
+  const assignmentsResult = await getWeekAssignments({
+    levelId: auth.currentLevelId!,
+    weekId: weekId,
+    withAttachments: true,
+  });
+
+  // Handle service errors
+  if (!assignmentsResult.success) {
+    return null;
+  }
 
   const assignmentsWithUrls = await Promise.all(
-    assignments.map(async (assignment) => {
+    assignmentsResult.data.map(async (assignment) => {
       const attachmentsWithUrls = await Promise.all(
         assignment.attachments.map(async (att) => {
           if (att.type === 'FILE' && att.fileKey) {
@@ -173,10 +182,15 @@ async function AssignmentsList({
     {},
   );
 
-  const studentAssignments = await getStudentAssignments(
+  const studentAssignmentsResult = await getStudentAssignments(
     auth.userId,
-    assignments.map((as) => as.id),
+    assignmentsResult.data.map((as) => as.id),
   );
+
+  // Handle service errors gracefully
+  const studentAssignments = studentAssignmentsResult.success
+    ? studentAssignmentsResult.data
+    : [];
 
   const assignmentStatusMap: Record<string, boolean> = {};
   studentAssignments.forEach((sa) => {
@@ -260,7 +274,7 @@ async function AssignmentsList({
             })}
           </TableBody>
         </Table>
-        {assignments.length === 0 && (
+        {assignmentsWithUrls.length === 0 && (
           <div className="p-6 text-center text-sm text-muted-foreground">
             لا توجد مهام لهذا الأسبوع
           </div>

@@ -1,13 +1,15 @@
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
-import { AssignmentsTableWithActions } from './assignments-table-with-actions';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { getWeekAssignments } from '@/features/assignments/db';
+import { getWeekAssignments } from '@/features/assignments/service';
 import { getLevelBySlug } from '@/lib/server/levels';
 import { getWeekByNumber } from '@/lib/server/weeks';
-import { CreateAssignmentSheet } from './create-assignment-sheet';
+import {
+  CreateAssignmentSheet,
+  AssignmentsTableWithActions,
+} from '@/features/assignments/components';
 
 export default async function ProgramWeekPage({
   params,
@@ -29,15 +31,20 @@ export default async function ProgramWeekPage({
     notFound();
   }
 
-  const assignments = await getWeekAssignments({
+  const assignmentsResult = await getWeekAssignments({
     levelId: levelData.id,
     weekId: weekData.week.id,
     programSlug: slug,
     withAttachments: true,
   });
 
+  // Handle service errors
+  if (!assignmentsResult.success) {
+    notFound();
+  }
+
   const assignmentsWithUrls = await Promise.all(
-    assignments.map(async (assignment) => {
+    assignmentsResult.data.map(async (assignment) => {
       const attachmentsWithUrls = await Promise.all(
         assignment.attachments.map(async (att) => {
           if (att.type === 'FILE' && att.fileKey) {

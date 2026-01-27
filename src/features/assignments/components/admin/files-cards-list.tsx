@@ -1,7 +1,13 @@
+/**
+ * FilesCardsList Component
+ *
+ * Displays a grid of file cards for uploaded/uploading files.
+ * Shows upload progress, preview, and delete functionality.
+ */
+
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/shared/utils';
-import { AttachedFile, UploadingFile } from './file-uploader';
 import {
   FileTextIcon,
   Trash2Icon,
@@ -9,17 +15,27 @@ import {
   Loader2Icon,
   XCircleIcon,
 } from 'lucide-react';
+import type { UploadingFile, FileCardItem } from '../../types';
 
-export type FileCardItem = AttachedFile | UploadingFile;
+export type { FileCardItem };
 
+/**
+ * Type guard to check if a file is currently uploading
+ */
 function isUploadingFile(file: FileCardItem): file is UploadingFile {
   return 'file' in file;
 }
 
+/**
+ * Get a unique key for the file
+ */
 function getDisplayKey(file: FileCardItem) {
   return file.key ?? (isUploadingFile(file) ? file.id : file.name);
 }
 
+/**
+ * Extract filename from S3 key (removes UUID prefix)
+ */
 function getFileNameFromKey(key: string | null | undefined) {
   if (!key) return 'ملف غير معروف';
 
@@ -30,6 +46,9 @@ function getFileNameFromKey(key: string | null | undefined) {
   return key;
 }
 
+/**
+ * Get display name for the file
+ */
 function getDisplayName(file: FileCardItem) {
   if (isUploadingFile(file)) {
     return file.file.name;
@@ -37,18 +56,25 @@ function getDisplayName(file: FileCardItem) {
   return getFileNameFromKey(file.key);
 }
 
+/**
+ * Get preview URL for the file
+ */
 function getPreviewUrl(file: FileCardItem) {
   if (isUploadingFile(file)) return file.objectURL;
   return file.tempUrl;
 }
 
-export function FilesCardsList({
-  files,
-  onFileDelete,
-}: {
+type FilesCardsListProps = {
+  /** Array of files to display */
   files: FileCardItem[];
+  /** Callback when a file is deleted */
   onFileDelete: (fileKey: string) => void;
-}) {
+};
+
+/**
+ * Grid of file cards showing uploaded and uploading files
+ */
+export function FilesCardsList({ files, onFileDelete }: FilesCardsListProps) {
   if (files.length === 0) return null;
 
   return (
@@ -79,9 +105,10 @@ export function FilesCardsList({
                 'hover:shadow-md hover:border-primary/50',
                 hasError && 'border-destructive bg-destructive/5',
                 isCompleted && 'border-green-200 bg-green-50/50',
-                !hasError && !isCompleted && 'border-border bg-card'
+                !hasError && !isCompleted && 'border-border bg-card',
               )}
             >
+              {/* Delete button */}
               <Button
                 type="button"
                 variant="ghost"
@@ -90,13 +117,14 @@ export function FilesCardsList({
                   'absolute top-2 left-2 z-10 h-7 w-7 rounded-full',
                   'bg-background/80 backdrop-blur-sm shadow-sm',
                   'opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:bg-destructive hover:text-destructive-foreground'
+                  'hover:bg-destructive hover:text-destructive-foreground',
                 )}
                 onClick={() => onFileDelete(String(file.key ?? key))}
               >
                 <Trash2Icon className="h-3.5 w-3.5" />
               </Button>
 
+              {/* Preview area */}
               <div className="w-full aspect-video bg-muted/50 flex items-center justify-center relative overflow-hidden">
                 {isPdf ? (
                   <FileTextIcon className="h-14 w-14 text-primary" />
@@ -114,6 +142,7 @@ export function FilesCardsList({
                 )}
               </div>
 
+              {/* File info and progress */}
               <div className="p-3 space-y-2">
                 <div
                   className="text-sm font-medium text-foreground truncate"
@@ -131,7 +160,7 @@ export function FilesCardsList({
                           'h-2 flex-1',
                           hasError && '[&>div]:bg-destructive',
                           isCompleted && '[&>div]:bg-green-600',
-                          isUploading && '[&>div]:bg-blue-500'
+                          isUploading && '[&>div]:bg-blue-500',
                         )}
                       />
                       {hasError ? (

@@ -1,6 +1,13 @@
+/**
+ * CreateAssignmentSheet Component
+ *
+ * Sheet dialog for creating new assignments.
+ * Uses the assignment form and calls the create action.
+ */
+
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -10,16 +17,23 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { AssignmentFormContent, AssignmentFormData } from './assignment-form';
-import { createAssignment } from '@/lib/server/actions';
+import { createAssignmentAction } from '../../actions';
 import { toast } from 'sonner';
 
 type CreateAssignmentSheetProps = {
+  /** Button variant */
   buttonVariant?: 'primary' | 'outline';
+  /** Level slug for the new assignment */
   levelSlug: string;
+  /** Week ID for the new assignment */
   weekId: string;
+  /** Program slug for the new assignment */
   programSlug: string;
 };
 
+/**
+ * Sheet component for creating new assignments
+ */
 export function CreateAssignmentSheet({
   buttonVariant = 'primary',
   levelSlug,
@@ -38,22 +52,28 @@ export function CreateAssignmentSheet({
 
   const onSubmit = async (data: AssignmentFormData) => {
     try {
-      console.log('creating assignment with data:', {
-        ...data,
-        fileKeys: data.newFileKeys,
-      });
-      // return;
-      const res = await createAssignment({
+      const res = await createAssignmentAction({
         weekId,
         levelSlug,
         programSlug,
-        assignment: { ...data, fileKeys: data.newFileKeys },
+        assignment: {
+          name: data.name,
+          description: data.description,
+          type: data.type,
+          fileKeys: data.newFileKeys,
+          links: data.links?.map((link) => ({
+            url: link.url,
+            id: link.id,
+            type: 'LINK' as const,
+          })),
+        },
       });
+
       if (res.success) {
         toast.success(`تم إنشاء المهمة ${data.name} بنجاح.`);
         setOpen(false);
       } else {
-        throw new Error();
+        throw new Error(res.error);
       }
     } catch {
       console.error('Create Assignment Error');

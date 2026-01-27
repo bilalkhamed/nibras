@@ -1,3 +1,10 @@
+/**
+ * EditAssignmentSheet Component
+ *
+ * Sheet dialog for editing existing assignments.
+ * Uses the assignment form and calls the update action.
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -9,17 +16,16 @@ import {
   SheetDescription,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import {
-  AssignmentFormContent,
-  AssignmentFormData,
-  Link,
-} from './assignment-form';
+import { AssignmentFormContent, AssignmentFormData } from './assignment-form';
+import type { Link } from '../../types';
 import { AssignmentTypes } from '@prisma/client';
-import { updateAssignment } from '@/lib/server/actions';
+import { updateAssignmentAction } from '../../actions';
 import { toast } from 'sonner';
 
-type CreateAssignmentSheetProps = {
+type EditAssignmentSheetProps = {
+  /** Assignment ID to edit */
   assignmentId: string;
+  /** Default values from existing assignment */
   defaultValues: {
     name: string;
     description: string | null;
@@ -28,10 +34,13 @@ type CreateAssignmentSheetProps = {
   };
 };
 
+/**
+ * Sheet component for editing existing assignments
+ */
 export function EditAssignmentSheet({
   assignmentId,
   defaultValues,
-}: CreateAssignmentSheetProps) {
+}: EditAssignmentSheetProps) {
   const [open, setOpen] = useState(false);
 
   const handleOpenChange = async (newOpen: boolean) => {
@@ -44,7 +53,7 @@ export function EditAssignmentSheet({
 
   const onSubmit = async (data: AssignmentFormData) => {
     try {
-      console.log('submitting', data);
+      // Combine existing file keys with new file keys
       const fileKeys = data.files ? data.files.map((file) => file.key) : [];
       if (data.newFileKeys) {
         data.newFileKeys.forEach((key) => {
@@ -52,15 +61,23 @@ export function EditAssignmentSheet({
         });
       }
 
-      const res = await updateAssignment(assignmentId, {
-        ...data,
+      const res = await updateAssignmentAction(assignmentId, {
+        name: data.name,
+        description: data.description,
+        type: data.type,
         fileKeys,
+        links: data.links?.map((link) => ({
+          url: link.url,
+          id: link.id,
+          type: 'LINK' as const,
+        })),
       });
+
       if (res.success) {
         toast.success('تم تحديث المهمة بنجاح.');
         setOpen(false);
       } else {
-        throw new Error();
+        throw new Error(res.error);
       }
     } catch {
       toast.error('حدث خطأ أثناء تحديث المهمة.');

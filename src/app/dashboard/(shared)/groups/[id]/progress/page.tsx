@@ -3,7 +3,7 @@ import { InfoSectionSkeleton } from '@/components/skeletons';
 import {
   getManyStudentAssignments,
   getWeekAssignments,
-} from '@/features/assignments/db';
+} from '@/features/assignments/service';
 import type { AssignmentStatus, StudentProgress } from '@/types/progress';
 import {
   getCurrentWeek,
@@ -77,16 +77,24 @@ async function StudentsAssignmentsList({
 
   const weekId = selectedWeek.week.id;
 
-  const assignments = await getWeekAssignments({
+  const assignmentsResult = await getWeekAssignments({
     levelId: group.cohort.currentLevelId,
     weekId: weekId,
     withAttachments: false,
   });
 
-  const studentAssignments = await getManyStudentAssignments(
+  // Handle service errors
+  const assignments = assignmentsResult.success ? assignmentsResult.data : [];
+
+  const studentAssignmentsResult = await getManyStudentAssignments(
     group.students.map((gs) => gs.student.id),
     assignments.map((as) => as.id),
   );
+
+  // Handle service errors gracefully
+  const studentAssignments = studentAssignmentsResult.success
+    ? studentAssignmentsResult.data
+    : [];
 
   const assignmentStatusMap = studentAssignments.reduce<
     Record<string, Record<string, AssignmentStatus>>
