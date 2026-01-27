@@ -29,7 +29,7 @@ export function InviteCodeModal({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${inviteCode}`
+        `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${inviteCode}`,
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);

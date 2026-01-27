@@ -10,6 +10,7 @@ import {
 import { StatCard } from './shared/stat-card';
 import { ActivityCard, ActivityItem } from './shared/activity-card';
 import { QuickActionCard } from './shared/quick-action-card';
+import { getRecentUsers, getUserCountsByRole } from '@/features/users/service';
 import prisma from '@/lib/server/prisma';
 
 function getTimeAgo(date: Date) {
@@ -25,20 +26,14 @@ function getTimeAgo(date: Date) {
 
 export async function AdminDashboard() {
   const [
-    userCounts,
+    userCountsResult,
     programCount,
     groupCount,
     pendingInvites,
-    recentUsers,
+    recentUsersResult,
     groupsWithoutSupervisor,
   ] = await Promise.all([
-    prisma.user.groupBy({
-      by: ['role'],
-      _count: true,
-      where: {
-        status: { not: 'deleted' },
-      },
-    }),
+    getUserCountsByRole(),
     prisma.program.count(),
     prisma.group.count(),
     prisma.invite.findMany({
@@ -60,20 +55,7 @@ export async function AdminDashboard() {
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
-    prisma.user.findMany({
-      where: {
-        status: 'active',
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
+    getRecentUsers(5),
     prisma.group.findMany({
       where: {
         supervisorId: undefined,
@@ -86,6 +68,9 @@ export async function AdminDashboard() {
       take: 3,
     }),
   ]);
+
+  const userCounts = userCountsResult.success ? userCountsResult.data : [];
+  const recentUsers = recentUsersResult.success ? recentUsersResult.data : [];
 
   const studentCount =
     userCounts.find((u) => u.role === 'student')?._count || 0;
@@ -113,7 +98,7 @@ export async function AdminDashboard() {
         label: 'عرض',
         href: '/dashboard/users',
       },
-    })
+    }),
   );
 
   const recentActivity: ActivityItem[] = recentUsers.map((user) => ({
@@ -146,7 +131,7 @@ export async function AdminDashboard() {
         label: 'تعيين مشرفة',
         href: '/dashboard/users?role=supervisor',
       },
-    })
+    }),
   );
 
   return (

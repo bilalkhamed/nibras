@@ -6,6 +6,7 @@ import prisma from '@/lib/server/prisma';
 import getAuthSession from '@/lib/server/auth-session';
 import labels from '@/lib/labels.json';
 import { AssignmentTypes } from '@prisma/client';
+import { getStudentBasicInfo } from '@/features/users/service';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -31,24 +32,13 @@ export async function StudentDashboard() {
   if (!session) return null;
 
   const [
-    student,
+    studentResult,
     completedCount,
     pendingAssignments,
     programProgress,
     recentCompletions,
   ] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.userId },
-      select: {
-        firstName: true,
-        cohort: {
-          select: {
-            name: true,
-            currentLevel: { select: { number: true } },
-          },
-        },
-      },
-    }),
+    getStudentBasicInfo(),
     prisma.studentAssignment.count({
       where: {
         studentId: session.userId,
@@ -148,6 +138,8 @@ export async function StudentDashboard() {
     }),
   ]);
 
+  const student = studentResult.success ? studentResult.data : null;
+
   const pendingCount = pendingAssignments.length;
   const totalAssignments = completedCount + pendingCount;
   const completionRate =
@@ -169,7 +161,7 @@ export async function StudentDashboard() {
         label: 'عرض',
         href: '/dashboard/assignments',
       },
-    })
+    }),
   );
 
   const completedActivities: ActivityItem[] = recentCompletions.map((sa) => ({

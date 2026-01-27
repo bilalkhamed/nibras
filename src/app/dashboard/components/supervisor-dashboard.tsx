@@ -3,6 +3,7 @@ import { StatCard } from './shared/stat-card';
 import { ActivityCard, ActivityItem } from './shared/activity-card';
 import prisma from '@/lib/server/prisma';
 import getAuthSession from '@/lib/server/auth-session';
+import { getStudentsWithAssignments } from '@/features/users/service';
 
 function getTimeAgo(date: Date) {
   const now = new Date();
@@ -21,7 +22,7 @@ export async function SupervisorDashboard() {
   const session = await getAuthSession();
   if (!session) return null;
 
-  const [groups, totalStudents, recentCompletions, studentsWithLowCompletion] =
+  const [groups, totalStudents, recentCompletions, studentsResult] =
     await Promise.all([
       prisma.group.findMany({
         where: {
@@ -103,39 +104,12 @@ export async function SupervisorDashboard() {
         orderBy: { completedAt: 'desc' },
         take: 5,
       }),
-      prisma.user.findMany({
-        where: {
-          role: 'student',
-          groupsAsStudent: {
-            some: {
-              isActive: true,
-              group: {
-                supervisorId: session.userId,
-              },
-            },
-          },
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          groupsAsStudent: {
-            where: { isActive: true },
-            select: {
-              group: { select: { name: true } },
-            },
-            take: 1,
-          },
-          studentAssignments: {
-            where: {
-              isCompleted: true,
-            },
-            select: { id: true },
-          },
-        },
-        take: 100,
-      }),
+      getStudentsWithAssignments(100),
     ]);
+
+  const studentsWithLowCompletion = studentsResult.success
+    ? studentsResult.data
+    : [];
 
   const totalGroups = groups.length;
 
@@ -145,9 +119,9 @@ export async function SupervisorDashboard() {
       group.students.reduce(
         (studentAcc, student) =>
           studentAcc + student.student.studentAssignments.length,
-        0
+        0,
       ),
-    0
+    0,
   );
 
   const studentsNeedingAttention = studentsWithLowCompletion
@@ -171,7 +145,7 @@ export async function SupervisorDashboard() {
           variant: isUrgent ? 'destructive' : 'outline',
         },
       };
-    }
+    },
   );
 
   const recentActivities: ActivityItem[] = recentCompletions.map(
@@ -186,13 +160,13 @@ export async function SupervisorDashboard() {
         label: 'مكتمل',
         variant: 'secondary' as const,
       },
-    })
+    }),
   );
 
   const groupActivities: ActivityItem[] = groups.map((group) => {
     const completedCount = group.students.reduce(
       (acc, s) => acc + s.student.studentAssignments.length,
-      0
+      0,
     );
     const avgCompletion =
       group._count.students > 0

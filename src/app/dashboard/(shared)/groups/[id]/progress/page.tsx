@@ -3,14 +3,14 @@ import { InfoSectionSkeleton } from '@/components/skeletons';
 import {
   getManyStudentAssignments,
   getWeekAssignments,
-} from '@/lib/server/assignments';
+} from '@/features/assignments/db';
 import type { AssignmentStatus, StudentProgress } from '@/types/progress';
 import {
   getCurrentWeek,
   getWeekByNumber,
   getWeeksTillDate,
 } from '@/lib/server/weeks';
-import { getGroupById } from '@/lib/server/groups';
+import { getGroupById } from '@/features/groups/db';
 import { notFound } from 'next/navigation';
 import { StudentProgressContainer } from './student-progress-container';
 import { WeekNavigator } from '@/components/common/week-navigator';

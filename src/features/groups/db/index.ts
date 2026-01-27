@@ -1,6 +1,6 @@
 'use cache';
 
-import prisma from './prisma';
+import prisma from '@/lib/server/prisma';
 
 export async function getGroupById(groupId: string) {
   const group = await prisma.group.findUnique({

@@ -10,6 +10,8 @@ import labels from '@/lib/labels.json';
 import { STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { formatDate } from '@/lib/shared/utils';
 import { Prisma } from '@prisma/client';
+import { runServiceOrRedirect } from '@/lib/server/service/helpers';
+import { getUserById } from '@/features/users/service';
 
 type UserDetailPageProps = {
   params: {
@@ -55,30 +57,16 @@ type SupervisorGroup = Prisma.GroupGetPayload<{
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const { id } = await params;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: id,
-    },
-    select: {
-      hashedPassword: false,
-      id: true,
-      birthYear: true,
-      country: true,
-      createdAt: true,
-      email: true,
-      firstName: true,
-      middleName: true,
-      lastName: true,
-      phone: true,
-      role: true,
-      status: true,
-      updatedAt: true,
-    },
-  });
+  const res = await runServiceOrRedirect(() => getUserById(id));
 
-  if (!user) {
-    return notFound();
+  if (!res.success) {
+    if (res.error.type === 'not-found') {
+      return notFound();
+    }
+    return <div>حدث خطأ غير متوقع. الرجاء المحاولة لاحقاً.</div>;
   }
+
+  const user = res.data;
 
   let studentGroups: StudentGroup[] = [];
 
@@ -171,11 +159,11 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 label="الدولة"
                 value={user.country || labels.common.null}
               />
-              <InfoField
+              {/* <InfoField
                 label="تاريخ الإنشاء"
                 value={formatDate(user.createdAt)}
               />
-              <InfoField label="آخر تحديث" value={formatDate(user.updatedAt)} />
+              <InfoField label="آخر تحديث" value={formatDate(user.updatedAt)} /> */}
             </div>
           </CardContent>
         </Card>

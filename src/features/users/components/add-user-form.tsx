@@ -13,26 +13,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import SearchSelect from '@/components/common/search-select';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Cohort, STUDENT_ROLE } from '@/types/types';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-
 import { zodResolver } from '@hookform/resolvers/zod';
-
 import {
   createUserSchema as formSchema,
-  CreateUserData as FormData,
+  type CreateUserData,
 } from '@/lib/shared/auth-schemas';
 import { Loader2Icon } from 'lucide-react';
 import { InviteCodeModal } from './invite-code-modal';
 import { toast } from 'sonner';
 import { ErrorMessage } from '@/components/forms/error-message';
-import { useRouter } from 'next/navigation';
+import { createUserAction } from '../actions';
 
 export function AddUserForm() {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [inviteCode, setInviteCode] = useState<string>('');
-  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
   useEffect(() => {
     const fetchCohorts = async () => {
       const response = await fetch('/api/cohorts');
@@ -48,8 +47,9 @@ export function AddUserForm() {
     handleSubmit,
     control,
     watch,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({
+    reset,
+    formState: { errors },
+  } = useForm<CreateUserData>({
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
@@ -57,29 +57,32 @@ export function AddUserForm() {
     },
   });
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+  const onSubmit: SubmitHandler<CreateUserData> = async (data) => {
+    const formData = new FormData();
+    formData.append('firstName', data.firstName);
+    formData.append('middleName', data.middleName);
+    formData.append('lastName', data.lastName);
+    formData.append('country', data.country);
+    formData.append('role', data.role);
+    formData.append('birthYear', String(data.birthYear));
+    if (data.cohortId) formData.append('cohortId', data.cohortId);
+
+    startTransition(async () => {
+      const result = await createUserAction(formData);
+
+      if (!result.success) {
+        toast.error(
+          result.error ||
+            'حدث خطأ أثناء إنشاء المستخدم. الرجاء المحاولة مرة أخرى.',
+          { duration: 2000 },
+        );
+        return;
+      }
+
+      setInviteCode(result.inviteCode);
+      setModalOpen(true);
+      reset();
     });
-
-    const result = await res.json();
-    if (!res.ok) {
-      toast.error(
-        result?.message ||
-          'حدث خطأ أثناء إنشاء المستخدم. الرجاء المحاولة مرة أخرى.',
-        { duration: 2000 }
-      );
-      return;
-    }
-
-    setInviteCode(result.inviteCode);
-    setModalOpen(true);
-    router.refresh();
-    console.log(data, errors);
   };
 
   const firstName = watch('firstName');
@@ -136,7 +139,6 @@ export function AddUserForm() {
                   id="birthYear"
                   placeholder="مثال: 2005"
                   type="number"
-                  // pattern="[0-9]*"
                   inputMode="numeric"
                   min={1900}
                   max={new Date().getFullYear() - 11}
@@ -199,7 +201,7 @@ export function AddUserForm() {
                         ([key, value]) => ({
                           id: key,
                           label: value,
-                        })
+                        }),
                       )}
                       placeholder="اختر الدولة"
                       searchPlaceholder="ابحثي عن الدولة"
@@ -253,9 +255,9 @@ export function AddUserForm() {
                 variant="primary"
                 size={'md'}
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isPending}
               >
-                {isSubmitting ? (
+                {isPending ? (
                   <Loader2Icon className="h-6 w-6 animate-spin text-amber-200" />
                 ) : (
                   labels.dashboard.users.create

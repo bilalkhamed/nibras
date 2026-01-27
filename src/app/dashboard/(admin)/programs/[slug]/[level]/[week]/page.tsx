@@ -4,7 +4,7 @@ import { AssignmentsTableWithActions } from './assignments-table-with-actions';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { getWeekAssignments } from '@/lib/server/assignments';
+import { getWeekAssignments } from '@/features/assignments/db';
 import { getLevelBySlug } from '@/lib/server/levels';
 import { getWeekByNumber } from '@/lib/server/weeks';
 import { CreateAssignmentSheet } from './create-assignment-sheet';

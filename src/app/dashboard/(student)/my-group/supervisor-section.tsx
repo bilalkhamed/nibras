@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Mail } from 'lucide-react';
-import type { getGroupById } from '@/lib/server/groups';
+import type { getGroupById } from '@/features/groups/db';
 
 type Props = {
   supervisor: NonNullable<

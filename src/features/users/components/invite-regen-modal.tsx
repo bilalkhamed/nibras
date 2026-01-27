@@ -15,7 +15,7 @@ import {
   Loader2Icon,
 } from 'lucide-react';
 
-interface InviteCodeModalProps {
+interface InviteRegenModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: {
@@ -28,7 +28,7 @@ export function InviteRegenModal({
   open,
   onOpenChange,
   user,
-}: InviteCodeModalProps) {
+}: InviteRegenModalProps) {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
@@ -37,7 +37,7 @@ export function InviteRegenModal({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${inviteCode}`
+        `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${inviteCode}`,
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);

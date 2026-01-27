@@ -22,17 +22,18 @@ import {
 } from '@/components/ui/select';
 import {
   ACTIVE_STATUS,
+  CountryCode,
   DELETED_STATUS,
   INVITED_STATUS,
   SUSPENDED_STATUS,
-  User,
   UserStatus,
 } from '@/types/types';
 import clsx from 'clsx';
 import { InviteRegenModal } from './invite-regen-modal';
+import { UserWithCohortDTO } from '../types';
 
 interface UsersTableProps {
-  users: User[];
+  users: UserWithCohortDTO[];
   pageSize?: number;
 }
 
@@ -66,7 +67,7 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
   const pageCount = Math.ceil(filtered.length / itemsPerPage);
   const pageUsers = filtered.slice(
     page * itemsPerPage,
-    page * itemsPerPage + itemsPerPage
+    page * itemsPerPage + itemsPerPage,
   );
 
   const age = (birthYear: number) => new Date().getFullYear() - birthYear;
@@ -267,7 +268,8 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
                     {u.cohort?.name || '-'}
                   </TableCell>
                   <TableCell className="text-foreground/90 dark:text-foreground">
-                    {labels.countries[u.country!] || labels.common.null}
+                    {labels.countries[u.country as CountryCode] ||
+                      labels.common.null}
                   </TableCell>
                   <TableCell className="text-foreground">
                     <span

@@ -1,7 +1,7 @@
 import {
   getStudentAssignments,
   getWeekAssignments,
-} from '@/lib/server/assignments';
+} from '@/features/assignments/db';
 import getAuthSession from '@/lib/server/auth-session';
 import { getAllPrograms } from '@/lib/server/programs';
 import { getCurrentWeek, getWeekByNumber } from '@/lib/server/weeks';
@@ -89,7 +89,7 @@ async function WeekProvider({
   weekNumber: number;
   children: (
     week: CalendarWeek & { week: Week },
-    isCurrentWeek: boolean
+    isCurrentWeek: boolean,
   ) => React.ReactNode;
 }) {
   const currentWeek = await getCurrentWeek();
@@ -158,10 +158,10 @@ async function AssignmentsList({
             };
           }
           return { ...att, tempUrl: att.url! }; // Fallback for links
-        })
+        }),
       );
       return { ...assignment, attachments: attachmentsWithUrls };
-    })
+    }),
   );
 
   const programs = await getAllPrograms();
@@ -170,12 +170,12 @@ async function AssignmentsList({
       acc[program.id] = program.name;
       return acc;
     },
-    {}
+    {},
   );
 
   const studentAssignments = await getStudentAssignments(
     auth.userId,
-    assignments.map((as) => as.id)
+    assignments.map((as) => as.id),
   );
 
   const assignmentStatusMap: Record<string, boolean> = {};

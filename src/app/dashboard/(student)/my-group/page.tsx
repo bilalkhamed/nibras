@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GroupInfoSection } from './group-info-section';
 import { SupervisorSection } from './supervisor-section';
 import { GroupStudentsSection } from './group-students-section';
-import { getGroupById } from '@/lib/server/groups';
+import { getGroupById } from '@/features/groups/db';
 import { getCurrentWeek } from '@/lib/server/weeks';
 
 export default async function StudentGroupPage() {

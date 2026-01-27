@@ -1,5 +1,4 @@
-import { AddUserForm } from './add-user-form';
-import UsersTableSection from './users-table-section';
+import { AddUserForm, UsersTableSection } from '@/features/users/components';
 import { Suspense } from 'react';
 import { UsersTableSkeleton } from '@/components/skeletons';
 import { Toaster } from '@/components/ui/sonner';

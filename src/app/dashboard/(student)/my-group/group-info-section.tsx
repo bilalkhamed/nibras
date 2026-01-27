@@ -1,5 +1,5 @@
 import { getCurrentWeek } from '@/lib/server/weeks';
-import type { getGroupById } from '@/lib/server/groups';
+import type { getGroupById } from '@/features/groups/db';
 
 type Props = {
   group: NonNullable<Awaited<ReturnType<typeof getGroupById>>>;

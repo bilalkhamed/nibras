@@ -1,5 +1,5 @@
 import { GroupList } from '@/components/common/group-list';
-import { getGroups } from '@/lib/server/groups';
+import { getGroups } from '@/features/groups/db';
 import { AccessTokenPayload, ADMIN_ROLE } from '@/types/types';
 
 export default async function GroupsListSection({

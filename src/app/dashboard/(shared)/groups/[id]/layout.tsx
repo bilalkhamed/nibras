@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { getGroupById } from '@/lib/server/groups';
+import { getGroupById } from '@/features/groups/db';
 import { GroupTabsNav } from './group-tabs-nav';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Skeleton } from '@/components/ui/skeleton';

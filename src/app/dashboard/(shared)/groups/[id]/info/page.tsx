@@ -6,7 +6,7 @@ import GroupStudentsTable, { GroupStudent } from './group-students-table';
 import AddStudentDialog from './add-student-dialog';
 import prisma from '@/lib/server/prisma';
 import { notFound } from 'next/navigation';
-import { getGroupById } from '@/lib/server/groups';
+import { getGroupById } from '@/features/groups/db';
 import getAuthSession from '@/lib/server/auth-session';
 import { Role } from '@prisma/client';
 import { ADMIN_ROLE } from '@/types/types';

@@ -8,7 +8,7 @@ import { AssignmentsGrid } from './assignments-grid';
 import {
   getStudentAssignments,
   getWeekAssignments,
-} from '@/lib/server/assignments';
+} from '@/features/assignments/db';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { WeekHero } from './week-hero';
 import { ProgramFilter } from './program-filter';
@@ -57,10 +57,10 @@ export default async function StudentAssignmentsPage({
             };
           }
           return { ...att, tempUrl: att.url! }; // Fallback for links
-        })
+        }),
       );
       return { ...assignment, attachments: attachmentsWithUrls };
-    })
+    }),
   );
 
   const totalAssignments = assignments.length;
@@ -111,7 +111,7 @@ async function StudentAssignmentWrapper({
 }) {
   const studentAssignments = await getStudentAssignments(
     userId,
-    assignments.map((a) => a.id)
+    assignments.map((a) => a.id),
   );
 
   return (

@@ -1,6 +1,6 @@
 import { cacheTag } from 'next/cache';
-import prisma from './prisma';
-import { getProgramBySlug } from './programs';
+import prisma from '@/lib/server/prisma';
+import { getProgramBySlug } from '@/lib/server/programs';
 import { Assignment, AssignmentAttachment } from '@prisma/client';
 
 type BaseOptions = {
