@@ -1,0 +1,300 @@
+import {
+  mapDalToService,
+  runServiceOperation,
+} from '@/lib/server/service/helpers';
+import {
+  countUsersByRole,
+  findManyUsers,
+  findRecentUsers,
+  findStudentBasicInfo,
+  findStudentsBySuperviorWithAssignments,
+  findUserByEmail,
+  findUserById,
+  findUserForInvite,
+  findUsersBasic,
+  findUsersNameOnly,
+  findUserWithRoleAndCohort,
+} from '../dal';
+import {
+  RecentUserDTO,
+  StudentBasicInfoDTO,
+  StudentWithAssignmentsDTO,
+  UserBasicDTO,
+  UserByEmail,
+  UserDTO,
+  UserInviteStatusDTO,
+  UserNameDTO,
+  UserWithRoleAndCohortDTO,
+} from '../types';
+import { ServiceReturn } from '@/lib/server/service/types';
+import { Role } from '@prisma/client';
+
+// ============================================================================
+// Basic Query Services
+// ============================================================================
+
+/** Get all users - admin only */
+export async function getAllUsers() {
+  return runServiceOperation(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+      const dalResult = await findManyUsers();
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get user by ID - admin only */
+export async function getUserById(id: string) {
+  return runServiceOperation<UserDTO>(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findUserById(id);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult) as ServiceReturn<UserDTO>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get user by email - no auth required (for login) */
+export async function getUserByEmail(email: string) {
+  return runServiceOperation<UserByEmail>(
+    async () => {
+      const dalResult = await findUserByEmail(email);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult) as ServiceReturn<UserByEmail>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: false },
+  );
+}
+
+// ============================================================================
+// Filtered Query Services
+// ============================================================================
+
+export type UserFilters = {
+  role?: Role;
+  groupStatus?: 'inactive';
+  cohortId?: string;
+};
+
+/** Get users with name only (for dropdowns) - admin only */
+export async function getUsersNameOnly(filters?: UserFilters) {
+  return runServiceOperation<UserNameDTO[]>(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findUsersNameOnly(filters);
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get users with basic info - admin only */
+export async function getUsersBasic(filters?: UserFilters) {
+  return runServiceOperation<UserBasicDTO[]>(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findUsersBasic(filters);
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+// ============================================================================
+// Dashboard Query Services
+// ============================================================================
+
+/** Get user counts by role - admin only */
+export async function getUserCountsByRole() {
+  return runServiceOperation(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await countUsersByRole();
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get recent users - admin only */
+export async function getRecentUsers(limit: number = 5) {
+  return runServiceOperation<RecentUserDTO[]>(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findRecentUsers(limit);
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get student basic info - for student's own dashboard */
+export async function getStudentBasicInfo() {
+  return runServiceOperation<StudentBasicInfoDTO>(
+    async (session) => {
+      const dalResult = await findStudentBasicInfo(session!.userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult) as ServiceReturn<StudentBasicInfoDTO>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get students with assignments for supervisor dashboard */
+export async function getStudentsWithAssignments(limit: number = 100) {
+  return runServiceOperation<StudentWithAssignmentsDTO[]>(
+    async (session) => {
+      if (session!.role !== 'supervisor') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findStudentsBySuperviorWithAssignments(
+        session!.userId,
+        limit,
+      );
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+// ============================================================================
+// Validation Query Services
+// ============================================================================
+
+/** Get user for invite validation - admin only */
+export async function getUserForInvite(userId: string) {
+  return runServiceOperation<UserInviteStatusDTO>(
+    async (session) => {
+      if (session!.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findUserForInvite(userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult) as ServiceReturn<UserInviteStatusDTO>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get user with role and cohort for validation - admin/supervisor only */
+export async function getUserWithRoleAndCohort(userId: string) {
+  return runServiceOperation<UserWithRoleAndCohortDTO>(
+    async (session) => {
+      if (!['admin', 'supervisor'].includes(session!.role)) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findUserWithRoleAndCohort(userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(
+          dalResult,
+        ) as ServiceReturn<UserWithRoleAndCohortDTO>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: true },
+  );
+}

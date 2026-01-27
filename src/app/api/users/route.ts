@@ -1,25 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CreateUserData, createUserSchema } from '@/lib/shared/auth-schemas';
 import { z } from 'zod';
-import prisma from '@/lib/server/prisma';
-import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
-import { ADMIN_ROLE, INVITED_STATUS, Role, STUDENT_ROLE } from '@/types/types';
-import { Prisma } from '@prisma/client';
-import { generateInvite } from '@/lib/server/hash';
+import { Role, STUDENT_ROLE } from '@/types/types';
+import {
+  createUser,
+  getUsersBasic,
+  getUsersNameOnly,
+} from '@/features/users/service';
 
 // Create a new user
 export async function POST(request: NextRequest) {
-  const cookie = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value || null;
-  const accessToken = cookie ? await verifyAccessToken(cookie) : null;
-
-  if (!accessToken) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  }
-
-  if (accessToken.role !== ADMIN_ROLE) {
-    return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-  }
-
   let body: CreateUserData;
   try {
     body = await request.json();
@@ -33,10 +23,10 @@ export async function POST(request: NextRequest) {
     ) {
       throw new Error('missing values');
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: 'Invalid request body' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -48,57 +38,31 @@ export async function POST(request: NextRequest) {
   if (data.role === STUDENT_ROLE && !data.cohortId) {
     return NextResponse.json(
       { message: 'Cohort ID is required for student users' },
-      { status: 422 }
+      { status: 422 },
     );
   }
 
-  const { expiresAt, selector, validatorHash, fullCode } = generateInvite();
-  try {
-    await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          ...data,
-          status: INVITED_STATUS,
-        },
-      });
+  const result = await createUser(data);
 
-      await tx.invite.create({
-        data: {
-          userId: user.id,
-          expiresAt,
-          selector,
-          validatorHash,
-        },
-      });
-    });
+  if (!result.success) {
     return NextResponse.json(
-      { message: 'User created successfully', inviteCode: fullCode },
-      { status: 201 }
-    );
-  } catch (err: any) {
-    return NextResponse.json(
-      { message: 'Error creating user', details: err.toString() },
-      { status: 500 }
+      { message: result.error.type },
+      { status: result.error.statusCode },
     );
   }
+
+  return NextResponse.json(
+    {
+      message: 'User created successfully',
+      inviteCode: result.data.inviteCode,
+    },
+    { status: 201 },
+  );
 }
 
 // 7SMMHS.02b7105ed6fe31389531a7d8921f3660da31c623fde2f9a263dd55c6f5a35e84
 
 export async function GET(request: NextRequest) {
-  const cookie = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
-  const accessToken = cookie ? await verifyAccessToken(cookie) : null;
-
-  if (!accessToken) {
-    return NextResponse.json(
-      { message: 'Unauthorized', accessToken, cookies: request.cookies },
-      { status: 401 }
-    );
-  }
-  if (accessToken.role !== ADMIN_ROLE) {
-    return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-  }
-
   const searchParams = request.nextUrl.searchParams;
 
   const role = searchParams.get('role');
@@ -106,58 +70,33 @@ export async function GET(request: NextRequest) {
   const groupStatus = searchParams.get('groupStatus');
   const cohortId = searchParams.get('cohortId');
 
-  const selectFields: Prisma.UserSelect =
-    nameOnly === 'true'
-      ? {
-          id: true,
-          firstName: true,
-          middleName: true,
-          lastName: true,
-        }
-      : {
-          id: true,
-          firstName: true,
-          middleName: true,
-          lastName: true,
-          email: true,
-          role: true,
-          birthYear: true,
-        };
-
   if (![null, 'student', 'supervisor', 'admin'].includes(role)) {
     return NextResponse.json(
       { message: 'Invalid role filter' },
-      { status: 422 }
+      { status: 422 },
     );
   }
 
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        role: role ? (role as Role) : undefined,
-        groupsAsStudent:
-          groupStatus === 'inactive'
-            ? {
-                none: {
-                  isActive: true,
-                },
-              }
-            : undefined,
-        cohortId: cohortId ? cohortId : undefined,
-      },
-      select: selectFields,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  const filters = {
+    role: role ? (role as Role) : undefined,
+    groupStatus: groupStatus === 'inactive' ? ('inactive' as const) : undefined,
+    cohortId: cohortId || undefined,
+  };
 
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+  const result =
+    nameOnly === 'true'
+      ? await getUsersNameOnly(filters)
+      : await getUsersBasic(filters);
 
+  if (!result.success) {
     return NextResponse.json(
-      { message: 'users retreived successfully', users },
-      { status: 200 }
+      { message: result.error.type },
+      { status: result.error.statusCode },
     );
-  } catch (error) {
-    return NextResponse.json(error, { status: 400 });
   }
+
+  return NextResponse.json(
+    { message: 'users retreived successfully', users: result.data },
+    { status: 200 },
+  );
 }

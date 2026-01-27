@@ -1,43 +1,37 @@
-import getAuthSession from '@/lib/server/auth-session';
-import { generateInvite, verifyHmacSha256 } from '@/lib/server/hash';
+import { generateInvite } from '@/lib/server/hash';
 import prisma from '@/lib/server/prisma';
-import { ADMIN_ROLE, INVITED_STATUS } from '@/types/types';
+import { INVITED_STATUS } from '@/types/types';
 import { NextRequest, NextResponse } from 'next/server';
+import { getUserForInvite } from '@/features/users/service';
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ userId: string }> }
+  context: { params: Promise<{ userId: string }> },
 ) {
   const { userId } = await context.params;
-  const auth = await getAuthSession();
-
-  if (!auth?.role) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  }
-
-  if (auth.role !== ADMIN_ROLE) {
-    return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-  }
 
   if (!userId) {
     return NextResponse.json(
       { message: 'Missing userId parameter' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+  const userResult = await getUserForInvite(userId);
 
-  if (!user) {
-    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+  if (!userResult.success) {
+    return NextResponse.json(
+      { message: userResult.error.type },
+      { status: userResult.error.statusCode },
+    );
   }
+
+  const user = userResult.data;
 
   if (user.status !== INVITED_STATUS) {
     return NextResponse.json(
       { message: 'User is not in invited status' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  ACCESS_TOKEN_COOKIE,
-  setAccessToken,
-  verifyAccessToken,
-} from '@/lib/server/tokens';
-import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
+import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/server/prisma';
 import { generateSixCharCode } from '@/lib/shared/utils';
-import { Prisma } from '@prisma/client';
+import { getUserById } from '@/features/users/service';
 
 type GroupData = {
   name: string;
@@ -29,7 +25,7 @@ export async function POST(request: NextRequest) {
   let body: GroupData;
   try {
     body = await request.json();
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
@@ -37,20 +33,28 @@ export async function POST(request: NextRequest) {
   if (!name || !supervisorId || !cohortId) {
     return NextResponse.json(
       { error: 'Missing required fields' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   try {
-    const supervisor = await prisma.user.findUnique({
-      where: { id: supervisorId },
-    });
-    if (!supervisor || supervisor.role !== SUPERVISOR_ROLE) {
+    const res = await getUserById(supervisorId);
+    if (!res.success) {
       return NextResponse.json(
-        { error: 'Invalid supervisor ID' },
-        { status: 400 }
+        { error: 'Supervisor not found' },
+        { status: 404 },
       );
     }
+
+    const supervisor = res.data;
+
+    if (supervisor.role !== SUPERVISOR_ROLE) {
+      return NextResponse.json(
+        { error: 'Invalid supervisor ID' },
+        { status: 400 },
+      );
+    }
+
     const group = await prisma.group.create({
       data: {
         name,
@@ -61,12 +65,12 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(
       { message: 'Group created successfully', group },
-      { status: 201 }
+      { status: 201 },
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

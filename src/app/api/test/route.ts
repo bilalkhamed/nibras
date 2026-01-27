@@ -3,6 +3,8 @@ import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from '@/lib/server/tokens';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import prisma from '@/lib/server/prisma';
 import { generateSixCharCode } from '@/lib/shared/utils';
+// NOTE: Test route uses DAL directly - this is acceptable for dev/testing only
+import { findUserByFirstName } from '@/features/users/dal';
 
 export async function GET(request: NextRequest) {
   const programs = await prisma.program.findMany({});
@@ -11,11 +13,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await prisma.user.findFirst({
-    where: {
-      firstName: 'سندس',
-    },
-  });
+  const userResult = await findUserByFirstName('سندس');
 
   const assignment = await prisma.assignment.findUnique({
     where: {
@@ -23,10 +21,14 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  if (!userResult.success || !userResult.data) {
+    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+  }
+
   try {
     const studentAssignment = await prisma.studentAssignment.create({
       data: {
-        studentId: user!.id,
+        studentId: userResult.data.id,
         assignmentId: assignment!.id,
       },
     });
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
         message: 'Error creating student assignment',
         error,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -68,7 +70,7 @@ export async function PATCH(request: NextRequest) {
         message: 'Error updating student assignment',
         // error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
