@@ -8,6 +8,10 @@ export type ServiceErrorType =
       statusCode: 403;
     }
   | {
+      type: 'bad-request';
+      statusCode: 400;
+    }
+  | {
       type: 'not-found';
       statusCode: 404;
     }

@@ -61,9 +61,21 @@ export function mapDalToService<T extends object | null>(
           error: { type: 'forbidden', statusCode: 403 },
         };
       case 'prisma-client':
+        if (dalError.error.code === 'P2002') {
+          return {
+            success: false,
+            error: { type: 'conflict', statusCode: 409 },
+          };
+        } else if (dalError.error.code === 'P2003') {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
+
         return {
           success: false,
-          error: { type: 'conflict', statusCode: 409 },
+          error: { type: 'internal', statusCode: 500 },
         };
       default:
         console.error('Unhandled DAL error in service layer:', dalError);
