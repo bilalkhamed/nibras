@@ -1,13 +1,14 @@
 import { loginSchema } from '@/lib/shared/auth-schemas';
 import { comparePasswords } from '@/lib/server/hash';
-import prisma from '@/lib/server/prisma';
 import { setAccessToken } from '@/lib/server/tokens';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { getUserByEmail } from '@/features/users/service';
 
 export async function POST(req: NextRequest) {
+  let body;
   try {
-    var body = await req.json();
+    body = await req.json();
   } catch {
     return NextResponse.json({ message: 'Invalid JSON' }, { status: 400 });
   }
@@ -20,39 +21,28 @@ export async function POST(req: NextRequest) {
 
   const { email, password } = data;
 
-  const foundUser = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      email: true,
-      role: true,
-      status: true,
-      hashedPassword: true,
-      firstName: true,
-      lastName: true,
-      groupsAsStudent: {
-        where: { isActive: true },
-      },
-      cohort: {
-        select: {
-          currentLevelId: true,
-        },
-      },
-    },
-  });
+  const res = await getUserByEmail(email);
 
-  if (!foundUser || !foundUser.hashedPassword) {
+  console.log(res);
+  if (!res.success) {
     return NextResponse.json(
-      {
-        error: 'Invalid email or password',
-      },
-      { status: 401 }
+      { error: 'Invalid email or password' },
+      { status: 401 },
+    );
+  }
+
+  const foundUser = res.data;
+
+  if (!foundUser.hashedPassword) {
+    return NextResponse.json(
+      { error: 'Invalid email or password' },
+      { status: 401 },
     );
   }
 
   const passwordMatch = await comparePasswords(
     password,
-    foundUser?.hashedPassword
+    foundUser.hashedPassword,
   );
 
   if (!passwordMatch) {
@@ -60,7 +50,7 @@ export async function POST(req: NextRequest) {
       {
         error: 'Invalid email or password',
       },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -73,11 +63,7 @@ export async function POST(req: NextRequest) {
     foundUser.cohort?.currentLevelId || null,
     foundUser.groupsAsStudent.length > 0
       ? foundUser.groupsAsStudent[0].groupId
-      : null
+      : null,
   );
   return NextResponse.json({ success: true }, { status: 200 });
-}
-
-export async function GET(request: Request) {
-  return NextResponse.json({ message: 'User endpoint', you: request.url });
 }
