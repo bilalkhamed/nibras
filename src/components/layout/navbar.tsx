@@ -18,11 +18,11 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-import { User } from '@/types/types';
+import { UserDTO } from '@/features/users/types';
 
 interface NavbarProps {
   extraRight?: React.ReactNode;
-  user: User | null;
+  user: UserDTO | null;
 }
 
 export function Navbar({ extraRight, user }: NavbarProps) {

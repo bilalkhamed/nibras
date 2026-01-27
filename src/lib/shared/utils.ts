@@ -1,4 +1,5 @@
-import { NavItem, User } from '@/types/types';
+import { UserDTO } from '@/features/users/types';
+import { NavItem } from '@/types/types';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -33,7 +34,7 @@ export function formatDate(value: string | Date) {
   });
 }
 
-export function getVisibleNavItems(items: NavItem[], user: User | null) {
+export function getVisibleNavItems(items: NavItem[], user: UserDTO | null) {
   return items.filter((item) => {
     if (item.auth && !user) return false;
     if (item.role && user?.role !== item.role) return false;
