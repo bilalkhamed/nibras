@@ -5,7 +5,7 @@ import { DalReturn } from '@/lib/server/dal/types';
 import prisma from '@/lib/server/prisma';
 import { Role } from '@prisma/client';
 import { cacheTag } from 'next/cache';
-import { UserWithCohortDTO } from '../types';
+import { UserByEmail, UserWithCohortDTO } from '../types';
 
 export async function findManyUsers(): Promise<DalReturn<UserWithCohortDTO[]>> {
   cacheTag('users');
@@ -49,6 +49,33 @@ export async function findUserById(
         status: true,
         phone: true,
         cohort: { select: { id: true, name: true } },
+      },
+    });
+  });
+}
+
+export async function findUserByEmail(
+  email: string,
+): Promise<DalReturn<UserByEmail | null>> {
+  return runDalOperation(async () => {
+    return await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        status: true,
+        hashedPassword: true,
+        firstName: true,
+        lastName: true,
+        groupsAsStudent: {
+          where: { isActive: true },
+        },
+        cohort: {
+          select: {
+            currentLevelId: true,
+          },
+        },
       },
     });
   });
