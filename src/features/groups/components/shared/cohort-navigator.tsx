@@ -6,7 +6,11 @@ import { Cohort } from '@prisma/client';
 import SearchSelect from '@/components/common/search-select';
 import { Card, CardContent } from '@/components/ui/card';
 
-export function CohortNavigator({ cohorts }: { cohorts: Cohort[] }) {
+interface CohortNavigatorProps {
+  cohorts: Cohort[];
+}
+
+export function CohortNavigator({ cohorts }: CohortNavigatorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

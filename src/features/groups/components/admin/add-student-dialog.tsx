@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { STUDENT_ROLE } from '@/types/types';
 import { useRouter } from 'next/navigation';
+import { addStudentToGroupAction } from '../../actions';
 
 type Student = {
   id: string;
@@ -26,25 +27,26 @@ type Student = {
   lastName: string;
 };
 
-export default function AddStudentDialog({
-  groupId,
-  cohortId,
-  cohortName,
-}: {
+interface AddStudentDialogProps {
   groupId: string;
   cohortId: string;
   cohortName: string;
-}) {
+}
+
+export function AddStudentDialog({
+  groupId,
+  cohortId,
+  cohortName,
+}: AddStudentDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [students, setStudents] = useState<Student[]>();
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
 
   useEffect(() => {
-    // Simulate fetching available students
     if (!open) return;
 
     setIsLoading(true);
@@ -60,12 +62,12 @@ export default function AddStudentDialog({
         const response = await fetch(`/api/users?${searchParams.toString()}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch supervisors');
+          throw new Error('Failed to fetch students');
         }
 
         const data = await response.json();
         setStudents(data.users);
-      } catch (err) {
+      } catch {
         toast.error('حدث خطأ أثناء تحميل الطالبات.');
       } finally {
         setIsLoading(false);
@@ -73,7 +75,7 @@ export default function AddStudentDialog({
     };
 
     fetchStudents();
-  }, [open]);
+  }, [open, cohortId]);
 
   const handleReset = () => {
     setSelectedStudentId('');
@@ -86,32 +88,30 @@ export default function AddStudentDialog({
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/groups/${groupId}/students`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: selectedStudentId }),
-      });
+  const handleSubmit = () => {
+    startTransition(async () => {
+      try {
+        const result = await addStudentToGroupAction(
+          groupId,
+          selectedStudentId,
+        );
 
-      if (!response.ok) {
-        throw new Error('Failed to add student to group');
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        router.refresh();
+        handleReset();
+        setOpen(false);
+        toast.success('تم إضافة الطالبة للمجموعة بنجاح!', {
+          duration: 2000,
+        });
+      } catch {
+        toast.error('حدث خطأ أثناء إضافة الطالبة. الرجاء المحاولة مرة أخرى.', {
+          duration: 2000,
+        });
       }
-
-      router.refresh();
-      handleReset();
-      setOpen(false);
-      toast.success('تم إضافة الطالبة للمجموعة بنجاح!', {
-        duration: 2000,
-      });
-    } catch (error) {
-      toast.error('حدث خطأ أثناء إضافة الطالبة. الرجاء المحاولة مرة أخرى.', {
-        duration: 2000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   return (
@@ -122,7 +122,7 @@ export default function AddStudentDialog({
           إضافة طالبة
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px ]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle className="text-right">إضافة طالبة للمجموعة</DialogTitle>
           <DialogDescription className="text-right text-muted-foreground">
@@ -154,9 +154,9 @@ export default function AddStudentDialog({
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <SearchSelect
-                  options={students.map((student: any) => ({
+                  options={students.map((student) => ({
                     id: student.id,
-                    label: `${student.firstName} ${student.middleName} ${student.lastName}`,
+                    label: `${student.firstName} ${student.middleName ?? ''} ${student.lastName}`,
                   }))}
                   value={selectedStudentId}
                   onChange={setSelectedStudentId}
@@ -168,15 +168,15 @@ export default function AddStudentDialog({
 
             <DialogFooter className="gap-2">
               <DialogClose asChild>
-                <Button variant="outline" disabled={isSubmitting}>
+                <Button variant="outline" disabled={isPending}>
                   إلغاء
                 </Button>
               </DialogClose>
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedStudentId || isSubmitting}
+                disabled={!selectedStudentId || isPending}
               >
-                {isSubmitting ? (
+                {isPending ? (
                   <>
                     <Loader2Icon className="h-4 w-4 ml-2 animate-spin" />
                     جاري الإضافة...

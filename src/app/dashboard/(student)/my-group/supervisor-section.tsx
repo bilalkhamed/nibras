@@ -2,12 +2,10 @@
 
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Mail } from 'lucide-react';
-import type { getGroupById } from '@/features/groups/db';
+import type { GroupSupervisorDTO } from '@/features/groups';
 
 type Props = {
-  supervisor: NonNullable<
-    Awaited<ReturnType<typeof getGroupById>>
-  >['supervisor'];
+  supervisor: GroupSupervisorDTO;
 };
 
 export function SupervisorSection({ supervisor }: Props) {

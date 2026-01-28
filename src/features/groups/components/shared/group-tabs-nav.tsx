@@ -40,7 +40,7 @@ export function GroupTabsNav({ groupId }: GroupTabsNavProps) {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                   'data-[state=active]:text-primary',
                   'data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground',
-                  'data-[state=inactive]:hover:bg-background/60'
+                  'data-[state=inactive]:hover:bg-background/60',
                 )}
               >
                 <Link href={`/dashboard/groups/${groupId}/${tab.value}`}>
@@ -50,7 +50,7 @@ export function GroupTabsNav({ groupId }: GroupTabsNavProps) {
                       'absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-primary transition-all duration-300',
                       isActive
                         ? 'scale-x-100 opacity-100'
-                        : 'scale-x-0 opacity-0 group-hover:scale-x-60 group-hover:opacity-60'
+                        : 'scale-x-0 opacity-0 group-hover:scale-x-60 group-hover:opacity-60',
                     )}
                   />
                 </Link>

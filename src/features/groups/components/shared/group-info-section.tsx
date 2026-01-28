@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Link from 'next/link';
-import labels from '@/lib/labels.json';
 import { Role } from '@prisma/client';
 import { ADMIN_ROLE } from '@/types/types';
 
@@ -36,7 +35,38 @@ interface GroupInfoSectionProps {
   userRole: Role;
 }
 
-export default function GroupInfoSection({
+function ActionButtons() {
+  return (
+    <div className="flex gap-2">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Edit className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>تحرير المجموعة</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Archive className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>أرشفة المجموعة</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>حذف المجموعة</TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+export function GroupInfoSection({
   groupName,
   studentCount,
   supervisor,
@@ -96,36 +126,5 @@ export default function GroupInfoSection({
         </CardContent>
       </Card>
     </TooltipProvider>
-  );
-}
-
-function ActionButtons() {
-  return (
-    <div className="flex items-center gap-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>تحرير المجموعة</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Archive className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>أرشفة المجموعة</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>حذف المجموعة</TooltipContent>
-      </Tooltip>
-    </div>
   );
 }

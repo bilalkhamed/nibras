@@ -1,18 +1,19 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { getGroupById } from '@/features/groups/db';
-import { GroupTabsNav } from './group-tabs-nav';
+import { getGroupById, GroupTabsNav } from '@/features/groups';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 
 type Params = Promise<{ id: string }>;
 
 async function GroupLayoutWrapper({ params }: { params: Params }) {
   const { id } = await params;
 
-  const group = await getGroupById(id);
-  if (!group) notFound();
+  const result = await getGroupById(id);
+  if (!result.success || !result.data) notFound();
+
+  const group = result.data;
 
   return (
     <div className="space-y-6">

@@ -1,11 +1,13 @@
-import GroupsListSection from './groups-list-section';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
-import CreateGroupDialog from './create-group-dialog';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
-import { CohortNavigator } from './cohort-navigator';
-import { CohortNavigatorWrapper } from './cohort-navigator-wrapper';
+import {
+  CreateGroupDialog,
+  CohortNavigator,
+  CohortNavigatorWrapper,
+  GroupsListSection,
+} from '@/features/groups';
 
 export default async function GroupsPage({
   searchParams,

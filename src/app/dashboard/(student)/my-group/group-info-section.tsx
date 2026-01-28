@@ -1,8 +1,8 @@
 import { getCurrentWeek } from '@/lib/server/weeks';
-import type { getGroupById } from '@/features/groups/db';
+import type { GroupDetailDTO } from '@/features/groups';
 
 type Props = {
-  group: NonNullable<Awaited<ReturnType<typeof getGroupById>>>;
+  group: GroupDetailDTO;
   currentWeek: NonNullable<Awaited<ReturnType<typeof getCurrentWeek>>>;
 };
 

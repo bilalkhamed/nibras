@@ -7,36 +7,39 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Trash2, Edit, ExternalLink } from 'lucide-react';
+import { Trash2, Edit, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTransition } from 'react';
+import { removeStudentFromGroupAction } from '../../actions';
 
-export default function StudentActions({
-  groupId,
-  studentId,
-}: {
+interface StudentActionsProps {
   groupId: string;
   studentId: string;
-}) {
+}
+
+export function StudentActions({ groupId, studentId }: StudentActionsProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const handleRemove = async () => {
-    console.log('Removing student', studentId, 'from group', groupId);
-    try {
-      const res = await fetch(`/api/groups/${groupId}/students/${studentId}`, {
-        method: 'PATCH',
-      });
+  const handleRemove = () => {
+    startTransition(async () => {
+      try {
+        const result = await removeStudentFromGroupAction(groupId, studentId);
 
-      if (!res.ok) throw new Error(res.statusText);
+        if (!result.success) {
+          throw new Error(result.error);
+        }
 
-      toast.success('تمت إزالة الطالبة من المجموعة بنجاح.');
-      router.refresh();
-    } catch (error) {
-      toast.error('حصل خطأ أثناء إزالة الطالبة من المجموعة.', {
-        description: (error as Error)?.message,
-      });
-    }
+        toast.success('تمت إزالة الطالبة من المجموعة بنجاح.');
+        router.refresh();
+      } catch (error) {
+        toast.error('حصل خطأ أثناء إزالة الطالبة من المجموعة.', {
+          description: (error as Error)?.message,
+        });
+      }
+    });
   };
 
   return (
@@ -62,8 +65,17 @@ export default function StudentActions({
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={handleRemove}>
-              <Trash2 className="h-4 w-4 text-destructive" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemove}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 text-destructive" />
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent>حذف من المجموعة</TooltipContent>

@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GroupInfoSection } from './group-info-section';
 import { SupervisorSection } from './supervisor-section';
 import { GroupStudentsSection } from './group-students-section';
-import { getGroupById } from '@/features/groups/db';
+import { getGroupById, type GroupDetailDTO } from '@/features/groups';
 import { getCurrentWeek } from '@/lib/server/weeks';
 
 export default async function StudentGroupPage() {
@@ -21,18 +21,21 @@ export default async function StudentGroupPage() {
     return <NoGroup />;
   }
 
-  const group = await getGroupById(activeGroupId);
-  if (!group) {
+  const groupResult = await getGroupById(activeGroupId);
+  if (!groupResult.success || !groupResult.data) {
     return <NoGroup />;
   }
+  const group = groupResult.data;
 
   const currentWeek = await getCurrentWeek();
 
-  const students = group.students.map((gs) => ({
-    id: gs.student.id,
-    name: `${gs.student.firstName} ${gs.student.middleName || ''} ${gs.student.lastName}`.trim(),
-    isMe: gs.student.id === auth.userId,
-  }));
+  const students = group.students.map(
+    (gs: GroupDetailDTO['students'][number]) => ({
+      id: gs.student.id,
+      name: `${gs.student.firstName} ${gs.student.middleName || ''} ${gs.student.lastName}`.trim(),
+      isMe: gs.student.id === auth.userId,
+    }),
+  );
 
   return (
     <div className="space-y-6">

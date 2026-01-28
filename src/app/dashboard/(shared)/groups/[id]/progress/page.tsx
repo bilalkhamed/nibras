@@ -10,7 +10,7 @@ import {
   getWeekByNumber,
   getWeeksTillDate,
 } from '@/lib/server/weeks';
-import { getGroupById } from '@/features/groups/db';
+import { getGroupById } from '@/features/groups';
 import { notFound } from 'next/navigation';
 import { StudentProgressContainer } from './student-progress-container';
 import { WeekNavigator } from '@/components/common/week-navigator';
@@ -49,11 +49,12 @@ async function StudentsAssignmentsList({
   const { id } = await params;
   const { week } = (await searchParams) || {};
 
-  const [group, session] = await Promise.all([
+  const [groupResult, session] = await Promise.all([
     getGroupById(id),
     getAuthSession(),
   ]);
-  if (!group) notFound();
+  if (!groupResult.success || !groupResult.data) notFound();
+  const group = groupResult.data;
   const currentUserName = session
     ? `${session.firstName} ${session.lastName}`
     : 'مشرف';

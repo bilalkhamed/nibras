@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Suspense } from 'react';
 import { InfoSectionSkeleton, TableSkeleton } from '@/components/skeletons';
-import GroupInfoSection from './group-info-section';
-import GroupStudentsTable, { GroupStudent } from './group-students-table';
-import AddStudentDialog from './add-student-dialog';
-import prisma from '@/lib/server/prisma';
 import { notFound } from 'next/navigation';
-import { getGroupById } from '@/features/groups/db';
+import {
+  getGroupById,
+  GroupInfoSection,
+  GroupStudentsTable,
+  AddStudentDialog,
+  type GroupStudent,
+} from '@/features/groups';
 import getAuthSession from '@/lib/server/auth-session';
 import { Role } from '@prisma/client';
 import { ADMIN_ROLE } from '@/types/types';
@@ -69,10 +71,16 @@ async function GroupDetailWrapper({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const group = await getGroupById(id);
-  const auth = await getAuthSession();
+  const [result, auth] = await Promise.all([
+    getGroupById(id),
+    getAuthSession(),
+  ]);
+
   if (!auth) notFound();
-  if (!group) notFound();
+  if (!result.success || !result.data) notFound();
+
+  const group = result.data;
+
   return (
     <div className="space-y-4">
       {/* Group Info Section */}

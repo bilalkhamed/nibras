@@ -7,14 +7,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/shared/utils';
-import StudentActions from './student-actions';
+import { StudentActions } from '../admin/student-actions';
 import { ADMIN_ROLE } from '@/types/types';
 
 export interface GroupStudent {
   student: {
     id: string;
     firstName: string;
-    middleName: string;
+    middleName: string | null;
     lastName: string;
   };
   joinedAt: Date;
@@ -26,7 +26,7 @@ interface GroupStudentsTableProps {
   userRole: string;
 }
 
-export default function GroupStudentsTable({
+export function GroupStudentsTable({
   groupStudents,
   groupId,
   userRole,
@@ -39,7 +39,7 @@ export default function GroupStudentsTable({
             <TableHead className="text-right">الاسم</TableHead>
             <TableHead className="text-right">تاريخ الانضمام</TableHead>
             {userRole === ADMIN_ROLE && (
-              <TableHead className=" text-center">الإجراءات</TableHead>
+              <TableHead className="text-center">الإجراءات</TableHead>
             )}
           </TableRow>
         </TableHeader>

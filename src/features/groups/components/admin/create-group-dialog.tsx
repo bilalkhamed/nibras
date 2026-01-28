@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/select';
 import SearchSelect from '@/components/common/search-select';
 import { Plus, Loader2, CheckIcon, Loader2Icon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { SUPERVISOR_ROLE } from '@/types/types';
+import { createGroupAction } from '../../actions';
 
 const cohorts = ['2025', '2024', '2023'];
 
@@ -37,15 +38,15 @@ interface Supervisor {
   lastName: string;
 }
 
-export default function CreateGroupDialog() {
+export function CreateGroupDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [cohort, setCohort] = useState('');
   const [supervisorId, setSupervisorId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
+  const [success] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -75,7 +76,7 @@ export default function CreateGroupDialog() {
         setDataFetched(true);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : 'Failed to load supervisors'
+          err instanceof Error ? err.message : 'Failed to load supervisors',
         );
         console.error('Error fetching supervisors:', err);
       } finally {
@@ -100,35 +101,30 @@ export default function CreateGroupDialog() {
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/groups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+  const handleSubmit = () => {
+    startTransition(async () => {
+      setError(null);
+      try {
+        const result = await createGroupAction({
           name,
           cohortId: cohort,
           supervisorId,
-        }),
-      });
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to create group');
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        router.refresh();
+        setOpen(false);
+        handleReset();
+        toast.success('تم إنشاء المجموعة بنجاح!', {
+          duration: 2000,
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
       }
-
-      router.refresh();
-      setOpen(false);
-      handleReset();
-      toast.success('تم إنشاء المجموعة بنجاح!', {
-        duration: 2000,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   // Transform supervisors to SearchSelect format
@@ -138,7 +134,7 @@ export default function CreateGroupDialog() {
   }));
 
   const supervisorName = supervisorOptions.find(
-    (s) => s.id === supervisorId
+    (s) => s.id === supervisorId,
   )?.label;
 
   return (
@@ -149,7 +145,7 @@ export default function CreateGroupDialog() {
           إنشاء مجموعة جديدة
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle className="text-right">إنشاء مجموعة جديدة</DialogTitle>
           <DialogDescription className="text-right text-muted-foreground">
@@ -244,7 +240,7 @@ export default function CreateGroupDialog() {
 
         <DialogFooter className="gap-2">
           <DialogClose asChild>
-            <Button variant="outline" disabled={isSubmitting}>
+            <Button variant="outline" disabled={isPending}>
               إلغاء
             </Button>
           </DialogClose>
@@ -254,12 +250,12 @@ export default function CreateGroupDialog() {
               !name ||
               !cohort ||
               !supervisorId ||
-              isSubmitting ||
+              isPending ||
               isLoading ||
               !dataFetched
             }
           >
-            {isSubmitting ? (
+            {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 ml-2 animate-spin" />
                 جاري الإنشاء...
