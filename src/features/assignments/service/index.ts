@@ -18,6 +18,6 @@ export {
 export {
   toggleCompletion,
   deleteAssignment,
-  updateAssignment,
+  modifyAssignment,
   createAssignment,
 } from './mutations';

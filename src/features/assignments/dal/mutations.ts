@@ -15,6 +15,7 @@ import type {
   CreateAssignmentData,
   StudentAssignmentDTO,
 } from '../types';
+import { revalidateTag } from 'next/cache';
 
 // ============================================================================
 // Student Assignment Mutations
@@ -79,23 +80,96 @@ export async function deleteAssignmentById(assignmentId: string) {
   });
 }
 
-/**
- * Update an assignment's basic information
- *
- * @param assignmentId - The assignment ID to update
- * @param data - The data to update (name, description, type)
- * @returns The updated assignment
- */
-export async function updateAssignmentBasic(
+export async function updateAssignment(
   assignmentId: string,
   data: {
     name: string;
     description: string | null;
     type: AssignmentTypes;
+    links?: { id?: string; url: string; type: typeof AttachmentType.LINK }[];
+    fileKeys: string[];
   },
 ) {
   return runDalOperation<AssignmentDTO>(async () => {
-    return prisma.assignment.update({
+    const existingAttachments = await prisma.assignmentAttachment.findMany({
+      where: {
+        assignmentId: assignmentId,
+      },
+    });
+
+    if (data.links) {
+      const existingLinks = existingAttachments.filter(
+        (att) => att.type === AttachmentType.LINK,
+      );
+
+      const linksToDelete = existingLinks.filter(
+        (link) => !data.links?.some((l) => l.id === link.id),
+      );
+
+      const linksToAdd = data.links.filter((link) => !link.id);
+
+      const linksToUpdate = data.links.filter((link) => {
+        if (!link.id) return false;
+
+        const original = existingLinks.find((db) => db.id === link.id);
+
+        return original && original.url !== link.url;
+      });
+
+      await prisma.$transaction([
+        prisma.assignmentAttachment.deleteMany({
+          where: {
+            id: { in: linksToDelete.map((link) => link.id) },
+            assignmentId: assignmentId,
+          },
+        }),
+        ...linksToUpdate.map((link) =>
+          prisma.assignmentAttachment.update({
+            where: { id: link.id!, assignmentId: assignmentId },
+            data: { url: link.url },
+          }),
+        ),
+        prisma.assignmentAttachment.createMany({
+          data: linksToAdd.map((link) => ({
+            assignmentId: assignmentId,
+            type: AttachmentType.LINK,
+            url: link.url,
+          })),
+        }),
+      ]);
+    }
+
+    if (data.fileKeys) {
+      const existingFiles = existingAttachments.filter(
+        (att) => att.type === AttachmentType.FILE,
+      );
+
+      const filesToDelete = existingFiles.filter(
+        (file) => !data.fileKeys.includes(file.fileKey!),
+      );
+
+      const filesToAdd = data.fileKeys.filter(
+        (key) => !existingFiles.some((file) => file.fileKey === key),
+      );
+
+      await prisma.$transaction([
+        prisma.assignmentAttachment.deleteMany({
+          where: {
+            id: { in: filesToDelete.map((file) => file.id) },
+            assignmentId: assignmentId,
+          },
+        }),
+        prisma.assignmentAttachment.createMany({
+          data: filesToAdd.map((key) => ({
+            assignmentId: assignmentId,
+            type: AttachmentType.FILE,
+            fileKey: key,
+          })),
+        }),
+      ]);
+    }
+
+    const updated = await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
         name: data.name,
@@ -103,112 +177,16 @@ export async function updateAssignmentBasic(
         type: data.type,
       },
     });
-  });
-}
 
-/**
- * Update assignment attachments (links)
- * Handles add, update, and delete operations for link attachments
- *
- * @param assignmentId - The assignment ID
- * @param links - Array of link data with optional IDs
- */
-export async function updateAssignmentLinks(
-  assignmentId: string,
-  links: { id?: string; url: string }[],
-) {
-  return runDalOperation(async () => {
-    const existingAttachments = await prisma.assignmentAttachment.findMany({
-      where: { assignmentId },
-    });
-
-    const existingLinks = existingAttachments.filter(
-      (att) => att.type === AttachmentType.LINK,
+    revalidateTag(
+      `assignments-level-${updated.levelId}-week-${updated.weekId}-program-${updated.programId}`,
+      'max',
     );
-
-    // Determine which links to delete, update, and add
-    const linksToDelete = existingLinks.filter(
-      (link) => !links.some((l) => l.id === link.id),
+    revalidateTag(
+      `assignments-level-${updated.levelId}-week-${updated.weekId}`,
+      'max',
     );
-
-    const linksToAdd = links.filter((link) => !link.id);
-
-    const linksToUpdate = links.filter((link) => {
-      if (!link.id) return false;
-      const original = existingLinks.find((db) => db.id === link.id);
-      return original && original.url !== link.url;
-    });
-
-    // Execute all operations in a transaction
-    await prisma.$transaction([
-      prisma.assignmentAttachment.deleteMany({
-        where: {
-          id: { in: linksToDelete.map((link) => link.id) },
-          assignmentId,
-        },
-      }),
-      ...linksToUpdate.map((link) =>
-        prisma.assignmentAttachment.update({
-          where: { id: link.id!, assignmentId },
-          data: { url: link.url },
-        }),
-      ),
-      prisma.assignmentAttachment.createMany({
-        data: linksToAdd.map((link) => ({
-          assignmentId,
-          type: AttachmentType.LINK,
-          url: link.url,
-        })),
-      }),
-    ]);
-  });
-}
-
-/**
- * Update assignment file attachments
- * Handles add and delete operations for file attachments
- *
- * @param assignmentId - The assignment ID
- * @param fileKeys - Array of S3 file keys that should remain attached
- */
-export async function updateAssignmentFiles(
-  assignmentId: string,
-  fileKeys: string[],
-) {
-  return runDalOperation(async () => {
-    const existingAttachments = await prisma.assignmentAttachment.findMany({
-      where: { assignmentId },
-    });
-
-    const existingFiles = existingAttachments.filter(
-      (att) => att.type === AttachmentType.FILE,
-    );
-
-    // Determine which files to delete and add
-    const filesToDelete = existingFiles.filter(
-      (file) => !fileKeys.includes(file.fileKey!),
-    );
-
-    const filesToAdd = fileKeys.filter(
-      (key) => !existingFiles.some((file) => file.fileKey === key),
-    );
-
-    // Execute all operations in a transaction
-    await prisma.$transaction([
-      prisma.assignmentAttachment.deleteMany({
-        where: {
-          id: { in: filesToDelete.map((file) => file.id) },
-          assignmentId,
-        },
-      }),
-      prisma.assignmentAttachment.createMany({
-        data: filesToAdd.map((key) => ({
-          assignmentId,
-          type: AttachmentType.FILE,
-          fileKey: key,
-        })),
-      }),
-    ]);
+    return updated;
   });
 }
 
@@ -236,7 +214,7 @@ export async function insertAssignment(data: CreateAssignmentData) {
       })),
     ];
 
-    return prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       // Validate all referenced entities exist
       const level = await tx.level.findUnique({
         where: { slug: data.levelSlug },
@@ -263,7 +241,7 @@ export async function insertAssignment(data: CreateAssignmentData) {
       }
 
       // Create the assignment with attachments
-      return tx.assignment.create({
+      return await tx.assignment.create({
         data: {
           name: data.assignment.name,
           description: data.assignment.description || null,
@@ -279,5 +257,16 @@ export async function insertAssignment(data: CreateAssignmentData) {
         },
       });
     });
+
+    revalidateTag(
+      `assignments-level-${created.levelId}-week-${created.weekId}-program-${created.programId}`,
+      'max',
+    );
+    revalidateTag(
+      `assignments-level-${created.levelId}-week-${created.weekId}`,
+      'max',
+    );
+
+    return created;
   });
 }

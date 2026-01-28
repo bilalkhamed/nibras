@@ -9,7 +9,7 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { updateAssignment } from '../service';
+import { modifyAssignment } from '../service';
 import type { UpdateAssignmentData, UpdateAssignmentResult } from '../types';
 
 /**
@@ -24,7 +24,7 @@ export async function updateAssignmentAction(
   assignmentId: string,
   data: UpdateAssignmentData,
 ): Promise<UpdateAssignmentResult> {
-  const result = await updateAssignment(assignmentId, data);
+  const result = await modifyAssignment(assignmentId, data);
 
   if (!result.success) {
     return {

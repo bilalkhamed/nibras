@@ -27,6 +27,7 @@ import type {
   StudentAssignmentDTO,
 } from '../types';
 import { createAssignmentSchema, updateAssignmentSchema } from '../types';
+import { updateAssignment } from '../dal/mutations';
 
 // ============================================================================
 // Student Assignment Mutations
@@ -118,7 +119,7 @@ export async function deleteAssignment(
  * @param data - The update data
  * @returns The updated assignment
  */
-export async function updateAssignment(
+export async function modifyAssignment(
   assignmentId: string,
   data: UpdateAssignmentData,
 ): Promise<ServiceReturn<AssignmentDTO>> {
@@ -140,33 +141,7 @@ export async function updateAssignment(
         };
       }
 
-      // Update links if provided
-      if (data.links) {
-        const linksResult = await updateAssignmentLinks(
-          assignmentId,
-          data.links,
-        );
-        if (!linksResult.success) {
-          return mapDalToService(linksResult);
-        }
-      }
-
-      // Update files
-      const filesResult = await updateAssignmentFiles(
-        assignmentId,
-        data.fileKeys,
-      );
-      if (!filesResult.success) {
-        return mapDalToService(filesResult);
-      }
-
-      // Update basic info
-      const dalResult = await updateAssignmentBasic(assignmentId, {
-        name: data.name,
-        description: data.description,
-        type: data.type,
-      });
-
+      const dalResult = await updateAssignment(assignmentId, parsed.data);
       return mapDalToService(dalResult);
     },
     { requireAuth: true },
