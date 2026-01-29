@@ -108,7 +108,7 @@ export type StudentAssignmentDTO = StudentAssignment;
 export type StudentAssignmentWithMarkerDTO = StudentAssignment & {
   markedBy: {
     firstName: string;
-    middleName: string | null;
+    middleName: string;
     lastName: string;
   } | null;
 };
