@@ -1,6 +1,6 @@
 'use client';
 
-import type { AssignmentProgressStatus } from '@/types/progress';
+import type { AssignmentProgressStatus } from '../../types';
 import {
   Accordion,
   AccordionContent,

@@ -16,7 +16,7 @@ import type {
   AssignmentStatus,
   AssignmentProgress,
   AssignmentProgressStatus,
-} from '@/types/progress';
+} from '../../types';
 import { toggleAssignmentCompletionAction } from '@/features/assignments/actions';
 
 type OptimisticAction = {

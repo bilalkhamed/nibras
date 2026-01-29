@@ -2,10 +2,13 @@ import { requireRoles } from '@/lib/server/require-roles';
 import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { GroupInfoSection } from './group-info-section';
-import { SupervisorSection } from './supervisor-section';
-import { GroupStudentsSection } from './group-students-section';
-import { getGroupById, type GroupDetailDTO } from '@/features/groups';
+import {
+  StudentGroupInfoSection,
+  SupervisorSection,
+  GroupStudentsSection,
+  getGroupById,
+  type GroupDetailDTO,
+} from '@/features/groups';
 import { getCurrentWeek } from '@/lib/server/weeks';
 
 export default async function StudentGroupPage() {
@@ -48,7 +51,7 @@ export default async function StudentGroupPage() {
       </div>
 
       {/* Group Info */}
-      <GroupInfoSection group={group} currentWeek={currentWeek!} />
+      <StudentGroupInfoSection group={group} currentWeek={currentWeek!} />
 
       {/* Supervisor Section */}
       {group.supervisor && <SupervisorSection supervisor={group.supervisor} />}

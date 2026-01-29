@@ -14,7 +14,7 @@ import type {
   StudentProgressStatus,
   ViewMode,
   AssignmentProgressStatus,
-} from '@/types/progress';
+} from '../../types';
 import { Input } from '@/components/ui/input';
 import {
   Select,

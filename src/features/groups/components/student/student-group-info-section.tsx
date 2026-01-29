@@ -1,12 +1,12 @@
 import { getCurrentWeek } from '@/lib/server/weeks';
-import type { GroupDetailDTO } from '@/features/groups';
+import type { GroupDetailDTO } from '../../types';
 
 type Props = {
   group: GroupDetailDTO;
   currentWeek: NonNullable<Awaited<ReturnType<typeof getCurrentWeek>>>;
 };
 
-export function GroupInfoSection({ group, currentWeek }: Props) {
+export function StudentGroupInfoSection({ group, currentWeek }: Props) {
   const { cohort } = group;
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import type { StudentProgressStatus } from '@/types/progress';
+import type { StudentProgressStatus } from '../../types';
 import {
   Accordion,
   AccordionContent,

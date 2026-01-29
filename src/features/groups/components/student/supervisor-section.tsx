@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Mail } from 'lucide-react';
-import type { GroupSupervisorDTO } from '@/features/groups';
+import type { GroupSupervisorDTO } from '../../types';
 
 type Props = {
   supervisor: GroupSupervisorDTO;

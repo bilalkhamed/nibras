@@ -29,7 +29,7 @@ import { AssignmentsTableSkeleton } from '@/components/skeletons';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { AttachmentsCell } from '../../components/attachments-cell';
+import { AttachmentsCell } from '@/features/assignments';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',

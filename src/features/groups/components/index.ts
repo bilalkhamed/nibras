@@ -17,3 +17,24 @@ export {
   GroupsListSection,
   type GroupStudent,
 } from './shared';
+
+// Progress tracking components
+export {
+  StudentProgressContainer,
+  StudentProgressTable,
+  StudentProgressAccordionView,
+  STATUS_CONFIG,
+  AssignmentProgressAccordion,
+  ASSIGNMENT_STATUS_CONFIG,
+  ViewModeToggle,
+  CompletionBadgeOptimistic,
+  ProgressProvider,
+  useProgressContext,
+} from './progress';
+
+// Student-facing components (my-group page)
+export {
+  StudentGroupInfoSection,
+  SupervisorSection,
+  GroupStudentsSection,
+} from './student';

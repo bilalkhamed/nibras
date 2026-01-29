@@ -83,7 +83,7 @@ export function AssignmentsTable({
                     <Badge
                       className={clsx(
                         'font-medium text-xs',
-                        ASSIGNMENT_TYPE_COLORS[a.type]
+                        ASSIGNMENT_TYPE_COLORS[a.type],
                       )}
                     >
                       {ASSIGNMENT_TYPE_LABELS[a.type]}

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/tooltip';
 import { toArabicNumerals, cn } from '@/lib/shared/utils';
 import { CompletionBadgeOptimistic } from './completion-badge-optimistic';
-import type { StudentProgress } from '@/types/progress';
+import type { StudentProgress } from '../../types';
 import { useProgressContext } from './progress-context';
 
 interface StudentProgressTableProps {

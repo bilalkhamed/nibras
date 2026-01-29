@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Users, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
-import type { ViewMode } from '@/types/progress';
+import type { ViewMode } from '../../types';
 import {
   Tooltip,
   TooltipContent,

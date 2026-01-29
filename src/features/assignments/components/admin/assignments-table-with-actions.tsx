@@ -8,7 +8,7 @@
 'use client';
 
 import { AssignmentAttachment, AttachmentType } from '@prisma/client';
-import { AssignmentsTable } from '@/app/dashboard/components/assignments-table';
+import { AssignmentsTable } from '../shared';
 import { DeleteAssignmentButton } from './delete-assignment-button';
 import { EditAssignmentSheet } from './edit-assignment-sheet';
 import type { AssignmentFormData } from './assignment-form';

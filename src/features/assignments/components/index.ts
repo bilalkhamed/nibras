@@ -28,3 +28,6 @@ export type { AssignmentFormData, Link } from './admin';
 export { formLinkSchema as linkSchema } from '../types';
 export { FileUploader, FilesCardsList, LinkManager } from './admin';
 export type { AttachedFile, UploadingFile, FileCardItem } from './admin';
+
+// Shared components
+export { AssignmentsTable, AttachmentsCell } from './shared';

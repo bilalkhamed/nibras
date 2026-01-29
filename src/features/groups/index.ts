@@ -35,6 +35,21 @@ export {
   CohortNavigatorWrapper,
   GroupsListSection,
   type GroupStudent,
+  // Progress
+  StudentProgressContainer,
+  StudentProgressTable,
+  StudentProgressAccordionView,
+  STATUS_CONFIG,
+  AssignmentProgressAccordion,
+  ASSIGNMENT_STATUS_CONFIG,
+  ViewModeToggle,
+  CompletionBadgeOptimistic,
+  ProgressProvider,
+  useProgressContext,
+  // Student (my-group)
+  StudentGroupInfoSection,
+  SupervisorSection,
+  GroupStudentsSection,
 } from './components';
 
 // Types
@@ -50,4 +65,14 @@ export type {
   AddStudentResult,
   RemoveStudentResult,
   GetGroupsOptions,
+  // Progress types
+  AssignmentStatus,
+  StudentProgressStatus,
+  StudentProgress,
+  StudentAssignmentDetail,
+  ProgressViewProps,
+  ViewMode,
+  AssignmentProgressStatus,
+  AssignmentProgress,
+  OptimisticAction,
 } from './types';

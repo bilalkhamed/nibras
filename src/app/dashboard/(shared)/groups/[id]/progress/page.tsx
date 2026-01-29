@@ -4,7 +4,8 @@ import {
   getManyStudentAssignments,
   getWeekAssignments,
 } from '@/features/assignments/service';
-import type { AssignmentStatus, StudentProgress } from '@/types/progress';
+import type { AssignmentStatus, StudentProgress } from '@/features/groups';
+import { StudentProgressContainer } from '@/features/groups';
 import {
   getCurrentWeek,
   getWeekByNumber,
@@ -12,7 +13,6 @@ import {
 } from '@/lib/server/weeks';
 import { getGroupById } from '@/features/groups';
 import { notFound } from 'next/navigation';
-import { StudentProgressContainer } from './student-progress-container';
 import { WeekNavigator } from '@/components/common/week-navigator';
 import getAuthSession from '@/lib/server/auth-session';
 
