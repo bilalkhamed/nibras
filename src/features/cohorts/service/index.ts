@@ -1,5 +1,5 @@
 /**
- * Programs Service - Public API
+ * Cohorts Service - Public API
  *
  * Re-exports all service functions for use in server actions.
  */
@@ -7,7 +7,7 @@
 import 'server-only';
 
 // Query operations
-export * from './queries';
+export { getAllCohorts } from './queries';
 
 // Mutation operations
-export { createProgram } from './mutations';
+export { createCohort } from './mutations';

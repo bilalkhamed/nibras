@@ -7,7 +7,7 @@ import SearchSelect from '@/components/common/search-select';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface CohortNavigatorProps {
-  cohorts: Cohort[];
+  cohorts: { id: string; name: string }[];
 }
 
 export function CohortNavigator({ cohorts }: CohortNavigatorProps) {

@@ -1,40 +1,37 @@
-import getAuthSession from '@/lib/server/auth-session';
-import prisma from '@/lib/server/prisma';
-import { ADMIN_ROLE } from '@/types/types';
 import { NextResponse } from 'next/server';
+import { getAllCohorts } from '@/features/cohorts/service';
 
 export async function GET() {
-  const auth = await getAuthSession();
+  const result = await getAllCohorts();
 
-  if (!auth) {
-    return NextResponse.json(
-      { message: 'Unauthorized' },
-      {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+  if (!result.success) {
+    switch (result.error.type) {
+      case 'unauthorized':
+        return NextResponse.json(
+          { message: 'Unauthorized' },
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      case 'forbidden':
+        return NextResponse.json(
+          { message: 'Forbidden' },
+          {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      default:
+        return NextResponse.json(
+          { message: 'Internal server error' },
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+    }
   }
 
-  if (auth.role !== ADMIN_ROLE) {
-    return NextResponse.json(
-      { message: 'Forbidden' },
-      {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
-
-  const cohorts = await prisma.cohort.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      startDate: 'asc',
-    },
-  });
-
-  return NextResponse.json({ cohorts });
+  return NextResponse.json({ cohorts: result.data });
 }
