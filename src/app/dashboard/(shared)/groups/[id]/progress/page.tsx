@@ -6,15 +6,12 @@ import {
 } from '@/features/assignments/service';
 import type { AssignmentStatus, StudentProgress } from '@/features/groups';
 import { StudentProgressContainer } from '@/features/groups';
-import {
-  getCurrentWeek,
-  getWeekByNumber,
-  getWeeksTillDate,
-} from '@/lib/server/weeks';
+import { getWeekByNumber, getWeeksTillDate } from '@/lib/server/weeks';
 import { getGroupById } from '@/features/groups';
 import { notFound } from 'next/navigation';
 import { WeekNavigator } from '@/components/common/week-navigator';
 import getAuthSession from '@/lib/server/auth-session';
+import { getCurrentWeek } from '@/features/programs/service';
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<{ week?: string }> | { week?: string };
@@ -58,23 +55,25 @@ async function StudentsAssignmentsList({
   const currentUserName = session
     ? `${session.firstName} ${session.lastName}`
     : 'مشرف';
-  const currentWeek = await getCurrentWeek();
-  if (!currentWeek) notFound(); // TODO: handle error properly
+  const currentWeekResult = await getCurrentWeek();
+  if (!currentWeekResult.success || !currentWeekResult.data) notFound(); // TODO: handle error properly
   // FIX: remove current week dependency (to support when there is no current week)
 
   const parsedWeek = Number(week);
 
   // here we are checking if either the week is invalid OR a future week
   const isInvalidWeek = Number.isNaN(parsedWeek) || parsedWeek < 1;
-  const isFutureWeek = !isInvalidWeek && parsedWeek > currentWeek.week.number;
+  const isFutureWeek =
+    !isInvalidWeek && parsedWeek > currentWeekResult.data.week.number;
 
   // if it is , default to current week
   const targetWeekNumber =
-    isInvalidWeek || isFutureWeek ? currentWeek.week.number : parsedWeek;
-
+    isInvalidWeek || isFutureWeek
+      ? currentWeekResult.data.week.number
+      : parsedWeek;
   // fetch the target week from DB
   const targetWeek = await getWeekByNumber(targetWeekNumber);
-  const selectedWeek = targetWeek ?? currentWeek;
+  const selectedWeek = targetWeek ?? currentWeekResult.data;
 
   const weekId = selectedWeek.week.id;
 
@@ -173,7 +172,7 @@ async function StudentsAssignmentsList({
 
 // just to load weeks then pass to WeekNavigator
 async function WeekNavigatorContainer() {
-  const [weeks, currentWeek] = await Promise.all([
+  const [weeks, currentWeekResult] = await Promise.all([
     getWeeksTillDate(),
     getCurrentWeek(),
   ]);
@@ -184,7 +183,11 @@ async function WeekNavigatorContainer() {
   return (
     <WeekNavigator
       weeks={mappedWeeks}
-      currentWeekNumber={currentWeek?.week.number}
+      currentWeekNumber={
+        currentWeekResult.success && currentWeekResult.data
+          ? currentWeekResult.data.week.number
+          : undefined
+      }
     />
   );
 }

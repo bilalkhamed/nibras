@@ -1,4 +1,3 @@
-import { getCurrentWeek } from '@/lib/server/weeks';
 import { requireRoles } from '@/lib/server/require-roles';
 import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
@@ -20,6 +19,7 @@ import {
   getStudentAssignments,
 } from '@/features/assignments/service';
 import type { AssignmentWithAttachmentsDTO } from '@/features/assignments/types';
+import { getCurrentWeek } from '@/features/programs/service';
 
 export default async function StudentAssignmentsPage({
   children,
@@ -33,11 +33,13 @@ export default async function StudentAssignmentsPage({
 
   const levelId = auth.currentLevelId;
 
-  const currentWeek = await getCurrentWeek();
+  const currentWeekResult = await getCurrentWeek();
 
-  if (!levelId || !currentWeek) {
+  if (!levelId || !currentWeekResult.success || !currentWeekResult.data) {
     return <NoData />;
   }
+
+  const currentWeek = currentWeekResult.data;
 
   const [assignmentsResult, programs] = await Promise.all([
     getWeekAssignments({
@@ -79,7 +81,7 @@ export default async function StudentAssignmentsPage({
     totalAssignments > 0
       ? `لديك ${totalAssignments} مهمات هذا الأسبوع`
       : 'لا توجد مهام حالياً، استعدي للتحدي القادم';
-  const heroTitle = currentWeek?.week.title ?? 'مهام الأسبوع';
+  const heroTitle = currentWeek?.week.title;
   const streakText = 'حافظي على السلسلة';
 
   const deadlineLabel = currentWeek?.endDate

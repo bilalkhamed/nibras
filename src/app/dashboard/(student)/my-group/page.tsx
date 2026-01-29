@@ -9,7 +9,7 @@ import {
   getGroupById,
   type GroupDetailDTO,
 } from '@/features/groups';
-import { getCurrentWeek } from '@/lib/server/weeks';
+import { getCurrentWeek } from '@/features/programs/service';
 
 export default async function StudentGroupPage() {
   const auth = await requireRoles(STUDENT_ROLE);
@@ -30,7 +30,7 @@ export default async function StudentGroupPage() {
   }
   const group = groupResult.data;
 
-  const currentWeek = await getCurrentWeek();
+  const weekResult = await getCurrentWeek();
 
   const students = group.students.map(
     (gs: GroupDetailDTO['students'][number]) => ({
@@ -51,7 +51,7 @@ export default async function StudentGroupPage() {
       </div>
 
       {/* Group Info */}
-      <StudentGroupInfoSection group={group} currentWeek={currentWeek!} />
+      <StudentGroupInfoSection group={group} currentWeek={weekResult} />
 
       {/* Supervisor Section */}
       {group.supervisor && <SupervisorSection supervisor={group.supervisor} />}

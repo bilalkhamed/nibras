@@ -1,13 +1,16 @@
-import { getCurrentWeek } from '@/lib/server/weeks';
 import type { GroupDetailDTO } from '../../types';
+import { ServiceReturn } from '@/lib/server/service/types';
+import { CalendarWeekDTO } from '@/features/programs/types';
 
 type Props = {
   group: GroupDetailDTO;
-  currentWeek: NonNullable<Awaited<ReturnType<typeof getCurrentWeek>>>;
+  currentWeek: ServiceReturn<CalendarWeekDTO | null>;
 };
 
 export function StudentGroupInfoSection({ group, currentWeek }: Props) {
   const { cohort } = group;
+
+  const weekLoadedSuccessfully = currentWeek.success && currentWeek.data;
 
   return (
     <section className="rounded-2xl border border-primary/15 bg-card p-6 shadow-sm dark:border-primary/25 dark:bg-[#15101f]">
@@ -54,11 +57,15 @@ export function StudentGroupInfoSection({ group, currentWeek }: Props) {
           <p className="text-xs font-semibold text-accent dark:text-accent/90">
             الأسبوع الحالي
           </p>
-          <p className="mt-1 text-lg font-bold text-foreground">
-            {currentWeek.week.title} -{' '}
-            {currentWeek.startDate.toLocaleDateString('ar-SA')} إلى{' '}
-            {currentWeek.endDate.toLocaleDateString('ar-SA')}
-          </p>
+          {weekLoadedSuccessfully ? (
+            <p className="mt-1 text-lg font-bold text-foreground">
+              {currentWeek.data?.week.title} -{' '}
+              {currentWeek.data?.startDate.toLocaleDateString('ar-SA')} إلى{' '}
+              {currentWeek.data?.endDate.toLocaleDateString('ar-SA')}
+            </p>
+          ) : (
+            <p className="mt-1 text-lg font-bold text-foreground">-</p>
+          )}
         </div>
       </div>
 

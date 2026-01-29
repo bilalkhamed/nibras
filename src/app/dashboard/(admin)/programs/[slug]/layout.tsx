@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { LevelTabs } from './level-tabs';
-import { getProgramBySlug } from '@/lib/server/programs';
 import { getAllLevels } from '@/lib/server/levels';
+import { getProgramBySlug } from '@/features/programs/service/queries';
+import { CustomAlert } from '@/components/common/custom-alert';
 
 interface ProgramDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -14,7 +15,22 @@ export default async function ProgramDetailPage({
 }: ProgramDetailPageProps) {
   const { slug } = await params;
 
-  const program = await getProgramBySlug(slug);
+  const result = await getProgramBySlug(slug);
+
+  if (!result.success) {
+    if (result.error.type === 'not-found') {
+      notFound();
+    }
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="خطأ"
+        description={'حدث خطأ أثناء جلب البرنامج. الرجاء المحاولة مرة أخرى.'}
+      />
+    );
+  }
+
+  const program = result.data;
 
   if (!program) {
     notFound();

@@ -4,7 +4,7 @@ import {
 } from '@/features/assignments/service';
 import getAuthSession from '@/lib/server/auth-session';
 import { getAllPrograms } from '@/lib/server/programs';
-import { getCurrentWeek, getWeekByNumber } from '@/lib/server/weeks';
+import { getWeekByNumber } from '@/lib/server/weeks';
 import { CalendarWeek, Week } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -30,6 +30,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { AttachmentsCell } from '@/features/assignments';
+import { getCurrentWeek } from '@/features/programs/service';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
@@ -92,10 +93,14 @@ async function WeekProvider({
     isCurrentWeek: boolean,
   ) => React.ReactNode;
 }) {
-  const currentWeek = await getCurrentWeek();
+  const currentWeekResult = await getCurrentWeek();
 
   // If the requested week is in the future, show no data
-  if (currentWeek && weekNumber > currentWeek.week.number) {
+  if (
+    currentWeekResult.success &&
+    currentWeekResult.data &&
+    weekNumber > currentWeekResult.data.week.number
+  ) {
     return (
       <div className="p-6 text-center text-sm text-muted-foreground">
         لا توجد معلومات متاحة لهذا الأسبوع
@@ -112,6 +117,8 @@ async function WeekProvider({
       </div>
     );
   }
+
+  const currentWeek = currentWeekResult.success ? currentWeekResult.data : null;
 
   const isCurrentWeek =
     !!currentWeek && currentWeek.week.number === week.week.number;

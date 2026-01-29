@@ -13,7 +13,9 @@ import CreateProgramDialog from './create-program-dialog';
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
-import { getAllPrograms } from '@/lib/server/programs';
+import { getAllPrograms } from '@/features/programs/service';
+import { CustomAlert } from '@/components/common/custom-alert';
+import { Program } from '@prisma/client';
 
 export default async function ProgramsPage() {
   return (
@@ -39,12 +41,19 @@ export default async function ProgramsPage() {
 
 async function Wrapper() {
   // await connection();
-  const programs: {
-    id: string;
-    name: string;
-    description: string | null;
-    slug: string;
-  }[] = await getAllPrograms();
+  const result = await getAllPrograms();
+
+  if (!result.success) {
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="خطأ"
+        description={'حدث خطأ أثناء جلب البرامج. الرجاء المحاولة مرة أخرى.'}
+      />
+    );
+  }
+
+  const programs = result.data;
 
   return (
     <div className="mt-5">
