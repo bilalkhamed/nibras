@@ -80,6 +80,36 @@ export async function getUserById(id: string) {
   );
 }
 
+/** Get current user info from session */
+export async function getCurrentUserData() {
+  return runServiceOperation<UserDTO>(
+    async (session) => {
+      if (!session) {
+        return {
+          success: false,
+          error: { type: 'unauthorized', statusCode: 401 },
+        };
+      }
+
+      const dalResult = await findUserById(session.userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult) as ServiceReturn<UserDTO>;
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return { success: true, data: dalResult.data };
+    },
+    { requireAuth: true },
+  );
+}
+
 /** Get user by email - no auth required (for login) */
 export async function getUserByEmail(email: string) {
   return runServiceOperation<UserByEmail>(

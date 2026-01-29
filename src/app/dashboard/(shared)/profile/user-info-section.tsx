@@ -13,6 +13,7 @@ import { formatRole } from '@/lib/shared/utils';
 import { getCurrentUser } from '@/lib/server/current-user';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import labels from '@/lib/labels.json';
+import { CountryCode } from '@/types/types';
 
 export default async function UserInfoSection() {
   const user = await getCurrentUser();
@@ -61,7 +62,9 @@ export default async function UserInfoSection() {
             <InfoField
               label="الدولة"
               value={
-                (user.country && labels.countries[user.country]) || 'غير محدد'
+                (user.country &&
+                  labels.countries[user.country as CountryCode]) ||
+                'غير محدد'
               }
               icon={<GlobeIcon className="h-4 w-4" />}
             />
