@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import { getProgramBySlug } from '@/features/programs/service';
 import { Program } from '@prisma/client';
+import { findProgramBySlug } from '@/features/programs/dal';
 
 // ============================================================================
 // Week Assignments Queries
@@ -54,7 +55,7 @@ export async function findWeekAssignments({
   'use cache';
 
   const programResult = programSlug
-    ? await getProgramBySlug(programSlug)
+    ? await findProgramBySlug(programSlug)
     : undefined;
 
   let program: Program | undefined;
