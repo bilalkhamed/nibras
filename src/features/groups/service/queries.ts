@@ -25,6 +25,7 @@ import type {
   GroupStudentDTO,
 } from '../types';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import { findStudentGroups } from '../dal/queries';
 
 // ============================================================================
 // Single Group Queries
@@ -103,6 +104,26 @@ export async function getGroups(
         success: false,
         error: { type: 'forbidden', statusCode: 403 },
       };
+    },
+    { requireAuth: true },
+  );
+}
+
+export async function getStudentAllGroups(
+  studentId: string,
+): Promise<ServiceReturn<GroupStudentDTO[]>> {
+  return runServiceOperation(
+    async (session) => {
+      // Students can only see their own groups
+      if (session!.role === 'student' && session!.userId !== studentId) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findStudentGroups(studentId);
+      return mapDalToService(dalResult);
     },
     { requireAuth: true },
   );

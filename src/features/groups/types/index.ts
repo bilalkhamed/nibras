@@ -224,6 +224,8 @@ export type OptimisticAction = {
 
 export const myGroupStudentSelect = {
   joinedAt: true,
+  isActive: true,
+  leftAt: true,
   group: {
     select: {
       name: true,

@@ -168,6 +168,48 @@ export async function findGroupsBySupervisor(
   return findGroups({ supervisorId });
 }
 
+export async function findStudentGroups(
+  studentId: string,
+): Promise<DalReturn<GroupStudentDTO[]>> {
+  return runDalOperation(async () => {
+    return await prisma.groupStudent.findMany({
+      where: {
+        studentId,
+      },
+
+      select: {
+        joinedAt: true,
+        isActive: true,
+        leftAt: true,
+        group: {
+          select: {
+            name: true,
+            cohort: {
+              select: {
+                name: true,
+              },
+            },
+            _count: {
+              select: {
+                students: true,
+              },
+            },
+            supervisor: {
+              select: {
+                firstName: true,
+                middleName: true,
+                lastName: true,
+                phone: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+}
+
 export async function findStudentActiveGroup(
   studentId: string,
 ): Promise<DalReturn<GroupStudentDTO | null>> {
@@ -180,6 +222,8 @@ export async function findStudentActiveGroup(
 
       select: {
         joinedAt: true,
+        isActive: true,
+        leftAt: true,
         group: {
           select: {
             name: true,

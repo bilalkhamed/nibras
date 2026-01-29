@@ -12,6 +12,12 @@ import { formatDate } from '@/lib/shared/utils';
 import { Prisma } from '@prisma/client';
 import { runServiceOrRedirect } from '@/lib/server/service/helpers';
 import { getUserById } from '@/features/users/service';
+import {
+  getGroups,
+  GroupListItemDTO,
+  GroupStudentDTO,
+} from '@/features/groups';
+import { getStudentAllGroups } from '@/features/groups/service/queries';
 
 type UserDetailPageProps = {
   params: {
@@ -68,55 +74,27 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 
   const user = res.data;
 
-  let studentGroups: StudentGroup[] = [];
+  let studentGroups: GroupStudentDTO[] = [];
 
   if (user.role === STUDENT_ROLE) {
-    studentGroups = await prisma.groupStudent.findMany({
-      where: {
-        studentId: user.id,
-      },
-      include: {
-        group: {
-          select: {
-            id: true,
-            name: true,
-            cohort: {
-              select: {
-                label: true,
-              },
-            },
-            supervisor: {
-              select: {
-                id: true,
-                firstName: true,
-                middleName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const res = await getStudentAllGroups(user.id);
+    if (res.success) {
+      studentGroups = res.data;
+    }
   }
 
   const activeGroup = studentGroups.find((g) => g.isActive);
 
-  let supervisorGroups: SupervisorGroup[] = [];
+  let supervisorGroups: GroupListItemDTO[] = [];
 
   if (user.role === SUPERVISOR_ROLE) {
-    supervisorGroups = await prisma.group.findMany({
-      where: {
-        supervisorId: user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        supervisorId: true,
-        cohortId: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const res = await getGroups({
+      supervisorId: user.id,
     });
+
+    if (res.success) {
+      supervisorGroups = res.data;
+    }
   }
 
   const age = new Date().getFullYear() - user.birthYear;
@@ -265,7 +243,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                           {item.group.supervisor.lastName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          الدفعة: {item.group.cohort.label}
+                          الدفعة: {item.group.cohort.name}
                         </p>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
@@ -300,7 +278,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                         {group.name}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        الدفعة: {group.cohortId}
+                        الدفعة: {group.cohort.name}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         بداية الإشراف: {formatDate(group.createdAt)}
