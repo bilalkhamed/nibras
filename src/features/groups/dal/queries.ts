@@ -15,6 +15,7 @@ import type {
   GroupDetailDTO,
   GroupListItemDTO,
   GetGroupsOptions,
+  GroupStudentDTO,
 } from '../types';
 
 // ============================================================================
@@ -165,4 +166,45 @@ export async function findGroupsBySupervisor(
   supervisorId: string,
 ): Promise<DalReturn<GroupListItemDTO[]>> {
   return findGroups({ supervisorId });
+}
+
+export async function findStudentActiveGroup(
+  studentId: string,
+): Promise<DalReturn<GroupStudentDTO | null>> {
+  return runDalOperation(async () => {
+    return await prisma.groupStudent.findFirst({
+      where: {
+        studentId,
+        isActive: true,
+      },
+
+      select: {
+        joinedAt: true,
+        group: {
+          select: {
+            name: true,
+            cohort: {
+              select: {
+                name: true,
+              },
+            },
+            _count: {
+              select: {
+                students: true,
+              },
+            },
+            supervisor: {
+              select: {
+                firstName: true,
+                middleName: true,
+                lastName: true,
+                phone: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  });
 }

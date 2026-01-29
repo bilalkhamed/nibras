@@ -62,19 +62,6 @@ export type GroupSupervisorDTO = {
 };
 
 /**
- * Basic group student info
- */
-export type GroupStudentDTO = {
-  student: {
-    id: string;
-    firstName: string;
-    middleName: string | null;
-    lastName: string;
-  };
-  joinedAt: Date;
-};
-
-/**
  * Group with full details (for info page)
  */
 export type GroupDetailDTO = {
@@ -164,7 +151,7 @@ export type GetGroupsOptions = {
 // Progress Types
 // ============================================================================
 
-import type { Assignment } from '@prisma/client';
+import type { Assignment, Prisma } from '@prisma/client';
 
 export type AssignmentStatus = {
   isCompleted: boolean;
@@ -222,3 +209,38 @@ export type OptimisticAction = {
   newCompleted: boolean;
   markerName: string;
 };
+
+// GroupStudent
+
+export const myGroupStudentSelect = {
+  joinedAt: true,
+  group: {
+    select: {
+      name: true,
+      cohort: {
+        select: {
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          students: true,
+        },
+      },
+      supervisor: {
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+          phone: true,
+          email: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.GroupStudentSelect;
+
+// 2. Generate the Type automatically 🪄
+export type GroupStudentDTO = Prisma.GroupStudentGetPayload<{
+  select: typeof myGroupStudentSelect;
+}>;

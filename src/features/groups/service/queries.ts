@@ -12,11 +12,17 @@ import {
   runServiceOperation,
 } from '@/lib/server/service/helpers';
 import type { ServiceReturn } from '@/lib/server/service/types';
-import { findGroupById, findGroups, findGroupsBySupervisor } from '../dal';
+import {
+  findGroupById,
+  findGroups,
+  findGroupsBySupervisor,
+  findStudentActiveGroup,
+} from '../dal';
 import type {
   GroupDetailDTO,
   GroupListItemDTO,
   GetGroupsOptions,
+  GroupStudentDTO,
 } from '../types';
 import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 
@@ -97,6 +103,26 @@ export async function getGroups(
         success: false,
         error: { type: 'forbidden', statusCode: 403 },
       };
+    },
+    { requireAuth: true },
+  );
+}
+
+export async function getStudentActiveGroup(
+  studentId: string,
+): Promise<ServiceReturn<GroupStudentDTO | null>> {
+  return runServiceOperation(
+    async (session) => {
+      // Students can only see their own active group
+      if (session!.role === 'student' && session!.userId !== studentId) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findStudentActiveGroup(studentId);
+      return mapDalToService(dalResult);
     },
     { requireAuth: true },
   );

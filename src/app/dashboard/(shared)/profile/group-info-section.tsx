@@ -7,51 +7,30 @@ import {
   UserCheck,
   Users,
   XCircleIcon,
-  XIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { InfoField } from '@/components/common/info-field';
-import prisma from '@/lib/server/prisma';
 import { AccessTokenPayload } from '@/types/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatDate } from '@/lib/shared/utils';
+import { getStudentActiveGroup } from '@/features/groups/service/queries';
+import { CustomAlert } from '@/components/common/custom-alert';
 
 type Props = {
   auth: AccessTokenPayload;
 };
 
 export default async function GroupInfoSection({ auth }: Props) {
-  const groupStudent = await prisma.groupStudent.findFirst({
-    where: {
-      studentId: auth.userId,
-      isActive: true,
-    },
+  const result = await getStudentActiveGroup(auth.userId);
 
-    select: {
-      joinedAt: true,
-      group: {
-        select: {
-          name: true,
-          cohortId: true,
-          _count: {
-            select: {
-              students: true,
-            },
-          },
-          supervisor: {
-            select: {
-              firstName: true,
-              middleName: true,
-              lastName: true,
-              phone: true,
-              email: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  if (!result.success) {
+    return (
+      <CustomAlert title={result?.error.type} description={result.error.type} />
+    );
+  }
+
+  const groupStudent = result.data;
 
   return (
     <section>
@@ -70,7 +49,7 @@ export default async function GroupInfoSection({ auth }: Props) {
                 />
                 <InfoField
                   label="الدفعة"
-                  value={groupStudent.group.cohortId}
+                  value={groupStudent.group.cohort.name}
                   icon={<GraduationCap className="h-4 w-4" />}
                 />
                 <InfoField
