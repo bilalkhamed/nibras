@@ -13,6 +13,17 @@ export async function getProgramBySlug(
     async () => {
       const dalResult = await findProgramBySlug(slug);
 
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
       return mapDalToService(dalResult);
     },
     {
