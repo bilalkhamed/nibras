@@ -1,4 +1,35 @@
 import { Prisma } from '@prisma/client';
+import { z } from 'zod';
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Schema for creating a new program
+ */
+export const createProgramSchema = z.object({
+  name: z.string().min(1, 'يرجى إدخال اسم البرنامج'),
+  description: z.string().optional(),
+});
+
+// ============================================================================
+// Inferred Types from Schemas
+// ============================================================================
+
+export type CreateProgramData = z.infer<typeof createProgramSchema>;
+
+// ============================================================================
+// Action Results
+// ============================================================================
+
+export type CreateProgramResult =
+  | { success: true; programId: string }
+  | { success: false; error: string };
+
+// ============================================================================
+// DTOs
+// ============================================================================
 
 const weekSelect = {
   id: true,

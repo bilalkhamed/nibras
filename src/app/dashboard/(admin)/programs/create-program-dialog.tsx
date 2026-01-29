@@ -13,21 +13,17 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Loader2, CheckIcon } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
-
-const programSchema = z.object({
-  name: z.string().min(1, 'يرجى إدخال اسم البرنامج'),
-  description: z.string().optional(),
-});
-
-type ProgramData = z.infer<typeof programSchema>;
+import { createProgramAction } from '@/features/programs/actions';
+import {
+  createProgramSchema,
+  type CreateProgramData,
+} from '@/features/programs/types';
 
 export default function CreateProgramDialog({
   buttonVariant = 'primary',
@@ -40,16 +36,14 @@ export default function CreateProgramDialog({
     reset,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<ProgramData>({
+  } = useForm<CreateProgramData>({
     mode: 'onTouched',
-    resolver: zodResolver(programSchema),
+    resolver: zodResolver(createProgramSchema),
   });
 
   const { name, description } = watch();
 
   const [open, setOpen] = useState(false);
-
-  const router = useRouter();
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -58,29 +52,21 @@ export default function CreateProgramDialog({
     }
   };
 
-  const onSubmit: SubmitHandler<ProgramData> = async (data) => {
-    try {
-      const response = await fetch('/api/programs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+  const onSubmit: SubmitHandler<CreateProgramData> = async (data) => {
+    const result = await createProgramAction(data);
 
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      router.refresh();
-      setOpen(false);
-      reset();
-      toast.success('تم إنشاء البرنامج بنجاح!', {
+    if (!result.success) {
+      toast.error(result.error, {
         duration: 2000,
       });
-    } catch {
-      toast.error('حدث خطأ أثناء إنشاء البرنامج. الرجاء المحاولة مرة أخرى.', {
-        duration: 2000,
-      });
+      return;
     }
+
+    setOpen(false);
+    reset();
+    toast.success('تم إنشاء البرنامج بنجاح!', {
+      duration: 2000,
+    });
   };
 
   return (
