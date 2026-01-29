@@ -61,6 +61,16 @@ export type GroupSupervisorDTO = {
   phone: string | null;
 };
 
+export type GroupStudentInfoDTO = {
+  student: {
+    id: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+  };
+  joinedAt: Date;
+};
+
 /**
  * Group with full details (for info page)
  */
@@ -71,7 +81,7 @@ export type GroupDetailDTO = {
   cohortId: string;
   createdAt: Date;
   supervisor: GroupSupervisorDTO;
-  students: GroupStudentDTO[];
+  students: GroupStudentInfoDTO[];
   cohort: {
     id: string;
     name: string;
