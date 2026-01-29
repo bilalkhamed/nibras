@@ -11,6 +11,7 @@ import {
   findLevelBySlug,
   findManyLevels,
   findManyPrograms,
+  findManyWeeks,
   findManyWeeksTillDate,
   findProgramBySlug,
   findWeekByDate,
@@ -180,6 +181,19 @@ export async function getWeeksTillDate(
   return runServiceOperation(
     async () => {
       const dalResult = await findManyWeeksTillDate(date || new Date());
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getAllWeeks(): Promise<ServiceReturn<WeekDTO[]>> {
+  return runServiceOperation(
+    async () => {
+      const dalResult = await findManyWeeks();
 
       return mapDalToService(dalResult);
     },

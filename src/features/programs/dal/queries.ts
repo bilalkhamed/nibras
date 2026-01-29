@@ -2,8 +2,8 @@
 
 import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
-import { DalError, DalReturn } from '@/lib/server/dal/types';
-import { CalendarWeek, Level, Program, Week } from '@prisma/client';
+import { DalReturn } from '@/lib/server/dal/types';
+import { Level, Program } from '@prisma/client';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import { CalendarWeekDTO, WeekDTO } from '../types';
 
@@ -105,8 +105,8 @@ export async function findCalendarWeekByNumber(
 }
 
 export async function findWeekByNumber(
-  weekNumber: number
-) : Promise<DalReturn<WeekDTO | null>> {
+  weekNumber: number,
+): Promise<DalReturn<WeekDTO | null>> {
   return runDalOperation(async () => {
     cacheTag('weeks');
     return await prisma.week.findUnique({
@@ -144,6 +144,22 @@ export async function findManyWeeksTillDate(
         week: {
           number: 'asc',
         },
+      },
+    });
+  });
+}
+
+export async function findManyWeeks(): Promise<DalReturn<WeekDTO[]>> {
+  return runDalOperation(async () => {
+    cacheTag('weeks');
+    return await prisma.week.findMany({
+      orderBy: {
+        number: 'asc',
+      },
+      select: {
+        id: true,
+        number: true,
+        title: true,
       },
     });
   });
