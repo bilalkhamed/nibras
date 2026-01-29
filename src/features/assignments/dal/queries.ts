@@ -9,7 +9,6 @@ import 'server-only';
 
 import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
-import { getProgramBySlug } from '@/lib/server/programs';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type {
   AssignmentWithRawAttachmentsDTO,
@@ -18,6 +17,8 @@ import type {
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
 } from '../types';
+import { getProgramBySlug } from '@/features/programs/service';
+import { Program } from '@prisma/client';
 
 // ============================================================================
 // Week Assignments Queries
@@ -52,7 +53,16 @@ export async function findWeekAssignments({
 }: WeekAssignmentsOptions): Promise<AssignmentWithRawAttachmentsDTO[]> {
   'use cache';
 
-  const program = programSlug ? await getProgramBySlug(programSlug) : undefined;
+  const programResult = programSlug
+    ? await getProgramBySlug(programSlug)
+    : undefined;
+
+  let program: Program | undefined;
+  if (!programResult?.success) {
+    program = undefined;
+  } else {
+    program = programResult?.data || undefined;
+  }
 
   // Build cache tags for efficient revalidation
   const tags = [

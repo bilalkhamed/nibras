@@ -4,12 +4,12 @@ import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getWeekAssignments } from '@/features/assignments/service';
-import { getLevelBySlug } from '@/lib/server/levels';
-import { getWeekByNumber } from '@/lib/server/weeks';
 import {
   CreateAssignmentSheet,
   AssignmentsTableWithActions,
 } from '@/features/assignments/components';
+import { getLevelBySlug, getWeekByNumber } from '@/features/programs/service';
+import { CustomAlert } from '@/components/common/custom-alert';
 
 export default async function ProgramWeekPage({
   params,
@@ -19,13 +19,34 @@ export default async function ProgramWeekPage({
   const { level, slug, week } = await params;
 
   //TODO get Week instead of CalendarWeek
-  const weekData = await getWeekByNumber(Number(week.replace('week-', '')));
+  const weekResult = await getWeekByNumber(Number(week.replace('week-', '')));
+
+  if (!weekResult.success) {
+    if (weekResult.error.type === 'not-found') {
+      notFound();
+    }
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="عذراً، حدث خطأ ما."
+        description={`فشل في جلب بيانات الأسبوع من الخادم. رمز الخطا: ${weekResult.error.statusCode}`}
+      />
+    );
+  }
+
+  const weekData = weekResult.data;
 
   if (!weekData) {
     notFound();
   }
 
-  const levelData = await getLevelBySlug(level);
+  const levelResult = await getLevelBySlug(level);
+
+  if (!levelResult.success) {
+    notFound();
+  }
+
+  const levelData = levelResult.data;
 
   if (!levelData) {
     notFound();
@@ -33,7 +54,7 @@ export default async function ProgramWeekPage({
 
   const assignmentsResult = await getWeekAssignments({
     levelId: levelData.id,
-    weekId: weekData.week.id,
+    weekId: weekData.id,
     programSlug: slug,
     withAttachments: true,
   });
@@ -69,11 +90,11 @@ export default async function ProgramWeekPage({
       <div className="space-y-6 mt-10">
         <div className="flex justify-between">
           <h3 className="text-xl font-bold text-foreground">
-            {weekData?.week.title}
+            {weekData.title}
           </h3>
           <CreateAssignmentSheet
             levelSlug={level}
-            weekId={weekData.week.id}
+            weekId={weekData.id}
             programSlug={slug}
           />
         </div>

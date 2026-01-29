@@ -1,3 +1,5 @@
+// 'use cache';
+
 import { Level, Program } from '@prisma/client';
 import { ServiceReturn } from '@/lib/server/service/types';
 import {
@@ -5,14 +7,17 @@ import {
   runServiceOperation,
 } from '@/lib/server/service/helpers';
 import {
+  findCalendarWeekByNumber,
   findLevelBySlug,
   findManyLevels,
   findManyPrograms,
+  findManyWeeksTillDate,
   findProgramBySlug,
   findWeekByDate,
+  findWeekByNumber,
 } from '../dal/queries';
 import { getAcademicYear } from '@/lib/server/academic-year';
-import { CalendarWeekDTO } from '../types';
+import { CalendarWeekDTO, WeekDTO } from '../types';
 
 export async function getProgramBySlug(
   slug: string,
@@ -88,6 +93,93 @@ export async function getCurrentWeek(): Promise<
     async () => {
       const { year: academicYear } = getAcademicYear();
       const dalResult = await findWeekByDate(academicYear, new Date());
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getWeekByDate(
+  date: Date,
+): Promise<ServiceReturn<CalendarWeekDTO | null>> {
+  return runServiceOperation(
+    async () => {
+      const { year: academicYear } = getAcademicYear();
+      const dalResult = await findWeekByDate(academicYear, date);
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getCalendarWeekByNumber(
+  weekNumber: number,
+): Promise<ServiceReturn<CalendarWeekDTO | null>> {
+  return runServiceOperation(
+    async () => {
+      const { year: academicYear } = getAcademicYear();
+      const dalResult = await findCalendarWeekByNumber(
+        academicYear,
+        weekNumber,
+      );
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getWeekByNumber(
+  weekNumber: number,
+): Promise<ServiceReturn<WeekDTO | null>> {
+  return runServiceOperation(
+    async () => {
+      const dalResult = await findWeekByNumber(weekNumber);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getWeeksTillDate(
+  date?: Date,
+): Promise<ServiceReturn<CalendarWeekDTO[]>> {
+  return runServiceOperation(
+    async () => {
+      const dalResult = await findManyWeeksTillDate(date || new Date());
 
       return mapDalToService(dalResult);
     },

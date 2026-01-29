@@ -6,12 +6,16 @@ import {
 } from '@/features/assignments/service';
 import type { AssignmentStatus, StudentProgress } from '@/features/groups';
 import { StudentProgressContainer } from '@/features/groups';
-import { getWeekByNumber, getWeeksTillDate } from '@/lib/server/weeks';
 import { getGroupById } from '@/features/groups';
 import { notFound } from 'next/navigation';
 import { WeekNavigator } from '@/components/common/week-navigator';
 import getAuthSession from '@/lib/server/auth-session';
-import { getCurrentWeek } from '@/features/programs/service';
+import {
+  getCalendarWeekByNumber,
+  getCurrentWeek,
+  getWeekByNumber,
+  getWeeksTillDate,
+} from '@/features/programs/service';
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<{ week?: string }> | { week?: string };
@@ -72,7 +76,11 @@ async function StudentsAssignmentsList({
       ? currentWeekResult.data.week.number
       : parsedWeek;
   // fetch the target week from DB
-  const targetWeek = await getWeekByNumber(targetWeekNumber);
+  const targetWeekResult = await getCalendarWeekByNumber(targetWeekNumber);
+  const targetWeek =
+    targetWeekResult.success && targetWeekResult.data
+      ? targetWeekResult.data
+      : null;
   const selectedWeek = targetWeek ?? currentWeekResult.data;
 
   const weekId = selectedWeek.week.id;
@@ -172,11 +180,16 @@ async function StudentsAssignmentsList({
 
 // just to load weeks then pass to WeekNavigator
 async function WeekNavigatorContainer() {
-  const [weeks, currentWeekResult] = await Promise.all([
+  const [weeksResult, currentWeekResult] = await Promise.all([
     getWeeksTillDate(),
     getCurrentWeek(),
   ]);
-  const mappedWeeks = weeks
+
+  if (!weeksResult.success) {
+    return <WeekNavigator weeks={[]} />;
+  }
+
+  const mappedWeeks = weeksResult.data
     .map((w) => ({ id: w.week.id, number: w.week.number, title: w.week.title }))
     .sort((a, b) => a.number - b.number);
 

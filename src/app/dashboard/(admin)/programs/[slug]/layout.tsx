@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import { LevelTabs } from './level-tabs';
-import { getAllLevels } from '@/lib/server/levels';
-import { getProgramBySlug } from '@/features/programs/service/queries';
+import {
+  getAllLevels,
+  getProgramBySlug,
+} from '@/features/programs/service/queries';
 import { CustomAlert } from '@/components/common/custom-alert';
 
 interface ProgramDetailPageProps {
@@ -36,8 +38,19 @@ export default async function ProgramDetailPage({
     notFound();
   }
 
-  const levels = await getAllLevels();
+  const levelsResult = await getAllLevels();
 
+  if (!levelsResult.success) {
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="عذرا، حدث خطأ ما."
+        description={'حدث خطأ أثناء جلب المستويات. الرجاء المحاولة مرة أخرى.'}
+      />
+    );
+  }
+
+  const levels = levelsResult.data;
   return (
     <div className="space-y-6">
       {/* Back Button + Header */}

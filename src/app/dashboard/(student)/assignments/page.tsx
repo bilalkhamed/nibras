@@ -3,7 +3,6 @@ import { STUDENT_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Program } from '@prisma/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getAllPrograms } from '@/lib/server/programs';
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
@@ -19,7 +18,7 @@ import {
   getStudentAssignments,
 } from '@/features/assignments/service';
 import type { AssignmentWithAttachmentsDTO } from '@/features/assignments/types';
-import { getCurrentWeek } from '@/features/programs/service';
+import { getAllPrograms, getCurrentWeek } from '@/features/programs/service';
 
 export default async function StudentAssignmentsPage({
   children,
@@ -41,7 +40,7 @@ export default async function StudentAssignmentsPage({
 
   const currentWeek = currentWeekResult.data;
 
-  const [assignmentsResult, programs] = await Promise.all([
+  const [assignmentsResult, programsResult] = await Promise.all([
     getWeekAssignments({
       levelId,
       weekId: currentWeek.week.id,
@@ -51,7 +50,7 @@ export default async function StudentAssignmentsPage({
   ]);
 
   // Handle service errors
-  if (!assignmentsResult.success) {
+  if (!assignmentsResult.success || !programsResult.success) {
     return <NoData />;
   }
 
@@ -102,9 +101,9 @@ export default async function StudentAssignmentsPage({
         deadlineLabel={deadlineLabel}
         streakText={streakText}
       />
-      <Suspense fallback={<LoadingSkeleton programs={programs} />}>
+      <Suspense fallback={<LoadingSkeleton programs={programsResult.data} />}>
         <StudentAssignmentWrapper
-          programs={programs}
+          programs={programsResult.data}
           assignments={assignmentsWithUrls}
           userId={auth.userId}
         />

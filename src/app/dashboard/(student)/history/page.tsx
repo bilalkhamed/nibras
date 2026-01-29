@@ -3,9 +3,6 @@ import {
   getWeekAssignments,
 } from '@/features/assignments/service';
 import getAuthSession from '@/lib/server/auth-session';
-import { getAllPrograms } from '@/lib/server/programs';
-import { getWeekByNumber } from '@/lib/server/weeks';
-import { CalendarWeek, Week } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import {
@@ -30,7 +27,13 @@ import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { AttachmentsCell } from '@/features/assignments';
-import { getCurrentWeek } from '@/features/programs/service';
+import {
+  getAllPrograms,
+  getCalendarWeekByNumber,
+  getCurrentWeek,
+} from '@/features/programs/service';
+import { CalendarWeekDTO } from '@/features/programs/types';
+import { CustomAlert } from '@/components/common/custom-alert';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
@@ -88,10 +91,7 @@ async function WeekProvider({
   children,
 }: {
   weekNumber: number;
-  children: (
-    week: CalendarWeek & { week: Week },
-    isCurrentWeek: boolean,
-  ) => React.ReactNode;
+  children: (week: CalendarWeekDTO, isCurrentWeek: boolean) => React.ReactNode;
 }) {
   const currentWeekResult = await getCurrentWeek();
 
@@ -108,15 +108,17 @@ async function WeekProvider({
     );
   }
 
-  const week = await getWeekByNumber(weekNumber);
+  const weekResult = await getCalendarWeekByNumber(weekNumber);
 
-  if (!week) {
+  if (!weekResult.success || !weekResult.data) {
     return (
       <div className="p-6 text-center text-sm text-muted-foreground">
         لا توجد معلومات متاحة لهذا الأسبوع
       </div>
     );
   }
+
+  const week = weekResult.data;
 
   const currentWeek = currentWeekResult.success ? currentWeekResult.data : null;
 
@@ -126,7 +128,7 @@ async function WeekProvider({
   return <>{children(week, isCurrentWeek)}</>;
 }
 
-async function WeekInfo({ week }: { week: CalendarWeek & { week: Week } }) {
+async function WeekInfo({ week }: { week: CalendarWeekDTO }) {
   return (
     <div className="p-4 text-center">
       <h2 className="text-xl font-semibold mb-2">{week.week.title}</h2>
@@ -180,7 +182,18 @@ async function AssignmentsList({
     }),
   );
 
-  const programs = await getAllPrograms();
+  const programsResult = await getAllPrograms();
+  if (!programsResult.success) {
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="عذراً، حدث خطأ ما."
+        description="فشل في جلب بيانات البرامج من الخادم."
+      />
+    );
+  }
+  const programs = programsResult.data;
+
   const programById = programs.reduce<Record<string, string>>(
     (acc, program) => {
       acc[program.id] = program.name;

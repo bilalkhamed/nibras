@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { getWeeksTillDate } from '@/lib/server/weeks';
 import { WeekNavigator } from '@/components/common/week-navigator';
+import { getWeeksTillDate } from '@/features/programs/service';
 
 export default function HistoryLayout({
   children,
@@ -20,8 +20,12 @@ export default function HistoryLayout({
 }
 
 async function WeekNavigatorContainer() {
-  const weeks = await getWeeksTillDate();
+  const weeksResult = await getWeeksTillDate();
 
+  if (!weeksResult.success) {
+    return <WeekNavigator weeks={[]} />;
+  }
+  const weeks = weeksResult.data;
   const mappedWeeks = weeks
     .map((w) => ({ id: w.week.id, number: w.week.number, title: w.week.title }))
     .sort((a, b) => a.number - b.number);

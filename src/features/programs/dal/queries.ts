@@ -5,7 +5,7 @@ import prisma from '@/lib/server/prisma';
 import { DalError, DalReturn } from '@/lib/server/dal/types';
 import { CalendarWeek, Level, Program, Week } from '@prisma/client';
 import { runDalOperation } from '@/lib/server/dal/helpers';
-import { CalendarWeekDTO } from '../types';
+import { CalendarWeekDTO, WeekDTO } from '../types';
 
 export async function findProgramBySlug(
   slug: string,
@@ -72,6 +72,77 @@ export async function findWeekByDate(
             title: true,
             id: true,
           },
+        },
+      },
+    });
+  });
+}
+
+export async function findCalendarWeekByNumber(
+  academicYear: number,
+  weekNumber: number,
+): Promise<DalReturn<CalendarWeekDTO | null>> {
+  return runDalOperation(async () => {
+    cacheTag('weeks');
+    return await prisma.calendarWeek.findFirst({
+      where: {
+        academicYear,
+        week: {
+          number: weekNumber,
+        },
+      },
+      include: {
+        week: {
+          select: {
+            number: true,
+            title: true,
+            id: true,
+          },
+        },
+      },
+    });
+  });
+}
+
+export async function findWeekByNumber(
+  weekNumber: number
+) : Promise<DalReturn<WeekDTO | null>> {
+  return runDalOperation(async () => {
+    cacheTag('weeks');
+    return await prisma.week.findUnique({
+      where: {
+        number: weekNumber,
+      },
+      select: {
+        id: true,
+        number: true,
+        title: true,
+      },
+    });
+  });
+}
+
+export async function findManyWeeksTillDate(
+  date: Date,
+): Promise<DalReturn<CalendarWeekDTO[]>> {
+  return runDalOperation(async () => {
+    cacheTag('weeks');
+    return await prisma.calendarWeek.findMany({
+      where: {
+        startDate: { lte: date },
+      },
+      include: {
+        week: {
+          select: {
+            number: true,
+            title: true,
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        week: {
+          number: 'asc',
         },
       },
     });
