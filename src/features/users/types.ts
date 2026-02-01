@@ -96,6 +96,9 @@ export const userByEmailSelect = {
   groupsAsStudent: {
     where: { isActive: true },
   },
+  managedCohorts: {
+    select: { cohortId: true },
+  },
   cohort: {
     select: {
       currentLevelId: true,

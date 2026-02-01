@@ -21,6 +21,7 @@ export async function setAccessToken(
   currentLevelId: string | null,
   activeGroupId: string | null,
   supervisedGroupId: string | null,
+  managedCohortId: string | null,
 ) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
   const token = await signAccessToken({
@@ -33,6 +34,7 @@ export async function setAccessToken(
     currentLevelId,
     activeGroupId,
     supervisedGroupId,
+    managedCohortId,
   });
   (await cookies()).set('accessToken', token, {
     httpOnly: true,

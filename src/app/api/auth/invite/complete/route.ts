@@ -70,6 +70,11 @@ export async function POST(request: NextRequest) {
               currentLevelId: true,
             },
           },
+          managedCohorts: {
+            select: {
+              cohortId: true,
+            },
+          },
           groupsAsStudent: {
             where: {
               isActive: true,
@@ -90,6 +95,7 @@ export async function POST(request: NextRequest) {
         ? updatedUser.groupsAsStudent[0].groupId
         : null,
       updatedUser.supervisedGroupId,
+      updatedUser.managedCohorts[0]?.cohortId || null,
     );
 
     return NextResponse.json(

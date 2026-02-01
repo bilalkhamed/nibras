@@ -32,6 +32,7 @@ export type AccessTokenPayload = {
   currentLevelId: string | null;
   activeGroupId: string | null;
   supervisedGroupId: string | null;
+  managedCohortId: string | null;
 };
 
 export type CountryCode = keyof typeof labels.countries;
