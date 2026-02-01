@@ -25,19 +25,43 @@ import { createUserAction } from '../actions';
 import { Role } from '@prisma/client';
 import { CreateUserInput, createUserSchema } from '../types';
 
-export function AddUserForm() {
+type AddUserFormProps = {
+  cohortId?: string;
+};
+
+export function AddUserForm({ cohortId }: AddUserFormProps) {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [inviteCode, setInviteCode] = useState<string>('');
   const [isPending, startTransition] = useTransition();
+  const [isLoadingCohorts, setIsLoadingCohorts] = useState(true);
 
   useEffect(() => {
     const fetchCohorts = async () => {
-      const response = await fetch('/api/cohorts');
-      const data = await response.json();
-      setCohorts(data.cohorts);
+      try {
+        setIsLoadingCohorts(true);
+        const url = cohortId ? `/api/cohorts/${cohortId}` : '/api/cohorts';
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          console.error('Failed to fetch cohorts:', response.statusText);
+          setCohorts([]);
+          return;
+        }
+
+        const data = await response.json();
+        console.log('Cohorts API response:', data);
+
+        const cohortsData = cohortId ? [data.cohort] : data.cohorts;
+        setCohorts(cohortsData.filter((c: Cohort | undefined) => c != null));
+      } catch (error) {
+        console.error('Error fetching cohorts:', error);
+        setCohorts([]);
+      } finally {
+        setIsLoadingCohorts(false);
+      }
     };
     fetchCohorts();
-  }, []);
+  }, [cohortId]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -52,6 +76,7 @@ export function AddUserForm() {
     mode: 'onTouched',
     defaultValues: {
       role: STUDENT_ROLE,
+      cohortId: cohortId || undefined,
     },
   });
 
@@ -148,6 +173,7 @@ export function AddUserForm() {
                         onChange(v);
                         onBlur();
                       }}
+                      disabled={!!cohortId}
                     >
                       <SelectTrigger
                         id="cohort"
@@ -156,21 +182,35 @@ export function AddUserForm() {
                         onChange={onChange}
                         value={value}
                       >
-                        <SelectValue placeholder="اختر الدفعة" />
+                        <SelectValue
+                          placeholder={
+                            isLoadingCohorts ? 'جاري التحميل...' : 'اختر الدفعة'
+                          }
+                        />
                       </SelectTrigger>
 
                       <SelectContent className="bg-card text-foreground border border-border">
-                        {cohorts.map((cohort) => {
-                          return (
-                            <SelectItem
-                              key={cohort.id}
-                              value={cohort.id}
-                              className="cursor-pointer"
-                            >
-                              {cohort.name}
-                            </SelectItem>
-                          );
-                        })}
+                        {isLoadingCohorts ? (
+                          <SelectItem value="loading" disabled>
+                            جاري التحميل...
+                          </SelectItem>
+                        ) : cohorts.length === 0 ? (
+                          <SelectItem value="no-cohorts" disabled>
+                            لا توجد دفعات
+                          </SelectItem>
+                        ) : (
+                          cohorts.map((cohort) => {
+                            return (
+                              <SelectItem
+                                key={cohort.id}
+                                value={cohort.id}
+                                className="cursor-pointer"
+                              >
+                                {cohort.name}
+                              </SelectItem>
+                            );
+                          })
+                        )}
                       </SelectContent>
                     </Select>
                   )}
@@ -223,31 +263,25 @@ export function AddUserForm() {
                       </SelectTrigger>
 
                       <SelectContent className="bg-card text-foreground border border-border">
-                        {/* <SelectItem value="student" className="cursor-pointer">
-                          طالبة
-                        </SelectItem>
-                        <SelectItem
-                          value="supervisor"
-                          className="cursor-pointer"
-                        >
-                          مشرفة
-                        </SelectItem> */}
-                        {Object.entries(Role).map(
-                          ([key]) =>
-                            key !== ADMIN_ROLE && (
-                              <SelectItem
-                                key={key}
-                                value={key}
-                                className="cursor-pointer"
-                              >
-                                {
-                                  labels.dashboard.users[
-                                    key as keyof typeof Role
-                                  ]
-                                }
-                              </SelectItem>
-                            ),
-                        )}
+                        {Object.entries(Role).map(([key]) => {
+                          if (key === ADMIN_ROLE) return null;
+                          if (
+                            cohortId &&
+                            key !== STUDENT_ROLE &&
+                            key !== 'supervisor'
+                          ) {
+                            return null;
+                          }
+                          return (
+                            <SelectItem
+                              key={key}
+                              value={key}
+                              className="cursor-pointer"
+                            >
+                              {labels.dashboard.users[key as keyof typeof Role]}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   )}

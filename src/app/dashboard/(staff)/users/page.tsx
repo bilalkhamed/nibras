@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { UsersTableSkeleton } from '@/components/skeletons';
 import { Toaster } from '@/components/ui/sonner';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
+import getAuthSession from '@/lib/server/auth-session';
+import { ADMIN_ROLE } from '@/types/types';
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
@@ -13,7 +15,9 @@ export default async function UsersPage({}) {
   return (
     <>
       <section>
-        {/* <AddUserForm /> */}
+        <Suspense fallback={'fetching form'}>
+          <AddUserFormContainer />
+        </Suspense>
         <Toaster
           richColors
           className="rounded-2xl"
@@ -36,5 +40,18 @@ export default async function UsersPage({}) {
         </section>
       </Suspense>
     </>
+  );
+}
+
+async function AddUserFormContainer() {
+  const session = await getAuthSession();
+
+  if (!session) return null;
+
+  console.log(session);
+  return session.role === ADMIN_ROLE ? (
+    <AddUserForm />
+  ) : (
+    <AddUserForm cohortId={session.managedCohortId!} />
   );
 }

@@ -7,7 +7,7 @@
 import 'server-only';
 
 // Query operations
-export { getAllCohorts } from './queries';
+export { getAllCohorts, getCohortById } from './queries';
 
 // Mutation operations
 export { createCohort } from './mutations';

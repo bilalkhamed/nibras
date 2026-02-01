@@ -14,7 +14,10 @@ import { generateInvite } from '@/lib/server/hash';
 export async function createUser(userData: CreateUserInput) {
   return runServiceOperation<CreateUserResult>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (
+        !session ||
+        (session.role !== 'admin' && session.role !== 'cohort_manager')
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -27,6 +30,25 @@ export async function createUser(userData: CreateUserInput) {
           success: false,
           error: { type: 'bad-request', statusCode: 400 },
         };
+      }
+
+      if (session.role === 'cohort_manager') {
+        if (
+          userData.role === 'student' &&
+          userData.cohortId !== session.managedCohortId
+        ) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+
+        if (userData.role !== 'student' && userData.role !== 'supervisor') {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
       }
 
       const { expiresAt, selector, validatorHash, fullCode } = generateInvite();
