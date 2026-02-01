@@ -1,4 +1,5 @@
-import { Cohort, Prisma, User } from '@prisma/client';
+import { Cohort, Prisma, Role, User } from '@prisma/client';
+import z from 'zod';
 
 // ============================================================================
 // Base DTOs
@@ -116,16 +117,26 @@ export type UserWithRoleAndCohortDTO = Pick<User, 'id' | 'role' | 'cohortId'>;
 // Mutation DTOs
 // ============================================================================
 
+export const createUserSchema = z.object({
+  firstName: z.string('الاسم الأول مطلوب').min(2, 'الاسم الأول مطلوب'),
+  middleName: z.string('الاسم الثاني مطلوب').min(2, 'الاسم الثاني مطلوب'),
+  lastName: z.string('اسم العائلة مطلوب').min(2, 'اسم العائلة مطلوب'),
+  birthYear: z
+    .number('سنة الميلاد مطلوبة')
+    .min(1900, 'سنة الميلاد غير صحيحة')
+    .max(new Date().getFullYear() - 11, 'سنة الميلاد غير صحيحة'),
+  cohortId: z.string('الدفعة مطلوبة').min(1, 'الدفعة مطلوبة').optional(),
+  country: z.string('الدولة مطلوبة').length(2, 'الدولة مطلوبة'),
+  role: z.enum(
+    Object.keys(Role).filter((key) => key !== 'admin') as Array<
+      keyof typeof Role
+    >,
+    'الرتبة مطلوبة',
+  ),
+});
+
 /** Input for creating a new user */
-export type CreateUserInput = {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  birthYear: number;
-  country: string;
-  role: 'student' | 'supervisor';
-  cohortId?: string;
-};
+export type CreateUserInput = z.infer<typeof createUserSchema>;
 
 /** Response after creating a user */
 export type CreatedUserDTO = Pick<

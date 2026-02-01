@@ -14,18 +14,16 @@ import {
 } from '@/components/ui/select';
 import SearchSelect from '@/components/common/search-select';
 import { useEffect, useState, useTransition } from 'react';
-import { Cohort, STUDENT_ROLE } from '@/types/types';
+import { ADMIN_ROLE, Cohort, STUDENT_ROLE } from '@/types/types';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  createUserSchema as formSchema,
-  type CreateUserData,
-} from '@/lib/shared/auth-schemas';
 import { Loader2Icon } from 'lucide-react';
 import { InviteCodeModal } from './invite-code-modal';
 import { toast } from 'sonner';
 import { ErrorMessage } from '@/components/forms/error-message';
 import { createUserAction } from '../actions';
+import { Role } from '@prisma/client';
+import { CreateUserInput, createUserSchema } from '../types';
 
 export function AddUserForm() {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
@@ -49,26 +47,17 @@ export function AddUserForm() {
     watch,
     reset,
     formState: { errors },
-  } = useForm<CreateUserData>({
-    resolver: zodResolver(formSchema),
+  } = useForm<CreateUserInput>({
+    resolver: zodResolver(createUserSchema),
     mode: 'onTouched',
     defaultValues: {
       role: STUDENT_ROLE,
     },
   });
 
-  const onSubmit: SubmitHandler<CreateUserData> = async (data) => {
-    const formData = new FormData();
-    formData.append('firstName', data.firstName);
-    formData.append('middleName', data.middleName);
-    formData.append('lastName', data.lastName);
-    formData.append('country', data.country);
-    formData.append('role', data.role);
-    formData.append('birthYear', String(data.birthYear));
-    if (data.cohortId) formData.append('cohortId', data.cohortId);
-
+  const onSubmit: SubmitHandler<CreateUserInput> = async (data) => {
     startTransition(async () => {
-      const result = await createUserAction(formData);
+      const result = await createUserAction(data);
 
       if (!result.success) {
         toast.error(
@@ -234,7 +223,7 @@ export function AddUserForm() {
                       </SelectTrigger>
 
                       <SelectContent className="bg-card text-foreground border border-border">
-                        <SelectItem value="student" className="cursor-pointer">
+                        {/* <SelectItem value="student" className="cursor-pointer">
                           طالبة
                         </SelectItem>
                         <SelectItem
@@ -242,7 +231,23 @@ export function AddUserForm() {
                           className="cursor-pointer"
                         >
                           مشرفة
-                        </SelectItem>
+                        </SelectItem> */}
+                        {Object.entries(Role).map(
+                          ([key]) =>
+                            key !== ADMIN_ROLE && (
+                              <SelectItem
+                                key={key}
+                                value={key}
+                                className="cursor-pointer"
+                              >
+                                {
+                                  labels.dashboard.users[
+                                    key as keyof typeof Role
+                                  ]
+                                }
+                              </SelectItem>
+                            ),
+                        )}
                       </SelectContent>
                     </Select>
                   )}

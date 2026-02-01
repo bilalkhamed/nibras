@@ -1,6 +1,6 @@
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import { DalReturn } from '@/lib/server/dal/types';
-import prisma from '@/lib/server/prisma';
+import prisma, { Prisma } from '@/lib/server/prisma';
 import { CreateUserInput, CreatedUserDTO } from '../types';
 
 // ============================================================================
@@ -28,6 +28,12 @@ export async function createUserWithInvite(
           role: userData.role,
           cohortId: userData.cohortId,
           status: 'invited',
+          managedCohorts:
+            userData.role === 'cohort_manager'
+              ? {
+                  create: { cohortId: userData.cohortId! },
+                }
+              : undefined,
         },
         select: {
           id: true,

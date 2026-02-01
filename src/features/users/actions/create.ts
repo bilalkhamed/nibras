@@ -1,9 +1,9 @@
 'use server';
 
-import { createUserSchema } from '@/lib/shared/auth-schemas';
 import { createUser } from '../service';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { CreateUserInput, createUserSchema } from '../types';
 
 export type CreateUserActionResult =
   | { success: true; inviteCode: string }
@@ -11,33 +11,21 @@ export type CreateUserActionResult =
 
 /** Server action to create a new user */
 export async function createUserAction(
-  formData: FormData,
+  data: CreateUserInput,
 ): Promise<CreateUserActionResult> {
-  const rawData = {
-    firstName: formData.get('firstName'),
-    middleName: formData.get('middleName'),
-    lastName: formData.get('lastName'),
-    country: formData.get('country'),
-    role: formData.get('role'),
-    birthYear: formData.get('birthYear')
-      ? Number(formData.get('birthYear'))
-      : undefined,
-    cohortId: formData.get('cohortId') || undefined,
-    phone: formData.get('phone') || undefined,
-  };
-
   // Validate with zod schema
-  const parseResult = createUserSchema.safeParse(rawData);
+  const parseResult = createUserSchema.safeParse(data);
   if (!parseResult.success) {
     return {
       success: false,
-      error: 'Validation failed',
+      error: 'حدث خطأ في التحقق من البيانات',
       details: parseResult.error.issues,
     };
   }
 
   const result = await createUser(parseResult.data);
 
+  console.log(parseResult.data.cohortId);
   if (!result.success) {
     return {
       success: false,
