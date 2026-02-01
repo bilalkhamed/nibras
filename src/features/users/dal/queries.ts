@@ -212,13 +212,24 @@ export async function findUsersBasic(
 /** Count users grouped by role (for admin dashboard stats) */
 export async function countUsersByRole(filters?: { cohortId?: string }) {
   return runDalOperation(async () => {
+    const where: Prisma.UserWhereInput = {
+      status: { not: 'deleted' },
+    };
+
+    if (filters?.cohortId) {
+      where.OR = [
+        { cohortId: filters.cohortId },
+        {
+          supervisedGroup: {
+            cohortId: filters.cohortId,
+          },
+        },
+      ];
+    }
     return await prisma.user.groupBy({
       by: ['role'],
       _count: true,
-      where: {
-        status: { not: 'deleted' },
-        cohortId: filters?.cohortId,
-      },
+      where: where,
     });
   });
 }
