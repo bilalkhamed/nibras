@@ -57,9 +57,6 @@ export async function AdminDashboard() {
     }),
     getRecentUsers(5),
     prisma.group.findMany({
-      where: {
-        supervisorId: undefined,
-      },
       select: {
         id: true,
         name: true,

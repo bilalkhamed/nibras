@@ -20,8 +20,6 @@ export {
 export {
   upsertStudentAssignment,
   deleteAssignmentById,
-  updateAssignmentBasic,
-  updateAssignmentLinks,
-  updateAssignmentFiles,
+  updateAssignment,
   insertAssignment,
 } from './mutations';

@@ -1,4 +1,4 @@
-import { NavItem, SidebarNavItem } from '@/types/types';
+import { NavItem, Role, SidebarNavItem } from '@/types/types';
 import {
   Home,
   NotebookPen,
@@ -47,11 +47,7 @@ const programs: SidebarNavItem = {
   ],
 };
 
-export const sidebarNavItems: {
-  admin: SidebarNavItem[];
-  supervisor: SidebarNavItem[];
-  student: SidebarNavItem[];
-} = {
+export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
   admin: [
     {
       label: 'المستخدمون',
@@ -70,6 +66,10 @@ export const sidebarNavItems: {
     { label: 'مهامي', href: '/dashboard/assignments', icon: BookOpen },
     { label: 'مساري', href: '/dashboard/history', icon: FolderClock },
   ],
+
+  cohort_manager: [],
+  group_manager: [],
+  media_team: [],
 };
 
 export const hideNavbarOnRoutes: string[] = [

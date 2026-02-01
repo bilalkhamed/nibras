@@ -15,9 +15,6 @@ import type { ServiceReturn } from '@/lib/server/service/types';
 import {
   upsertStudentAssignment,
   deleteAssignmentById,
-  updateAssignmentBasic,
-  updateAssignmentLinks,
-  updateAssignmentFiles,
   insertAssignment,
 } from '../dal';
 import type {
