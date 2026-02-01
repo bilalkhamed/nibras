@@ -10,7 +10,7 @@ import {
 import { StatCard } from './shared/stat-card';
 import { ActivityCard, ActivityItem } from './shared/activity-card';
 import { QuickActionCard } from './shared/quick-action-card';
-import { getRecentUsers, getUserCountsByRole } from '@/features/users/service';
+import { getRecentUsers, getUsersRoleCounts } from '@/features/users/service';
 import prisma from '@/lib/server/prisma';
 
 function getTimeAgo(date: Date) {
@@ -33,7 +33,7 @@ export async function AdminDashboard() {
     recentUsersResult,
     groupsWithoutSupervisor,
   ] = await Promise.all([
-    getUserCountsByRole(),
+    getUsersRoleCounts(),
     prisma.program.count(),
     prisma.group.count(),
     prisma.invite.findMany({
@@ -66,14 +66,18 @@ export async function AdminDashboard() {
     }),
   ]);
 
-  const userCounts = userCountsResult.success ? userCountsResult.data : [];
+  const userCounts = userCountsResult.success
+    ? userCountsResult.data
+    : {
+        admin: 0,
+        supervisor: 0,
+        student: 0,
+      };
   const recentUsers = recentUsersResult.success ? recentUsersResult.data : [];
 
-  const studentCount =
-    userCounts.find((u) => u.role === 'student')?._count || 0;
-  const supervisorCount =
-    userCounts.find((u) => u.role === 'supervisor')?._count || 0;
-  const adminCount = userCounts.find((u) => u.role === 'admin')?._count || 0;
+  const studentCount = userCounts.student;
+  const supervisorCount = userCounts.supervisor;
+  const adminCount = userCounts.admin;
   const totalUsers = studentCount + supervisorCount + adminCount;
 
   const pendingInviteActivities: ActivityItem[] = pendingInvites.map(
