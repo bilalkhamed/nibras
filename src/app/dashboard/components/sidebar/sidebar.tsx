@@ -18,8 +18,8 @@ import getAuthSession from '@/lib/server/auth-session';
 export async function DashboardSidebar({}: React.ComponentProps<
   typeof Sidebar
 >) {
-  const auth = await getAuthSession();
-  if (!auth) {
+  const session = await getAuthSession();
+  if (!session) {
     return null;
   }
   return (
@@ -39,14 +39,17 @@ export async function DashboardSidebar({}: React.ComponentProps<
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain role={auth.role} />
+        <NavMain
+          role={session.role}
+          supervisedGroupId={session.supervisedGroupId}
+        />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
           user={{
-            firstName: auth.firstName,
-            lastName: auth.lastName,
-            role: auth.role,
+            firstName: session.firstName,
+            lastName: session.lastName,
+            role: session.role,
           }}
         />
       </SidebarFooter>

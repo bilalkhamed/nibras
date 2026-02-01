@@ -55,11 +55,15 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: UserRound,
       isActive: true,
     },
-    { label: 'المجموعات', href: '/dashboard/groups', icon: UsersRound },
+    { label: 'المجموعات', href: '/dashboard/groups/', icon: UsersRound },
     programs,
   ],
   supervisor: [
-    { label: 'مجموعاتي', href: '/dashboard/groups', icon: UsersRound },
+    {
+      label: 'مجموعتي',
+      href: '/dashboard/groups/[groupId]/info',
+      icon: UsersRound,
+    },
   ],
   student: [
     { label: 'مجموعتي', href: '/dashboard/my-group', icon: UsersRound },

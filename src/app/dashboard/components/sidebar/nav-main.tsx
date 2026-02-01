@@ -18,16 +18,31 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Role } from '@/types/types';
+import { Role, SUPERVISOR_ROLE } from '@/types/types';
 import { getActiveSidebarItem } from './page-title';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { sidebarNavItems } from '@/lib/shared/site.config';
 
-export function NavMain({ role }: { role: Role }) {
-  const items = sidebarNavItems[role];
+export function NavMain({
+  role,
+  supervisedGroupId,
+}: {
+  role: Role;
+  supervisedGroupId?: string | null;
+}) {
+  const items = sidebarNavItems[role].map((item) => ({
+    ...item,
+    href: supervisedGroupId
+      ? item.href.replace('[groupId]', supervisedGroupId)
+      : item.href,
+  }));
   const pathname = usePathname();
-  const activeItem = getActiveSidebarItem(pathname);
+  const activeItem =
+    role === SUPERVISOR_ROLE && pathname.includes('groups')
+      ? sidebarNavItems[role].find((item) => item.label === 'مجموعتي')!
+      : getActiveSidebarItem(pathname);
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>الرئيسية</SidebarGroupLabel>
