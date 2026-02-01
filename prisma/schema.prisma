@@ -64,6 +64,7 @@ model User {
   @@index([role])
   @@index([role, status])
   @@index([cohortId, role])
+  @@index([supervisedGroupId])
   @@map("users")
 }
 
