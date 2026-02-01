@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     foundUser.groupsAsStudent.length > 0
       ? foundUser.groupsAsStudent[0].groupId
       : null,
+    foundUser.supervisedGroupId,
   );
   return NextResponse.json({ success: true }, { status: 200 });
 }

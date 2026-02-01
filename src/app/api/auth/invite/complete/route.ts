@@ -2,7 +2,7 @@ import { InvitedUserData, invitedUserSchema } from '@/lib/shared/auth-schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateInvite } from '../validate-invite';
 import { z } from 'zod';
-import prisma from '@/lib/server/prisma';
+import prisma, { Prisma } from '@/lib/server/prisma';
 import { hashPassword } from '@/lib/server/hash';
 import { ACTIVE_STATUS } from '@/types/types';
 import { setAccessToken } from '@/lib/server/tokens';
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { message: 'Invalid request body' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   if (!success) {
     return NextResponse.json(
       { message: 'Invalid user data', errors: z.treeifyError(error) },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
           role: true,
           firstName: true,
           lastName: true,
+          supervisedGroupId: true,
           cohort: {
             select: {
               currentLevelId: true,
@@ -87,26 +88,30 @@ export async function POST(request: NextRequest) {
       updatedUser.cohort?.currentLevelId || null,
       updatedUser.groupsAsStudent.length > 0
         ? updatedUser.groupsAsStudent[0].groupId
-        : null
+        : null,
+      updatedUser.supervisedGroupId,
     );
 
     return NextResponse.json(
       { message: 'Invite completed successfully' },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     if (typeof error === 'object' && error && 'code' in error) {
-      if ((error as any).code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         return NextResponse.json(
           { message: 'Email already in use' },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
 
     return NextResponse.json(
       { message: 'Server error completing invite', error },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
