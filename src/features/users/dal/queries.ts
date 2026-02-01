@@ -99,20 +99,20 @@ export async function findUserById(
   { cohortId }: { cohortId?: string } = {},
 ): Promise<DalReturn<UserWithCohortDTO | null>> {
   return runDalOperation(async () => {
-    return await prisma.user.findUnique({
-      where: {
-        id,
-        OR: [
-          { cohortId: cohortId },
-          {
-            supervisedGroup: cohortId
-              ? {
-                  cohortId: cohortId,
-                }
-              : undefined,
+    const where: Prisma.UserWhereUniqueInput = { id };
+
+    if (cohortId) {
+      where.OR = [
+        { cohortId: cohortId },
+        {
+          supervisedGroup: {
+            cohortId: cohortId,
           },
-        ],
-      },
+        },
+      ];
+    }
+    return await prisma.user.findUnique({
+      where,
       select: {
         id: true,
         firstName: true,
