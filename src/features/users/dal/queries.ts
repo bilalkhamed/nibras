@@ -11,6 +11,7 @@ import {
   StudentWithAssignmentsDTO,
   UserBasicDTO,
   UserByEmail,
+  userByEmailSelect,
   UserInviteStatusDTO,
   UserNameDTO,
   UserWithCohortAndTimestampsDTO,
@@ -107,23 +108,7 @@ export async function findUserByEmail(
   return runDalOperation(async () => {
     return await prisma.user.findUnique({
       where: { email },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        status: true,
-        hashedPassword: true,
-        firstName: true,
-        lastName: true,
-        groupsAsStudent: {
-          where: { isActive: true },
-        },
-        cohort: {
-          select: {
-            currentLevelId: true,
-          },
-        },
-      },
+      select: userByEmailSelect,
     });
   });
 }

@@ -83,7 +83,7 @@ export type StudentWithAssignmentsDTO = {
 // Auth & Invite DTOs
 // ============================================================================
 
-const userByEmailSelect = {
+export const userByEmailSelect = {
   id: true,
   email: true,
   role: true,
@@ -91,6 +91,7 @@ const userByEmailSelect = {
   hashedPassword: true,
   firstName: true,
   lastName: true,
+  supervisedGroupId: true,
   groupsAsStudent: {
     where: { isActive: true },
   },
