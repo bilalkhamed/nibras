@@ -73,7 +73,7 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
 
   cohort_manager: [
     {
-      label: 'المستخدمين',
+      label: 'المستخدمون',
       href: '/dashboard/users',
       icon: UserRound,
     },
