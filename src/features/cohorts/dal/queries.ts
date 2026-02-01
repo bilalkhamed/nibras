@@ -39,3 +39,20 @@ export async function findManyCohorts(): Promise<DalReturn<CohortListDTO[]>> {
     });
   });
 }
+
+export async function findCohortById(
+  id: string,
+): Promise<DalReturn<CohortListDTO | null>> {
+  'use cache';
+  cacheTag('cohorts-list');
+
+  return runDalOperation(async () => {
+    return prisma.cohort.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  });
+}

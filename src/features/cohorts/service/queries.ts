@@ -15,6 +15,7 @@ import type { ServiceReturn } from '@/lib/server/service/types';
 import { findManyCohorts } from '../dal';
 import type { CohortListDTO } from '../types';
 import { ADMIN_ROLE } from '@/types/types';
+import { findCohortById } from '../dal/queries';
 
 // ============================================================================
 // Cohort Queries
@@ -39,6 +40,40 @@ export async function getAllCohorts(): Promise<ServiceReturn<CohortListDTO[]>> {
 
       if (!dalResult.success) {
         return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: dalResult.data,
+      };
+    },
+    { requireAuth: true },
+  );
+}
+
+export async function getCohortById(
+  id: string,
+): Promise<ServiceReturn<CohortListDTO | null>> {
+  return runServiceOperation(
+    async (session) => {
+      if (session!.role !== ADMIN_ROLE) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findCohortById(id);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
       }
 
       return {
