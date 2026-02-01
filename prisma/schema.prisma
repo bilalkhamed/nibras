@@ -10,8 +10,11 @@ datasource db {
 
 enum Role {
   admin
+  cohort_manager
+  group_manager
   supervisor
   student
+  media_team
 }
 
 enum UserStatus {
@@ -39,8 +42,12 @@ model User {
   country        String?
   phone          String?
 
-  groupsAsSupervisor Group[]        @relation("SupervisedGroups")
-  groupsAsStudent    GroupStudent[] @relation("StudentGroups")
+  groupsAsStudent GroupStudent[] @relation("StudentGroups")
+
+  supervisedGroupId String?
+  supervisedGroup   Group?  @relation("GroupSupervisors", fields: [supervisedGroupId], references: [id])
+
+  managedGroups GroupManager[] @relation("UserGroupManagers")
 
   cohort   Cohort? @relation("CohortStudents", fields: [cohortId], references: [id])
   cohortId String?
@@ -64,10 +71,10 @@ model Group {
   name String
   code String @unique
 
-  cohortId     String
-  cohort       Cohort @relation(fields: [cohortId], references: [id])
-  supervisorId String
-  supervisor   User   @relation("SupervisedGroups", fields: [supervisorId], references: [id])
+  cohortId    String
+  cohort      Cohort         @relation(fields: [cohortId], references: [id])
+  supervisors User[]         @relation("GroupSupervisors")
+  managers    GroupManager[] @relation("GroupGroupManagers")
 
   students GroupStudent[]
 
@@ -78,9 +85,46 @@ model Group {
 
   @@unique([cohortId, name])
   @@index([cohortId])
-  @@index([supervisorId])
-  @@index([cohortId, supervisorId])
   @@map("groups")
+}
+
+model GroupManager {
+  id String @id @default(cuid(2))
+
+  groupId String
+  userId  String
+
+  group Group @relation("GroupGroupManagers", fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation("UserGroupManagers", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_managers")
+}
+
+model GroupStudent {
+  id String @id @default(cuid(2))
+
+  groupId   String
+  studentId String
+
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student User  @relation("StudentGroups", fields: [studentId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+  isActive Boolean   @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([groupId, isActive])
+  @@index([studentId, isActive])
+  @@map("group_students")
 }
 
 model Cohort {
@@ -103,27 +147,6 @@ model Cohort {
 
   @@index([status])
   @@map("cohorts")
-}
-
-model GroupStudent {
-  id String @id @default(cuid(2))
-
-  groupId   String
-  studentId String
-
-  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student User  @relation("StudentGroups", fields: [studentId], references: [id], onDelete: Cascade)
-
-  joinedAt DateTime  @default(now())
-  leftAt   DateTime?
-  isActive Boolean   @default(true)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([groupId, isActive])
-  @@index([studentId, isActive])
-  @@map("group_students")
 }
 
 model Invite {
