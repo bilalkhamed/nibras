@@ -47,7 +47,8 @@ model User {
   supervisedGroupId String?
   supervisedGroup   Group?  @relation("GroupSupervisors", fields: [supervisedGroupId], references: [id])
 
-  managedGroups GroupManager[] @relation("UserGroupManagers")
+  managedGroups  GroupManager[]  @relation("UserGroupManagers")
+  managedCohorts CohortManager[] @relation("UserCohortManagers")
 
   cohort   Cohort? @relation("CohortStudents", fields: [cohortId], references: [id])
   cohortId String?
@@ -128,25 +129,44 @@ model GroupStudent {
 }
 
 model Cohort {
-  id             String       @id @default(cuid(2))
+  id             String          @id @default(cuid(2))
   name           String
-  slug           String       @unique
+  slug           String          @unique
   startDate      DateTime
   endDate        DateTime?
   entryLevelId   String
-  entryLevel     Level        @relation("CohortEntryLevel", fields: [entryLevelId], references: [id])
+  entryLevel     Level           @relation("CohortEntryLevel", fields: [entryLevelId], references: [id])
   groups         Group[]
-  students       User[]       @relation("CohortStudents")
-  status         CohortStatus @default(active)
+  students       User[]          @relation("CohortStudents")
+  status         CohortStatus    @default(active)
   label          String
   currentLevelId String
-  currentLevel   Level        @relation("CohortCurrentLevel", fields: [currentLevelId], references: [id])
+  currentLevel   Level           @relation("CohortCurrentLevel", fields: [currentLevelId], references: [id])
+  managers       CohortManager[] @relation("CohortCohortManagers")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([status])
   @@map("cohorts")
+}
+
+model CohortManager {
+  id String @id @default(cuid(2))
+
+  cohortId String
+  userId   String
+
+  cohort Cohort @relation("CohortCohortManagers", fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserCohortManagers", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cohortId, userId])
+  @@index([cohortId])
+  @@index([userId])
+  @@map("cohort_managers")
 }
 
 model Invite {
