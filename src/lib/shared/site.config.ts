@@ -71,7 +71,13 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
     { label: 'مساري', href: '/dashboard/history', icon: FolderClock },
   ],
 
-  cohort_manager: [],
+  cohort_manager: [
+    {
+      label: 'المستخدمين',
+      href: '/dashboard/users',
+      icon: UserRound,
+    },
+  ],
   group_manager: [],
   media_team: [],
 };

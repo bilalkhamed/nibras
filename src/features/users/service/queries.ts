@@ -37,13 +37,20 @@ import { Role } from '@prisma/client';
 export async function getAllUsers() {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
       }
-      const dalResult = await findManyUsers();
+      let filter;
+      if (session!.role === 'cohort_manager') {
+        filter = { cohortId: 'yikedfyhnyaia2fl8o8bhjrz' };
+      }
+
+      const dalResult = await findManyUsers(filter);
+      console.log(dalResult.success && dalResult.data.length);
+
       return mapDalToService(dalResult);
     },
     { requireAuth: true },
@@ -54,14 +61,19 @@ export async function getAllUsers() {
 export async function getUserById(id: string) {
   return runServiceOperation<UserDTO>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
       }
 
-      const dalResult = await findUserById(id);
+      let filter;
+
+      if (session!.role === 'cohort_manager') {
+        filter = { cohortId: 'yikedfyhnyaia2fl8o8bhjrz' };
+      }
+      const dalResult = await findUserById(id, filter);
 
       if (!dalResult.success) {
         return mapDalToService(dalResult) as ServiceReturn<UserDTO>;

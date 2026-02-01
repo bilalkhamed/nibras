@@ -3,7 +3,7 @@
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import { DalReturn } from '@/lib/server/dal/types';
 import prisma from '@/lib/server/prisma';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { cacheTag } from 'next/cache';
 import {
   RecentUserDTO,
@@ -24,13 +24,29 @@ import {
 // ============================================================================
 
 /** Find all users (excluding admins) with cohort info */
-export async function findManyUsers(): Promise<DalReturn<UserWithCohortDTO[]>> {
+export async function findManyUsers({
+  cohortId,
+}: {
+  cohortId?: string;
+} = {}): Promise<DalReturn<UserWithCohortDTO[]>> {
   cacheTag('users');
   return runDalOperation(async () => {
+    const where: Prisma.UserWhereInput = {
+      role: { not: Role.admin },
+    };
+
+    if (cohortId) {
+      where.OR = [
+        { cohortId: cohortId },
+        {
+          supervisedGroup: {
+            cohortId: cohortId,
+          },
+        },
+      ];
+    }
     return await prisma.user.findMany({
-      where: {
-        role: { not: Role.admin },
-      },
+      where: where,
       select: {
         id: true,
         firstName: true,
@@ -80,10 +96,23 @@ export async function findManyUsersWithTimestamps(): Promise<
 /** Find user by ID with cohort info */
 export async function findUserById(
   id: string,
+  { cohortId }: { cohortId?: string } = {},
 ): Promise<DalReturn<UserWithCohortDTO | null>> {
   return runDalOperation(async () => {
     return await prisma.user.findUnique({
-      where: { id },
+      where: {
+        id,
+        OR: [
+          { cohortId: cohortId },
+          {
+            supervisedGroup: cohortId
+              ? {
+                  cohortId: cohortId,
+                }
+              : undefined,
+          },
+        ],
+      },
       select: {
         id: true,
         firstName: true,

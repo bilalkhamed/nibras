@@ -2,7 +2,12 @@ import { redirect } from 'next/navigation';
 import { AdminDashboard } from './components/admin-dashboard';
 import { SupervisorDashboard } from './components/supervisor-dashboard';
 import { StudentDashboard } from './components/student-dashboard';
-import { ADMIN_ROLE, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import {
+  ADMIN_ROLE,
+  COHORT_MANAGER_ROLE,
+  STUDENT_ROLE,
+  SUPERVISOR_ROLE,
+} from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Suspense } from 'react';
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
@@ -19,6 +24,8 @@ export default async function DashboardPage() {
               return <SupervisorDashboard />;
             case STUDENT_ROLE:
               return <StudentDashboard />;
+            case COHORT_MANAGER_ROLE:
+              return <h1> welcome </h1>;
             default:
               redirect('/forbidden');
           }

@@ -13,7 +13,7 @@ export default async function UsersPage({}) {
   return (
     <>
       <section>
-        <AddUserForm />
+        {/* <AddUserForm /> */}
         <Toaster
           richColors
           className="rounded-2xl"
