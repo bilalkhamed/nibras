@@ -11,6 +11,7 @@ import {
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Suspense } from 'react';
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
+import { CohortManagerDashboard } from './components/cohort-manager-dashboard';
 
 export default async function DashboardPage() {
   return (
@@ -25,7 +26,7 @@ export default async function DashboardPage() {
             case STUDENT_ROLE:
               return <StudentDashboard />;
             case COHORT_MANAGER_ROLE:
-              return <h1> welcome </h1>;
+              return <CohortManagerDashboard />;
             default:
               redirect('/forbidden');
           }
