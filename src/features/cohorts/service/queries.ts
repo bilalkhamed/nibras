@@ -14,7 +14,7 @@ import {
 import type { ServiceReturn } from '@/lib/server/service/types';
 import { findManyCohorts } from '../dal';
 import type { CohortListDTO } from '../types';
-import { ADMIN_ROLE } from '@/types/types';
+import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
 import { findCohortById } from '../dal/queries';
 
 // ============================================================================
@@ -56,7 +56,10 @@ export async function getCohortById(
 ): Promise<ServiceReturn<CohortListDTO | null>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
