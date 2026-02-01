@@ -1,6 +1,10 @@
 import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
-import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import {
+  ADMIN_ROLE,
+  COHORT_MANAGER_ROLE,
+  SUPERVISOR_ROLE,
+} from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import {
   CreateGroupDialog,
@@ -18,7 +22,7 @@ export default async function GroupsPage({
 
   return (
     <Suspense fallback={<CardsListSkeleton />}>
-      <AuthGuard roles={[ADMIN_ROLE, SUPERVISOR_ROLE]}>
+      <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, SUPERVISOR_ROLE]}>
         {(auth) => (
           <div className="space-y-6">
             <div className="flex items-center justify-between">

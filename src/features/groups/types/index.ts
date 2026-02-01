@@ -118,14 +118,36 @@ export type GroupListItemDTO = {
 /**
  * Group student entry in junction table
  */
-export type GroupStudentEntryDTO = {
-  id: string;
-  groupId: string;
-  studentId: string;
-  isActive: boolean;
-  joinedAt: Date;
-  leftAt: Date | null;
-};
+export const selectGroupStudent = {
+  id: true,
+  groupId: true,
+  studentId: true,
+  isActive: true,
+  joinedAt: true,
+  leftAt: true,
+} satisfies Prisma.GroupStudentSelect;
+
+export type GroupStudentEntryDTO = Prisma.GroupStudentGetPayload<{
+  select: typeof selectGroupStudent;
+}>;
+
+export const selectGroupStudentWithCohortId = {
+  id: true,
+  groupId: true,
+  studentId: true,
+  isActive: true,
+  joinedAt: true,
+  leftAt: true,
+  group: {
+    select: {
+      cohortId: true,
+    },
+  },
+} satisfies Prisma.GroupStudentSelect;
+
+export type GroupStudentWithCohortIdDTO = Prisma.GroupStudentGetPayload<{
+  select: typeof selectGroupStudentWithCohortId;
+}>;
 
 // ============================================================================
 // Action Results

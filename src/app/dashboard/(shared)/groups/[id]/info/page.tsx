@@ -11,7 +11,7 @@ import {
 } from '@/features/groups';
 import getAuthSession from '@/lib/server/auth-session';
 import { Role } from '@prisma/client';
-import { ADMIN_ROLE } from '@/types/types';
+import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
 
 async function GroupStudentsSection({
   groupId,
@@ -32,7 +32,7 @@ async function GroupStudentsSection({
         <CardTitle className="text-lg font-semibold">
           الطالبات ({groupStudents.length})
         </CardTitle>
-        {userRole === ADMIN_ROLE && (
+        {(userRole === ADMIN_ROLE || userRole === COHORT_MANAGER_ROLE) && (
           <AddStudentDialog
             groupId={groupId}
             cohortId={cohortId}

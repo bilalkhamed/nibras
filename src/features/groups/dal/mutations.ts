@@ -11,7 +11,12 @@ import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
 import { generateSixCharCode } from '@/lib/shared/utils';
-import type { GroupStudentEntryDTO } from '../types';
+import {
+  GroupStudentWithCohortIdDTO,
+  selectGroupStudent,
+  selectGroupStudentWithCohortId,
+  type GroupStudentEntryDTO,
+} from '../types';
 
 // ============================================================================
 // Group CRUD Mutations
@@ -125,7 +130,7 @@ export async function insertGroupStudent(
 export async function findActiveGroupStudent(
   groupId: string,
   studentId: string,
-): Promise<DalReturn<GroupStudentEntryDTO | null>> {
+): Promise<DalReturn<GroupStudentWithCohortIdDTO | null>> {
   return runDalOperation(async () => {
     return prisma.groupStudent.findFirst({
       where: {
@@ -133,6 +138,7 @@ export async function findActiveGroupStudent(
         studentId,
         isActive: true,
       },
+      select: selectGroupStudentWithCohortId,
     });
   });
 }

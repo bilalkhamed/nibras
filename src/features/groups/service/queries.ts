@@ -24,7 +24,11 @@ import type {
   GetGroupsOptions,
   GroupStudentDTO,
 } from '../types';
-import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import {
+  ADMIN_ROLE,
+  COHORT_MANAGER_ROLE,
+  SUPERVISOR_ROLE,
+} from '@/types/types';
 import { findStudentGroups } from '../dal/queries';
 
 // ============================================================================
@@ -96,6 +100,13 @@ export async function getGroups(
       // Admins can see all groups (optionally filtered)
       if (role === ADMIN_ROLE) {
         const dalResult = await findGroups(options);
+        return mapDalToService(dalResult);
+      }
+
+      if (role === COHORT_MANAGER_ROLE) {
+        const dalResult = await findGroups({
+          cohortId: session!.managedCohortId!,
+        });
         return mapDalToService(dalResult);
       }
 

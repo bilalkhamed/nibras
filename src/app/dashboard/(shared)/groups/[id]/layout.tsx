@@ -3,7 +3,11 @@ import { notFound } from 'next/navigation';
 import { getGroupById, GroupTabsNav } from '@/features/groups';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ADMIN_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import {
+  ADMIN_ROLE,
+  COHORT_MANAGER_ROLE,
+  SUPERVISOR_ROLE,
+} from '@/types/types';
 
 type Params = Promise<{ id: string }>;
 
@@ -40,7 +44,7 @@ export default function GroupLayout({
       <Suspense
         fallback={<Skeleton className="h-16 animate-pulse rounded bg-muted" />}
       >
-        <AuthGuard roles={[SUPERVISOR_ROLE, ADMIN_ROLE]}>
+        <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, SUPERVISOR_ROLE]}>
           <GroupLayoutWrapper params={params} />
         </AuthGuard>
       </Suspense>

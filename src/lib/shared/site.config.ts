@@ -77,6 +77,11 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       href: '/dashboard/users',
       icon: UserRound,
     },
+    {
+      label: 'المجموعات',
+      href: '/dashboard/groups/',
+      icon: UsersRound,
+    },
   ],
   group_manager: [],
   media_team: [],

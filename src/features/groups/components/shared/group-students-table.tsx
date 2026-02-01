@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/shared/utils';
 import { StudentActions } from '../admin/student-actions';
-import { ADMIN_ROLE } from '@/types/types';
+import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
 
 export interface GroupStudent {
   student: {
@@ -38,7 +38,7 @@ export function GroupStudentsTable({
           <TableRow className="border-b border-border">
             <TableHead className="text-right">الاسم</TableHead>
             <TableHead className="text-right">تاريخ الانضمام</TableHead>
-            {userRole === ADMIN_ROLE && (
+            {(userRole === ADMIN_ROLE || userRole === COHORT_MANAGER_ROLE) && (
               <TableHead className="text-center">الإجراءات</TableHead>
             )}
           </TableRow>
@@ -56,7 +56,8 @@ export function GroupStudentsTable({
               <TableCell className="text-right text-sm">
                 {formatDate(joinedAt)}
               </TableCell>
-              {userRole === ADMIN_ROLE && (
+              {(userRole === ADMIN_ROLE ||
+                userRole === COHORT_MANAGER_ROLE) && (
                 <TableCell className="text-right">
                   <StudentActions groupId={groupId} studentId={student.id} />
                 </TableCell>

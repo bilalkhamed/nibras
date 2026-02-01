@@ -20,7 +20,12 @@ import {
   findGroupById,
 } from '../dal';
 import type { CreateGroupData, GroupStudentEntryDTO } from '../types';
-import { ADMIN_ROLE, SUPERVISOR_ROLE, STUDENT_ROLE } from '@/types/types';
+import {
+  ADMIN_ROLE,
+  SUPERVISOR_ROLE,
+  STUDENT_ROLE,
+  COHORT_MANAGER_ROLE,
+} from '@/types/types';
 import { getUserWithRoleAndCohort } from '@/features/users/service';
 
 // ============================================================================
@@ -99,7 +104,10 @@ export async function addStudentToGroup(
 ): Promise<ServiceReturn<GroupStudentEntryDTO>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -108,11 +116,22 @@ export async function addStudentToGroup(
 
       // Validate student exists and has correct role
       const studentResult = await getUserWithRoleAndCohort(studentId);
+      console.log(studentResult);
+
       if (!studentResult.success) {
         return {
           success: false,
           error: { type: 'bad-request', statusCode: 400 },
         };
+      }
+
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (studentResult.data.cohortId !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
       }
 
       if (studentResult.data.role !== STUDENT_ROLE) {
@@ -162,7 +181,10 @@ export async function removeStudentFromGroup(
 ): Promise<ServiceReturn<{ removed: boolean }>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -171,6 +193,7 @@ export async function removeStudentFromGroup(
 
       // Find active group student entry
       const entryResult = await findActiveGroupStudent(groupId, studentId);
+
       if (!entryResult.success) {
         return mapDalToService(entryResult);
       }
@@ -180,6 +203,15 @@ export async function removeStudentFromGroup(
           success: false,
           error: { type: 'not-found', statusCode: 404 },
         };
+      }
+
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (entryResult.data.group.cohortId !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
       }
 
       // Deactivate the entry

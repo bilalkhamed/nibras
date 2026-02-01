@@ -158,10 +158,17 @@ export type UserFilters = {
 export async function getUsersNameOnly(filters?: UserFilters) {
   return runServiceOperation<UserNameDTO[]>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      if (session!.role === 'cohort_manager') {
+        filters = {
+          ...filters,
+          cohortId: session?.managedCohortId || undefined,
         };
       }
 
@@ -176,13 +183,19 @@ export async function getUsersNameOnly(filters?: UserFilters) {
 export async function getUsersBasic(filters?: UserFilters) {
   return runServiceOperation<UserBasicDTO[]>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
       }
 
+      if (session!.role === 'cohort_manager') {
+        filters = {
+          ...filters,
+          cohortId: session?.managedCohortId || undefined,
+        };
+      }
       const dalResult = await findUsersBasic(filters);
       return mapDalToService(dalResult);
     },
@@ -312,7 +325,7 @@ export async function getUserForInvite(userId: string) {
 export async function getUserWithRoleAndCohort(userId: string) {
   return runServiceOperation<UserWithRoleAndCohortDTO>(
     async (session) => {
-      if (!['admin', 'supervisor'].includes(session!.role)) {
+      if (!['admin', 'cohort_manager', 'supervisor'].includes(session!.role)) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
