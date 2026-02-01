@@ -26,14 +26,16 @@ import type { GroupStudentEntryDTO } from '../types';
 export async function insertGroup(data: {
   name: string;
   cohortId: string;
-  supervisorId: string;
+  supervisors: string[];
 }): Promise<DalReturn<{ id: string; name: string; code: string }>> {
   return runDalOperation(async () => {
     return prisma.group.create({
       data: {
         name: data.name,
         cohortId: data.cohortId,
-        supervisorId: data.supervisorId,
+        supervisors: {
+          connect: data.supervisors.map((id) => ({ id })),
+        },
         code: generateSixCharCode(),
       },
       select: {

@@ -16,7 +16,7 @@ import { z } from 'zod';
 export const createGroupSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),
   cohortId: z.string().min(1, 'الدفعة مطلوبة'),
-  supervisorId: z.string().min(1, 'المشرفة مطلوبة'),
+  supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
 });
 
 /**
@@ -80,7 +80,7 @@ export type GroupDetailDTO = {
   code: string;
   cohortId: string;
   createdAt: Date;
-  supervisor: GroupSupervisorDTO;
+  supervisors: GroupSupervisorDTO[];
   students: GroupStudentInfoDTO[];
   cohort: {
     id: string;
@@ -109,12 +109,7 @@ export type GroupListItemDTO = {
       title: string;
     } | null;
   };
-  supervisor: {
-    id: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-  };
+  supervisors: GroupSupervisorDTO[];
   _count: {
     students: number;
   };
@@ -228,6 +223,7 @@ export const myGroupStudentSelect = {
   leftAt: true,
   group: {
     select: {
+      id: true,
       name: true,
       cohort: {
         select: {
@@ -239,7 +235,7 @@ export const myGroupStudentSelect = {
           students: true,
         },
       },
-      supervisor: {
+      supervisors: {
         select: {
           firstName: true,
           middleName: true,

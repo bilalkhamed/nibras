@@ -17,7 +17,7 @@ import {
   insertGroupStudent,
   findActiveGroupStudent,
   deactivateGroupStudent,
-  findGroupForAuth,
+  findGroupById,
 } from '../dal';
 import type { CreateGroupData, GroupStudentEntryDTO } from '../types';
 import { ADMIN_ROLE, SUPERVISOR_ROLE, STUDENT_ROLE } from '@/types/types';
@@ -46,27 +46,27 @@ export async function createGroup(
       }
 
       // Validate supervisor exists and has correct role
-      const supervisorResult = await getUserWithRoleAndCohort(
-        data.supervisorId,
-      );
-      if (!supervisorResult.success) {
-        return {
-          success: false,
-          error: { type: 'bad-request', statusCode: 400 },
-        };
-      }
+      for (const supervisorId of data.supervisors) {
+        const supervisorResult = await getUserWithRoleAndCohort(supervisorId);
+        if (!supervisorResult.success) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
 
-      if (supervisorResult.data.role !== SUPERVISOR_ROLE) {
-        return {
-          success: false,
-          error: { type: 'bad-request', statusCode: 400 },
-        };
+        if (supervisorResult.data.role !== SUPERVISOR_ROLE) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
       }
 
       const dalResult = await insertGroup({
         name: data.name,
         cohortId: data.cohortId,
-        supervisorId: data.supervisorId,
+        supervisors: data.supervisors,
       });
 
       if (!dalResult.success) {
@@ -123,7 +123,7 @@ export async function addStudentToGroup(
       }
 
       // Validate group exists and cohorts match
-      const groupResult = await findGroupForAuth(groupId);
+      const groupResult = await findGroupById(groupId);
       if (!groupResult.success) {
         return mapDalToService(groupResult);
       }

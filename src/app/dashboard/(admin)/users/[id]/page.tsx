@@ -4,14 +4,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CopyValue } from '@/components/common/copy-value';
 import { InfoField } from '@/components/common/info-field';
-import { Snowflake, Trash2, KeyRound, Pencil } from 'lucide-react';
-import prisma from '@/lib/server/prisma';
+import {
+  Snowflake,
+  Trash2,
+  KeyRound,
+  Pencil,
+  ExternalLink,
+} from 'lucide-react';
 import labels from '@/lib/labels.json';
-import { STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
+import { Role, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { formatDate } from '@/lib/shared/utils';
-import { Prisma } from '@prisma/client';
 import { runServiceOrRedirect } from '@/lib/server/service/helpers';
 import { getUserById } from '@/features/users/service';
+import Link from 'next/link';
 import {
   getGroups,
   GroupListItemDTO,
@@ -24,41 +29,6 @@ type UserDetailPageProps = {
     id: string;
   };
 };
-
-type StudentGroup = Prisma.GroupStudentGetPayload<{
-  include: {
-    group: {
-      select: {
-        id: true;
-        name: true;
-        cohort: {
-          select: {
-            label: true;
-          };
-        };
-        supervisor: {
-          select: {
-            id: true;
-            firstName: true;
-            middleName: true;
-            lastName: true;
-          };
-        };
-      };
-    };
-  };
-}>;
-
-type SupervisorGroup = Prisma.GroupGetPayload<{
-  select: {
-    id: true;
-    name: true;
-    supervisorId: true;
-    cohortId: true;
-    createdAt: true;
-    updatedAt: true;
-  };
-}>;
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const { id } = await params;
@@ -193,20 +163,23 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
               <CardContent className="p-4 md:p-6">
                 {activeGroup ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InfoField
-                      label="اسم المجموعة"
-                      value={activeGroup.group.name}
-                    />
-                    <InfoField
-                      label="المشرفة"
-                      value={
-                        activeGroup.group.supervisor.firstName +
-                        ' ' +
-                        activeGroup.group.supervisor.middleName +
-                        ' ' +
-                        activeGroup.group.supervisor.lastName
-                      }
-                    />
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          المجموعة
+                        </p>
+                        <p className="font-medium text-foreground">
+                          {activeGroup.group.name}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/dashboard/groups/${activeGroup.group.id}/info`}
+                      >
+                        <Button variant="ghost" size="sm">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
                     <InfoField
                       label="تاريخ الانضمام"
                       value={formatDate(activeGroup.joinedAt)}
@@ -234,13 +207,15 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                   >
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-right">
                       <div className="space-y-1">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-foreground flex items-center">
                           {item.group.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          المشرفة: {item.group.supervisor.firstName}{' '}
-                          {item.group.supervisor.middleName}{' '}
-                          {item.group.supervisor.lastName}
+                          <Link
+                            href={`/dashboard/groups/${item.group.id}/info`}
+                          >
+                            <Button variant="ghost" size="sm">
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </Link>
                         </p>
                         <p className="text-sm text-muted-foreground">
                           الدفعة: {item.group.cohort.name}
@@ -308,7 +283,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
   );
 }
 
-function RoleBadge({ role }: { role: 'admin' | 'supervisor' | 'student' }) {
+function RoleBadge({ role }: { role: Role }) {
   const map = {
     admin: {
       label: 'مسؤول',
@@ -320,6 +295,21 @@ function RoleBadge({ role }: { role: 'admin' | 'supervisor' | 'student' }) {
     },
     student: {
       label: 'طالبة',
+      className:
+        'bg-secondary/20 text-secondary-foreground border-secondary/30',
+    },
+    cohort_manager: {
+      label: 'مديرة دفعة',
+      className:
+        'bg-secondary/20 text-secondary-foreground border-secondary/30',
+    },
+    group_manager: {
+      label: 'مديرة مجموعات',
+      className:
+        'bg-secondary/20 text-secondary-foreground border-secondary/30',
+    },
+    media_team: {
+      label: 'فريق الاعلام',
       className:
         'bg-secondary/20 text-secondary-foreground border-secondary/30',
     },

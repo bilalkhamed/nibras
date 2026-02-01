@@ -4,26 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Users, UserRound, XCircleIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-
-type GroupListItem = {
-  id: string;
-  name: string;
-  supervisor: {
-    id: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-  };
-  cohort: {
-    name: string;
-  };
-  _count: {
-    students: number;
-  };
-};
+import { GroupListItemDTO } from '../../types';
 
 type GroupListProps = {
-  groups: GroupListItem[];
+  groups: GroupListItemDTO[];
   hrefBase: string;
 };
 
@@ -73,7 +57,12 @@ export function GroupList({ groups, hrefBase }: GroupListProps) {
                   <UserRound className="h-4 w-4 text-secondary-foreground" />
                 </div>
                 <span className="text-foreground font-medium">
-                  {Object.values(group.supervisor).splice(1).join(' ')}
+                  {group.supervisors
+                    .map(
+                      (supervisor) =>
+                        `${supervisor.firstName} ${supervisor.lastName}`,
+                    )
+                    .join('، ')}
                 </span>
               </div>
               <Separator className="my-3" />

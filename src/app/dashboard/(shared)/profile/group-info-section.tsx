@@ -1,8 +1,6 @@
 import {
   CalendarClock,
   GraduationCap,
-  Mail,
-  Phone,
   User,
   UserCheck,
   Users,
@@ -64,26 +62,28 @@ export default async function GroupInfoSection({ auth }: Props) {
                 />
               </div>
               <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField
-                  label="اسم المشرفة"
-                  value={`${groupStudent.group.supervisor.firstName} ${groupStudent.group.supervisor.middleName} ${groupStudent.group.supervisor.lastName}`}
-                  icon={<User className="h-4 w-4" />}
-                />
-                {groupStudent.group.supervisor.phone && (
-                  <InfoField
-                    label="رقم الجوال"
-                    value={groupStudent.group.supervisor.phone}
-                    icon={<Phone className="h-4 w-4" />}
-                  />
-                )}
-                {groupStudent.group.supervisor.email && (
-                  <InfoField
-                    label="البريد الإلكتروني"
-                    value={groupStudent.group.supervisor.email}
-                    icon={<Mail className="h-4 w-4" />}
-                  />
-                )}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  المشرفات ({groupStudent.group.supervisors.length})
+                </h3>
+                <div className="space-y-2">
+                  {groupStudent.group.supervisors.map((supervisor, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm p-2 rounded-md bg-muted/30"
+                    >
+                      <span className="font-medium">
+                        {supervisor.firstName} {supervisor.middleName}{' '}
+                        {supervisor.lastName}
+                      </span>
+                      <div className="flex items-center gap-3 text-muted-foreground text-xs sm:text-sm">
+                        {supervisor.phone && <span>{supervisor.phone}</span>}
+                        {supervisor.email && <span>{supervisor.email}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           ) : (

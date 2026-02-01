@@ -10,7 +10,6 @@ import 'server-only';
 // Query operations
 export {
   findGroupById,
-  findGroupForAuth,
   findGroups,
   findGroupsBySupervisor,
   findStudentActiveGroup,

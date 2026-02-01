@@ -9,7 +9,11 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { createGroup } from '../service';
-import { createGroupSchema, type CreateGroupResult } from '../types';
+import {
+  CreateGroupData,
+  createGroupSchema,
+  type CreateGroupResult,
+} from '../types';
 
 /**
  * Create a new group
@@ -18,7 +22,7 @@ import { createGroupSchema, type CreateGroupResult } from '../types';
  * @returns Success with groupId or error
  */
 export async function createGroupAction(
-  data: unknown,
+  data: CreateGroupData,
 ): Promise<CreateGroupResult> {
   // Validate input
   const parsed = createGroupSchema.safeParse(data);

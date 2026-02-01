@@ -14,24 +14,10 @@ import {
 import Link from 'next/link';
 import { Role } from '@prisma/client';
 import { ADMIN_ROLE } from '@/types/types';
+import { GroupDetailDTO } from '../../types';
 
 interface GroupInfoSectionProps {
-  groupName: string;
-  cohortId: string;
-  studentCount: number;
-  supervisor: {
-    id: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    email: string | null;
-    phone: string | null;
-  };
-  cohort: {
-    id: string;
-    name: string;
-    currentLevel: { id: string; title: string };
-  };
+  group: GroupDetailDTO;
   userRole: Role;
 }
 
@@ -66,13 +52,7 @@ function ActionButtons() {
   );
 }
 
-export function GroupInfoSection({
-  groupName,
-  studentCount,
-  supervisor,
-  cohort,
-  userRole,
-}: GroupInfoSectionProps) {
+export function GroupInfoSection({ group, userRole }: GroupInfoSectionProps) {
   return (
     <TooltipProvider>
       <Card className="border-border bg-card/80">
@@ -86,40 +66,50 @@ export function GroupInfoSection({
           {/* Group Details */}
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InfoField label="اسم المجموعة" value={groupName} />
+              <InfoField label="اسم المجموعة" value={group.name} />
               <InfoField
                 label="الدفعة"
-                value={`${cohort.name} - ${cohort.currentLevel.title}`}
+                value={`${group.cohort.name} - ${group.cohort.currentLevel.title}`}
               />
-              <InfoField label="عدد الطالبات" value={`${studentCount} طالبة`} />
+              <InfoField
+                label="عدد الطالبات"
+                value={`${group.students.length} طالبة`}
+              />
             </div>
           </div>
 
           <Separator />
 
-          {userRole === ADMIN_ROLE && (
+          {userRole === ADMIN_ROLE && group.supervisors.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-1">
-                <h3 className="font-semibold text-foreground">
-                  معلومات المشرفة
-                </h3>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href={`/dashboard/users/${supervisor.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>عرض صفحة المشرفة</TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField
-                  label="اسم المشرفة"
-                  value={`${supervisor.firstName} ${supervisor.middleName} ${supervisor.lastName}`}
-                  icon={<User className="h-4 w-4" />}
-                />
+              <h3 className="font-semibold text-foreground">
+                المشرفات ({group.supervisors.length})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {group.supervisors.map((supervisor) => (
+                  <div
+                    key={supervisor.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-card p-3 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">
+                        {supervisor.firstName} {supervisor.middleName}{' '}
+                        {supervisor.lastName}
+                      </span>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link href={`/dashboard/users/${supervisor.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>عرض صفحة المشرفة</TooltipContent>
+                    </Tooltip>
+                  </div>
+                ))}
               </div>
             </div>
           )}

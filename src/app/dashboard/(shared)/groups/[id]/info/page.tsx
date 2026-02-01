@@ -84,14 +84,7 @@ async function GroupDetailWrapper({
   return (
     <div className="space-y-4">
       {/* Group Info Section */}
-      <GroupInfoSection
-        groupName={group.name}
-        cohortId={group.cohortId}
-        studentCount={group.students.length}
-        supervisor={group.supervisor}
-        cohort={group.cohort}
-        userRole={auth.role}
-      />
+      <GroupInfoSection group={group} userRole={auth.role} />
 
       {/* Students Section with Suspense */}
       <GroupStudentsSection

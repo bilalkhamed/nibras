@@ -53,7 +53,7 @@ export async function getGroupById(
 
       // Check authorization
       if (group && session!.role === SUPERVISOR_ROLE) {
-        if (group.supervisor.id !== session!.userId) {
+        if (!group.supervisors.some((s) => s.id === session!.userId)) {
           return {
             success: false,
             error: { type: 'forbidden', statusCode: 403 },

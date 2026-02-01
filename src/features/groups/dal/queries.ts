@@ -11,11 +11,12 @@ import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
-import type {
-  GroupDetailDTO,
-  GroupListItemDTO,
-  GetGroupsOptions,
-  GroupStudentDTO,
+import {
+  type GroupDetailDTO,
+  type GroupListItemDTO,
+  type GetGroupsOptions,
+  type GroupStudentDTO,
+  myGroupStudentSelect,
 } from '../types';
 
 // ============================================================================
@@ -39,7 +40,7 @@ export async function findGroupById(
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: {
-        supervisor: {
+        supervisors: {
           select: {
             id: true,
             firstName: true,
@@ -75,30 +76,6 @@ export async function findGroupById(
   });
 }
 
-/**
- * Find a group by ID for authorization checks
- * Only returns basic group info needed for access control
- *
- * @param groupId - The group ID
- * @returns Basic group info or null if not found
- */
-export async function findGroupForAuth(
-  groupId: string,
-): Promise<
-  DalReturn<{ id: string; supervisorId: string; cohortId: string } | null>
-> {
-  return runDalOperation(async () => {
-    return prisma.group.findUnique({
-      where: { id: groupId },
-      select: {
-        id: true,
-        supervisorId: true,
-        cohortId: true,
-      },
-    });
-  });
-}
-
 // ============================================================================
 // Group List Queries
 // ============================================================================
@@ -119,7 +96,13 @@ export async function findGroups(
   return runDalOperation(async () => {
     return prisma.group.findMany({
       where: {
-        supervisorId: options.supervisorId,
+        supervisors: options.supervisorId
+          ? {
+              some: {
+                id: options.supervisorId,
+              },
+            }
+          : undefined,
         cohortId: options.cohortId,
       },
       select: {
@@ -134,12 +117,14 @@ export async function findGroups(
             currentLevel: true,
           },
         },
-        supervisor: {
+        supervisors: {
           select: {
             id: true,
             firstName: true,
             middleName: true,
             lastName: true,
+            email: true,
+            phone: true,
           },
         },
         _count: {
@@ -177,35 +162,7 @@ export async function findStudentGroups(
         studentId,
       },
 
-      select: {
-        joinedAt: true,
-        isActive: true,
-        leftAt: true,
-        group: {
-          select: {
-            name: true,
-            cohort: {
-              select: {
-                name: true,
-              },
-            },
-            _count: {
-              select: {
-                students: true,
-              },
-            },
-            supervisor: {
-              select: {
-                firstName: true,
-                middleName: true,
-                lastName: true,
-                phone: true,
-                email: true,
-              },
-            },
-          },
-        },
-      },
+      select: myGroupStudentSelect,
     });
   });
 }
@@ -220,35 +177,7 @@ export async function findStudentActiveGroup(
         isActive: true,
       },
 
-      select: {
-        joinedAt: true,
-        isActive: true,
-        leftAt: true,
-        group: {
-          select: {
-            name: true,
-            cohort: {
-              select: {
-                name: true,
-              },
-            },
-            _count: {
-              select: {
-                students: true,
-              },
-            },
-            supervisor: {
-              select: {
-                firstName: true,
-                middleName: true,
-                lastName: true,
-                phone: true,
-                email: true,
-              },
-            },
-          },
-        },
-      },
+      select: myGroupStudentSelect,
     });
   });
 }

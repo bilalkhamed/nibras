@@ -54,7 +54,9 @@ export default async function StudentGroupPage() {
       <StudentGroupInfoSection group={group} currentWeek={weekResult} />
 
       {/* Supervisor Section */}
-      {group.supervisor && <SupervisorSection supervisor={group.supervisor} />}
+      {group.supervisors.length > 0 && (
+        <SupervisorSection supervisors={group.supervisors} />
+      )}
 
       {/* Students Grid */}
       <GroupStudentsSection students={students} />

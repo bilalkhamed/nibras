@@ -249,7 +249,7 @@ export async function findStudentBasicInfo(
 }
 
 /** Find students with assignment completion (for supervisor dashboard) */
-export async function findStudentsBySuperviorWithAssignments(
+export async function findStudentsBySupervisorWithAssignments(
   supervisorId: string,
   limit: number = 100,
 ): Promise<DalReturn<StudentWithAssignmentsDTO[]>> {
@@ -260,7 +260,7 @@ export async function findStudentsBySuperviorWithAssignments(
         groupsAsStudent: {
           some: {
             isActive: true,
-            group: { supervisorId },
+            group: { supervisors: { some: { id: supervisorId } } },
           },
         },
       },

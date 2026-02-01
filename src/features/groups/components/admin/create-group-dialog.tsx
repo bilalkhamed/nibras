@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import SearchSelect from '@/components/common/search-select';
 import { Plus, Loader2, CheckIcon, Loader2Icon } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
@@ -28,8 +27,17 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { SUPERVISOR_ROLE } from '@/types/types';
 import { createGroupAction } from '../../actions';
-
-const cohorts = ['2025', '2024', '2023'];
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from '@/components/ui/multi-select';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createGroupSchema, type CreateGroupData } from '../../types';
 
 interface Supervisor {
   id: string;
@@ -38,26 +46,45 @@ interface Supervisor {
   lastName: string;
 }
 
+interface Cohort {
+  id: string;
+  name: string;
+}
+
 export function CreateGroupDialog() {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [cohort, setCohort] = useState('');
-  const [supervisorId, setSupervisorId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [success, setSuccess] = useState(false);
+
+  // Data state
+  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success] = useState<boolean>(false);
 
   const router = useRouter();
 
-  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
-  const [dataFetched, setDataFetched] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<CreateGroupData>({
+    resolver: zodResolver(createGroupSchema),
+    defaultValues: {
+      name: '',
+      cohortId: '',
+      supervisors: [],
+    },
+  });
 
-  // Lazy load supervisors when dialog opens
+  // Lazy load data when dialog opens
   useEffect(() => {
     if (!open || dataFetched) return;
 
-    const fetchSupervisors = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
@@ -65,77 +92,78 @@ export function CreateGroupDialog() {
           role: SUPERVISOR_ROLE,
           nameOnly: 'true',
         });
-        const response = await fetch(`/api/users?${searchParams.toString()}`);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch supervisors');
-        }
+        // Parallel fetching
+        const [supervisorsRes, cohortsRes] = await Promise.all([
+          fetch(`/api/users?${searchParams.toString()}`),
+          fetch('/api/cohorts'),
+        ]);
 
-        const data = await response.json();
-        setSupervisors(data.users);
+        if (!supervisorsRes.ok) throw new Error('Failed to fetch supervisors');
+        if (!cohortsRes.ok) throw new Error('Failed to fetch cohorts');
+
+        const supervisorsData = await supervisorsRes.json();
+        const cohortsData = await cohortsRes.json();
+
+        setSupervisors(supervisorsData.users);
+        setCohorts(cohortsData.cohorts);
         setDataFetched(true);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load supervisors',
-        );
-        console.error('Error fetching supervisors:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSupervisors();
+    fetchData();
   }, [open, dataFetched]);
-
-  const handleReset = () => {
-    setName('');
-    setCohort('');
-    setSupervisorId('');
-    setError(null);
-  };
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
-      handleReset();
+      reset();
+      setSuccess(false);
+      setError(null);
     }
   };
 
-  const handleSubmit = () => {
+  const onSubmit = (data: CreateGroupData) => {
     startTransition(async () => {
       setError(null);
       try {
-        const result = await createGroupAction({
-          name,
-          cohortId: cohort,
-          supervisorId,
-        });
+        const result = await createGroupAction(data);
 
         if (!result.success) {
           throw new Error(result.error);
         }
 
+        setSuccess(true);
         router.refresh();
-        setOpen(false);
-        handleReset();
         toast.success('تم إنشاء المجموعة بنجاح!', {
           duration: 2000,
         });
+
+        // Close after a short delay to show success
+        setTimeout(() => {
+          setOpen(false);
+          reset();
+          setSuccess(false);
+        }, 1500);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       }
     });
   };
 
-  // Transform supervisors to SearchSelect format
-  const supervisorOptions = supervisors.map((s) => ({
-    id: s.id,
-    label: `${s.firstName} ${s.middleName} ${s.lastName}`,
-  }));
-
-  const supervisorName = supervisorOptions.find(
-    (s) => s.id === supervisorId,
-  )?.label;
+  const selectedCohortName = cohorts.find(
+    (c) => c.id === watch('cohortId'),
+  )?.name;
+  const selectedSupervisors = watch('supervisors');
+  const selectedSupervisorsNames = supervisors
+    .filter((s) => selectedSupervisors.includes(s.id))
+    .map((s) => `${s.firstName} ${s.middleName} ${s.lastName}`)
+    .join('، ');
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -149,122 +177,165 @@ export function CreateGroupDialog() {
         <DialogHeader>
           <DialogTitle className="text-right">إنشاء مجموعة جديدة</DialogTitle>
           <DialogDescription className="text-right text-muted-foreground">
-            أضيفي معلومات المجموعة الجديدة وحددي المشرفة المسؤولة.
+            أضيفي معلومات المجموعة الجديدة وحددي المشرفات.
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading && (
+        {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2Icon className="h-6 w-6 animate-spin text-primary" />
             <span className="ml-2 text-muted-foreground">جاري التحميل...</span>
           </div>
-        )}
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {error && (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-right">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
 
-        {error && (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-right">
-            <p className="text-sm text-destructive">{error}</p>
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <div className="grid gap-4">
-            {/* Name Field */}
-            <div className="grid gap-2">
-              <Label htmlFor="group-name" className="text-right">
-                اسم المجموعة
-              </Label>
-              <Input
-                id="group-name"
-                placeholder="مثال: مجموعة النور"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="text-right"
+            {/* Name */}
+            <div className="space-y-1">
+              <Label className="text-right block">اسم المجموعة</Label>
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <Input
+                    placeholder="مثال: مجموعة النور"
+                    className="text-right"
+                    {...field}
+                  />
+                )}
               />
+              {errors.name && (
+                <p className="text-right text-sm text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
-            {/* Cohort Select */}
-            <div className="grid gap-2">
-              <Label htmlFor="cohort" className="text-right">
-                الدفعة
-              </Label>
-              <Select dir="rtl" value={cohort} onValueChange={setCohort}>
-                <SelectTrigger id="cohort" className="w-full">
-                  <SelectValue placeholder="اختر الدفعة" />
-                </SelectTrigger>
-                <SelectContent className="bg-card text-foreground border border-border">
-                  {cohorts.map((c) => (
-                    <SelectItem key={c} value={c} className="cursor-pointer">
-                      دفعة {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Cohort */}
+            <div className="space-y-1 w-full">
+              <Label className="text-right block">الدفعة</Label>
+              <Controller
+                control={control}
+                name="cohortId"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    dir="rtl"
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر الدفعة" className="" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card text-foreground border border-border">
+                      {cohorts.map((cohort) => (
+                        <SelectItem
+                          key={cohort.id}
+                          value={cohort.id}
+                          className="cursor-pointer"
+                        >
+                          {cohort.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.cohortId && (
+                <p className="text-right text-sm text-destructive">
+                  {errors.cohortId.message}
+                </p>
+              )}
             </div>
 
-            {/* Supervisor SearchSelect */}
-            <div className="grid gap-2">
-              <Label htmlFor="supervisor" className="text-right">
-                المشرفة
-              </Label>
-              <SearchSelect
-                options={supervisorOptions}
-                value={supervisorId}
-                onChange={setSupervisorId}
-                placeholder="اختر المشرفة"
-                searchPlaceholder="ابحثي عن المشرفة..."
+            {/* Supervisors MultiSelect */}
+            <div className="space-y-1">
+              <Label className="text-right block">المشرفات</Label>
+              <Controller
+                control={control}
+                name="supervisors"
+                render={({ field }) => (
+                  <MultiSelect
+                    values={field.value}
+                    onValuesChange={field.onChange}
+                  >
+                    <MultiSelectTrigger className="w-full">
+                      <MultiSelectValue placeholder="اختر المشرفات" />
+                    </MultiSelectTrigger>
+                    <MultiSelectContent>
+                      <MultiSelectGroup>
+                        {supervisors.map((supervisor) => (
+                          <MultiSelectItem
+                            key={supervisor.id}
+                            value={supervisor.id}
+                          >
+                            {`${supervisor.firstName} ${supervisor.middleName} ${supervisor.lastName}`}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelectGroup>
+                    </MultiSelectContent>
+                  </MultiSelect>
+                )}
               />
+              {errors.supervisors && (
+                <p className="text-right text-sm text-destructive">
+                  {errors.supervisors.message}
+                </p>
+              )}
             </div>
 
             {success && (
-              <Alert variant="success" className="max-w-2xl mx-auto">
+              <Alert variant="success" className="mx-auto">
                 <CheckIcon className="h-5 w-5 text-success" />
                 <AlertTitle>تم إنشاء المجموعة بنجاح!</AlertTitle>
               </Alert>
             )}
 
-            {/* Confirmation Message */}
-            {name && cohort && supervisorName && (
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-right">
-                <p className="text-sm text-foreground/90">
-                  <span className="font-semibold">سيتم إضافة:</span>
-                  <br />
-                  <span className="text-primary font-medium">{name}</span>
-                  <br />
-                  الدفعة <span className="font-medium">دفعة {cohort}</span> •
-                  المشرفة <span className="font-medium">{supervisorName}</span>
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+            {/* Confirmation Preview */}
+            {!success &&
+              watch('name') &&
+              watch('cohortId') &&
+              watch('supervisors').length > 0 && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-right">
+                  <p className="text-sm text-foreground/90">
+                    <span className="font-semibold">سيتم إضافة:</span>
+                    <br />
+                    <span className="text-primary font-medium">
+                      {watch('name')}
+                    </span>
+                    <br />
+                    الدفعة{' '}
+                    <span className="font-medium">{selectedCohortName}</span> •
+                    المشرفات: <br />{' '}
+                    <span className="font-medium">
+                      {selectedSupervisorsNames}
+                    </span>
+                  </p>
+                </div>
+              )}
 
-        <DialogFooter className="gap-2">
-          <DialogClose asChild>
-            <Button variant="outline" disabled={isPending}>
-              إلغاء
-            </Button>
-          </DialogClose>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              !name ||
-              !cohort ||
-              !supervisorId ||
-              isPending ||
-              isLoading ||
-              !dataFetched
-            }
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 ml-2 animate-spin" />
-                جاري الإنشاء...
-              </>
-            ) : (
-              'إنشاء المجموعة'
-            )}
-          </Button>
-        </DialogFooter>
+            <DialogFooter className="gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isPending}>
+                  إلغاء
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isPending || !dataFetched}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                    جاري الإنشاء...
+                  </>
+                ) : (
+                  'إنشاء المجموعة'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

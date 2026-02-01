@@ -26,7 +26,9 @@ export async function SupervisorDashboard() {
     await Promise.all([
       prisma.group.findMany({
         where: {
-          supervisorId: session.userId,
+          supervisors: {
+            some: { id: session.userId },
+          },
         },
         select: {
           id: true,
@@ -62,7 +64,7 @@ export async function SupervisorDashboard() {
         where: {
           isActive: true,
           group: {
-            supervisorId: session.userId,
+            supervisors: { some: { id: session.userId } },
           },
         },
       }),
@@ -74,7 +76,7 @@ export async function SupervisorDashboard() {
               some: {
                 isActive: true,
                 group: {
-                  supervisorId: session.userId,
+                  supervisors: { some: { id: session.userId } },
                 },
               },
             },

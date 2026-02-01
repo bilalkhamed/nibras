@@ -7,7 +7,7 @@ import {
   findManyUsers,
   findRecentUsers,
   findStudentBasicInfo,
-  findStudentsBySuperviorWithAssignments,
+  findStudentsBySupervisorWithAssignments,
   findUserByEmail,
   findUserById,
   findUserForInvite,
@@ -253,7 +253,7 @@ export async function getStudentsWithAssignments(limit: number = 100) {
         };
       }
 
-      const dalResult = await findStudentsBySuperviorWithAssignments(
+      const dalResult = await findStudentsBySupervisorWithAssignments(
         session!.userId,
         limit,
       );
