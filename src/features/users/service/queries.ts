@@ -45,11 +45,10 @@ export async function getAllUsers() {
       }
       let filter;
       if (session!.role === 'cohort_manager') {
-        filter = { cohortId: 'yikedfyhnyaia2fl8o8bhjrz' };
+        filter = { cohortId: session?.managedCohortId || undefined };
       }
 
       const dalResult = await findManyUsers(filter);
-      console.log(dalResult.success && dalResult.data.length);
 
       return mapDalToService(dalResult);
     },
@@ -71,7 +70,7 @@ export async function getUserById(id: string) {
       let filter;
 
       if (session!.role === 'cohort_manager') {
-        filter = { cohortId: 'yikedfyhnyaia2fl8o8bhjrz' };
+        filter = { cohortId: session?.managedCohortId || undefined };
       }
       const dalResult = await findUserById(id, filter);
 
