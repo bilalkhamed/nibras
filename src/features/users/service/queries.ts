@@ -3,6 +3,7 @@ import {
   runServiceOperation,
 } from '@/lib/server/service/helpers';
 import {
+  countUsers,
   countUsersByRole,
   findManyUsers,
   findRecentUsers,
@@ -207,19 +208,80 @@ export async function getUsersBasic(filters?: UserFilters) {
 // Dashboard Query Services
 // ============================================================================
 
-/** Get user counts by role - admin only */
-export async function getUserCountsByRole() {
-  return runServiceOperation(
+/** Get user counts by role - admin and cohort manager */
+export async function getUsersRoleCounts(filters?: { cohortId?: string }) {
+  return runServiceOperation<{ [key in Role]: number }>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      // Allow admin and cohort manager
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
       }
 
-      const dalResult = await countUsersByRole();
-      return mapDalToService(dalResult);
+      let cohortIdFilter = filters?.cohortId;
+
+      // Force cohort manager to their cohort
+      if (session!.role === 'cohort_manager') {
+        const managedCohortId = session!.managedCohortId;
+        cohortIdFilter = managedCohortId || undefined;
+      }
+
+      const dalResult = await countUsersByRole({ cohortId: cohortIdFilter });
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      // Transform array to object
+      const counts: { [key in Role]: number } = {
+        admin: 0,
+        cohort_manager: 0,
+        supervisor: 0,
+        student: 0,
+        group_manager: 0,
+        media_team: 0,
+      };
+
+      dalResult.data.forEach((item) => {
+        counts[item.role] = item._count;
+      });
+
+      return {
+        success: true,
+        data: counts,
+      };
+    },
+    { requireAuth: true },
+  );
+}
+
+/** Get total users count with filters */
+export async function getUsersCount(filters?: { cohortId?: string }) {
+  return runServiceOperation<{ count: number }>(
+    async (session) => {
+      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      let cohortIdFilter = filters?.cohortId;
+
+      if (session!.role === 'cohort_manager') {
+        const managedCohortId = session!.managedCohortId;
+        if (cohortIdFilter && cohortIdFilter !== managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+        cohortIdFilter = managedCohortId || undefined;
+      }
+
+      return mapDalToService(await countUsers({ cohortId: cohortIdFilter }));
     },
     { requireAuth: true },
   );

@@ -13,6 +13,7 @@ export {
   findGroups,
   findGroupsBySupervisor,
   findStudentActiveGroup,
+  countGroups,
 } from './queries';
 
 // Mutation operations

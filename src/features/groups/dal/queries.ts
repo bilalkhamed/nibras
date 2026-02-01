@@ -181,3 +181,26 @@ export async function findStudentActiveGroup(
     });
   });
 }
+
+// ============================================================================
+// Stats Queries
+// ============================================================================
+
+/**
+ * Count groups with optional filtering
+ *
+ * @param filters - Filter options (cohortId)
+ * @returns Number of groups matching filters
+ */
+export async function countGroups(
+  filters?: { cohortId?: string },
+): Promise<DalReturn<{ count: number }>> {
+  return runDalOperation(async () => {
+    const count = await prisma.group.count({
+      where: {
+        cohortId: filters?.cohortId,
+      },
+    });
+    return { count };
+  });
+}

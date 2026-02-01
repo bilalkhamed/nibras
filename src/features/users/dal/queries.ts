@@ -210,15 +210,33 @@ export async function findUsersBasic(
 // ============================================================================
 
 /** Count users grouped by role (for admin dashboard stats) */
-export async function countUsersByRole() {
+export async function countUsersByRole(filters?: { cohortId?: string }) {
   return runDalOperation(async () => {
     return await prisma.user.groupBy({
       by: ['role'],
       _count: true,
       where: {
         status: { not: 'deleted' },
+        cohortId: filters?.cohortId,
       },
     });
+  });
+}
+
+/** Count users with optional filtering */
+export async function countUsers(filters?: {
+  cohortId?: string;
+  role?: Role;
+}): Promise<DalReturn<{ count: number }>> {
+  return runDalOperation(async () => {
+    const count = await prisma.user.count({
+      where: {
+        status: { not: 'deleted' },
+        cohortId: filters?.cohortId,
+        role: filters?.role,
+      },
+    });
+    return { count };
   });
 }
 

@@ -17,6 +17,7 @@ import {
   findGroups,
   findGroupsBySupervisor,
   findStudentActiveGroup,
+  countGroups,
 } from '../dal';
 import type {
   GroupDetailDTO,
@@ -155,6 +156,58 @@ export async function getStudentActiveGroup(
 
       const dalResult = await findStudentActiveGroup(studentId);
       return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+// ============================================================================
+// Stats Queries
+// ============================================================================
+
+/**
+ * Get count of groups with optional filtering
+ *
+ * @param filters - Filter options (cohortId)
+ * @returns Number of groups
+ */
+export async function getGroupCount(filters?: {
+  cohortId?: string;
+}): Promise<ServiceReturn<{ count: number }>> {
+  return runServiceOperation(
+    async (session) => {
+      const role = session!.role;
+
+      // Students cannot access this
+      if (role === 'student') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      // Cohort Managers restricted to their cohort
+      if (role === COHORT_MANAGER_ROLE) {
+        const managedCohortId = session!.managedCohortId;
+
+        if (!managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+
+        // Default to managed cohort if not provided, or use provided valid cohortId
+        return mapDalToService(
+          await countGroups({
+            cohortId: managedCohortId,
+          }),
+        );
+      }
+
+      // Admins and others (e.g. Supervisors) can see counts
+      // Note: Supervisors might need this for general stats
+      return mapDalToService(await countGroups(filters));
     },
     { requireAuth: true },
   );
