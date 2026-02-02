@@ -157,8 +157,6 @@ export async function findUsersNameOnly(
   filters?: FindUsersWithFiltersParams,
 ): Promise<DalReturn<UserNameDTO[]>> {
   return runDalOperation(async () => {
-    console.log('welcome to dal');
-
     // 1. Base Filter (Safe defaults)
     const where: Prisma.UserWhereInput = {
       role: filters?.role,
@@ -178,7 +176,7 @@ export async function findUsersNameOnly(
           { supervisedGroup: { cohortId: filters.cohortId } }, // Working in my cohort
           { supervisedGroupId: null }, // Available to hire
         ];
-      } else {
+      } else if (!filters.role || filters.role === 'student') {
         // ✅ STUDENT MODE: Strict
         where.cohortId = filters.cohortId;
       }
@@ -226,7 +224,7 @@ export async function findUsersBasic(
           { supervisedGroup: { cohortId: filters.cohortId } }, // Working in my cohort
           { supervisedGroupId: null }, // Available to hire
         ];
-      } else {
+      } else if (!filters.role || filters.role === 'student') {
         // ✅ STUDENT MODE: Strict
         where.cohortId = filters.cohortId;
       }
