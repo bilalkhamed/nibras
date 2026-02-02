@@ -14,6 +14,7 @@ export const ADMIN_ROLE = 'admin';
 export const SUPERVISOR_ROLE = 'supervisor';
 export const STUDENT_ROLE = 'student';
 export const COHORT_MANAGER_ROLE = 'cohort_manager';
+export const GROUP_MANAGER_ROLE = 'group_manager';
 
 export const ACTIVE_STATUS = UserStatus.active;
 export const SUSPENDED_STATUS = UserStatus.suspended;

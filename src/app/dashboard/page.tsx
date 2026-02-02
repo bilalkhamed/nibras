@@ -5,6 +5,7 @@ import { StudentDashboard } from './components/student-dashboard';
 import {
   ADMIN_ROLE,
   COHORT_MANAGER_ROLE,
+  GROUP_MANAGER_ROLE,
   STUDENT_ROLE,
   SUPERVISOR_ROLE,
 } from '@/types/types';
@@ -12,6 +13,7 @@ import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { Suspense } from 'react';
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
 import { CohortManagerDashboard } from './components/cohort-manager-dashboard';
+import { GroupManagerDashboard } from './components/group-manager-dashboard';
 
 export default async function DashboardPage() {
   return (
@@ -27,6 +29,8 @@ export default async function DashboardPage() {
               return <StudentDashboard />;
             case COHORT_MANAGER_ROLE:
               return <CohortManagerDashboard />;
+            case GROUP_MANAGER_ROLE:
+              return <GroupManagerDashboard userId={auth.userId} />;
             default:
               redirect('/forbidden');
           }
