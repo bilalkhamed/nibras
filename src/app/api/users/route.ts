@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const groupStatus = searchParams.get('groupStatus');
   const cohortId = searchParams.get('cohortId');
 
-  if (![null, 'student', 'supervisor', 'admin'].includes(role)) {
+  if (role && ![...Object.keys(Role)].includes(role)) {
     return NextResponse.json(
       { message: 'Invalid role filter' },
       { status: 422 },
