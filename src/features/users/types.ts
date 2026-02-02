@@ -114,7 +114,10 @@ export type UserByEmail = Prisma.UserGetPayload<{
 export type UserInviteStatusDTO = Pick<User, 'id' | 'status'>;
 
 /** User with role and cohort for validation */
-export type UserWithRoleAndCohortDTO = Pick<User, 'id' | 'role' | 'cohortId'>;
+export type UserWithRoleAndCohortAndGroupDTO = Pick<
+  User,
+  'id' | 'role' | 'cohortId' | 'supervisedGroupId'
+>;
 
 // ============================================================================
 // Mutation DTOs

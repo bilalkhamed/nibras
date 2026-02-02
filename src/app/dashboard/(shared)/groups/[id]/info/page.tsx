@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { InfoSectionSkeleton, TableSkeleton } from '@/components/skeletons';
+import { InfoSectionSkeleton } from '@/components/skeletons';
 import { notFound } from 'next/navigation';
 import {
   getGroupById,
@@ -84,7 +84,13 @@ async function GroupDetailWrapper({
   return (
     <div className="space-y-4">
       {/* Group Info Section */}
-      <GroupInfoSection group={group} userRole={auth.role} />
+      <GroupInfoSection
+        group={group}
+        user={{
+          role: auth.role,
+          managedCohortId: auth.managedCohortId,
+        }}
+      />
 
       {/* Students Section with Suspense */}
       <GroupStudentsSection

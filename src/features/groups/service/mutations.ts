@@ -18,22 +18,27 @@ import {
   findActiveGroupStudent,
   deactivateGroupStudent,
   findGroupById,
+  updateGroup as updateGroupDal,
 } from '../dal';
-import type { CreateGroupData, GroupStudentEntryDTO } from '../types';
+import type {
+  CreateGroupData,
+  GroupStudentEntryDTO,
+  UpdateGroupData,
+} from '../types';
 import {
   ADMIN_ROLE,
   SUPERVISOR_ROLE,
   STUDENT_ROLE,
   COHORT_MANAGER_ROLE,
 } from '@/types/types';
-import { getUserWithRoleAndCohort } from '@/features/users/service';
+import { getUserWithRoleAndCohortAndGroup } from '@/features/users/service';
 
 // ============================================================================
-// Group CRUD - Admin Only
+// Group CRUD - Admin or Cohort Manager Only
 // ============================================================================
 
 /**
- * Create a new group - admin only
+ * Create a new group - admin or cohort manager only
  *
  * @param data - Group creation data
  * @returns The created group ID
@@ -43,16 +48,29 @@ export async function createGroup(
 ): Promise<ServiceReturn<{ groupId: string }>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
       }
 
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (data.cohortId !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
       // Validate supervisor exists and has correct role
       for (const supervisorId of data.supervisors) {
-        const supervisorResult = await getUserWithRoleAndCohort(supervisorId);
+        const supervisorResult =
+          await getUserWithRoleAndCohortAndGroup(supervisorId);
         if (!supervisorResult.success) {
           return {
             success: false,
@@ -66,9 +84,120 @@ export async function createGroup(
             error: { type: 'bad-request', statusCode: 400 },
           };
         }
+
+        if (supervisorResult.data.supervisedGroupId) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
       }
 
       const dalResult = await insertGroup({
+        name: data.name,
+        cohortId: data.cohortId,
+        supervisors: data.supervisors,
+      });
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: { groupId: dalResult.data.id },
+      };
+    },
+    { requireAuth: true },
+  );
+}
+
+/**
+ * Update an existing group - admin or cohort manager only
+ *
+ * @param groupId - The group ID to update
+ * @param data - Group update data
+ * @returns The updated group ID
+ */
+export async function updateGroup(
+  groupId: string,
+  data: UpdateGroupData,
+): Promise<ServiceReturn<{ groupId: string }>> {
+  return runServiceOperation(
+    async (session) => {
+      // Authorization: admin or cohort manager only
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      // Fetch the existing group to check permissions
+      const groupResult = await findGroupById(groupId);
+      if (!groupResult.success) {
+        return mapDalToService(groupResult);
+      }
+
+      if (!groupResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      // Cohort manager permission check: can only update groups in their cohort
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (groupResult.data.cohortId !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+
+        // Cohort manager cannot change the cohort of a group
+        if (data.cohortId !== groupResult.data.cohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
+      // Validate supervisors exist and have correct role
+      for (const supervisorId of data.supervisors) {
+        const supervisorResult =
+          await getUserWithRoleAndCohortAndGroup(supervisorId);
+        if (!supervisorResult.success) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
+
+        if (supervisorResult.data.role !== SUPERVISOR_ROLE) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
+
+        if (
+          supervisorResult.data.supervisedGroupId &&
+          supervisorResult.data.supervisedGroupId !== groupId
+        ) {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
+      }
+
+      // Update the group
+      const dalResult = await updateGroupDal(groupId, {
         name: data.name,
         cohortId: data.cohortId,
         supervisors: data.supervisors,
@@ -115,7 +244,7 @@ export async function addStudentToGroup(
       }
 
       // Validate student exists and has correct role
-      const studentResult = await getUserWithRoleAndCohort(studentId);
+      const studentResult = await getUserWithRoleAndCohortAndGroup(studentId);
       console.log(studentResult);
 
       if (!studentResult.success) {

@@ -16,7 +16,7 @@ import {
   UserNameDTO,
   UserWithCohortAndTimestampsDTO,
   UserWithCohortDTO,
-  UserWithRoleAndCohortDTO,
+  UserWithRoleAndCohortAndGroupDTO,
 } from '../types';
 
 // ============================================================================
@@ -343,9 +343,9 @@ export async function findUserForInvite(
 }
 
 /** Find user with role and cohort (for group assignment validation) */
-export async function findUserWithRoleAndCohort(
+export async function findUserWithRoleAndCohortAndGroup(
   userId: string,
-): Promise<DalReturn<UserWithRoleAndCohortDTO | null>> {
+): Promise<DalReturn<UserWithRoleAndCohortAndGroupDTO | null>> {
   return runDalOperation(async () => {
     return await prisma.user.findUnique({
       where: { id: userId },
@@ -353,6 +353,7 @@ export async function findUserWithRoleAndCohort(
         id: true,
         role: true,
         cohortId: true,
+        supervisedGroupId: true,
       },
     });
   });

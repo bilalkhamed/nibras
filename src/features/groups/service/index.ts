@@ -13,6 +13,7 @@ export { getGroupById, getGroups } from './queries';
 // Mutation operations
 export {
   createGroup,
+  updateGroup,
   addStudentToGroup,
   removeStudentFromGroup,
 } from './mutations';

@@ -13,25 +13,38 @@ import {
 } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import { Role } from '@prisma/client';
-import { ADMIN_ROLE } from '@/types/types';
+import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
 import { GroupDetailDTO } from '../../types';
+import { EditGroupSheet } from '../management/edit-group-sheet';
 
 interface GroupInfoSectionProps {
   group: GroupDetailDTO;
-  userRole: Role;
+  user: {
+    role: Role;
+    managedCohortId: string | null;
+  };
 }
 
-function ActionButtons() {
+interface ActionButtonsProps {
+  group: GroupDetailDTO;
+  managedCohortId: string | null;
+}
+
+function ActionButtons({ group, managedCohortId }: ActionButtonsProps) {
+  // Prepare default values for edit form
+  const defaultValues = {
+    name: group.name,
+    cohortId: group.cohortId,
+    supervisors: group.supervisors.map((s) => s.id),
+  };
+
   return (
     <div className="flex gap-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>تحرير المجموعة</TooltipContent>
-      </Tooltip>
+      <EditGroupSheet
+        groupId={group.id}
+        defaultValues={defaultValues}
+        cohortId={managedCohortId || undefined}
+      />
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="sm">
@@ -52,7 +65,7 @@ function ActionButtons() {
   );
 }
 
-export function GroupInfoSection({ group, userRole }: GroupInfoSectionProps) {
+export function GroupInfoSection({ group, user }: GroupInfoSectionProps) {
   return (
     <TooltipProvider>
       <Card className="border-border bg-card/80">
@@ -60,7 +73,12 @@ export function GroupInfoSection({ group, userRole }: GroupInfoSectionProps) {
           <CardTitle className="text-lg font-semibold">
             معلومات المجموعة
           </CardTitle>
-          {userRole === ADMIN_ROLE && <ActionButtons />}
+          {(user.role === ADMIN_ROLE || user.role === COHORT_MANAGER_ROLE) && (
+            <ActionButtons
+              group={group}
+              managedCohortId={user.managedCohortId}
+            />
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Group Details */}
@@ -80,39 +98,40 @@ export function GroupInfoSection({ group, userRole }: GroupInfoSectionProps) {
 
           <Separator />
 
-          {userRole === ADMIN_ROLE && group.supervisors.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-foreground">
-                المشرفات ({group.supervisors.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {group.supervisors.map((supervisor) => (
-                  <div
-                    key={supervisor.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-card p-3 hover:bg-muted transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">
-                        {supervisor.firstName} {supervisor.middleName}{' '}
-                        {supervisor.lastName}
-                      </span>
+          {(user.role === ADMIN_ROLE || user.role === COHORT_MANAGER_ROLE) &&
+            group.supervisors.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-foreground">
+                  المشرفات ({group.supervisors.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {group.supervisors.map((supervisor) => (
+                    <div
+                      key={supervisor.id}
+                      className="flex items-center justify-between rounded-lg border border-border bg-card p-3 hover:bg-muted transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {supervisor.firstName} {supervisor.middleName}{' '}
+                          {supervisor.lastName}
+                        </span>
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link href={`/dashboard/users/${supervisor.id}`}>
+                            <Button variant="ghost" size="sm">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>عرض صفحة المشرفة</TooltipContent>
+                      </Tooltip>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href={`/dashboard/users/${supervisor.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>عرض صفحة المشرفة</TooltipContent>
-                    </Tooltip>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </CardContent>
       </Card>
     </TooltipProvider>

@@ -20,6 +20,15 @@ export const createGroupSchema = z.object({
 });
 
 /**
+ * Schema for updating an existing group
+ */
+export const updateGroupSchema = z.object({
+  name: z.string().min(1, 'اسم المجموعة مطلوب'),
+  cohortId: z.string().min(1, 'الدفعة مطلوبة'),
+  supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
+});
+
+/**
  * Schema for adding a student to a group
  */
 export const addStudentToGroupSchema = z.object({
@@ -40,6 +49,7 @@ export const removeStudentFromGroupSchema = z.object({
 // ============================================================================
 
 export type CreateGroupData = z.infer<typeof createGroupSchema>;
+export type UpdateGroupData = z.infer<typeof updateGroupSchema>;
 export type AddStudentToGroupData = z.infer<typeof addStudentToGroupSchema>;
 export type RemoveStudentFromGroupData = z.infer<
   typeof removeStudentFromGroupSchema
@@ -154,6 +164,10 @@ export type GroupStudentWithCohortIdDTO = Prisma.GroupStudentGetPayload<{
 // ============================================================================
 
 export type CreateGroupResult =
+  | { success: true; groupId: string }
+  | { success: false; error: string };
+
+export type UpdateGroupResult =
   | { success: true; groupId: string }
   | { success: false; error: string };
 

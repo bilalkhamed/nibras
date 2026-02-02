@@ -7,7 +7,7 @@ import {
 } from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import {
-  CreateGroupDialog,
+  CreateGroupSheet,
   CohortNavigator,
   CohortNavigatorWrapper,
   GroupsListSection,
@@ -23,20 +23,25 @@ export default async function GroupsPage({
   return (
     <Suspense fallback={<CardsListSkeleton />}>
       <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, SUPERVISOR_ROLE]}>
-        {(auth) => (
+        {(session) => (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-foreground">المجموعات</h1>
-              {auth.role === ADMIN_ROLE && <CreateGroupDialog />}
+              {(session.role === ADMIN_ROLE ||
+                session.role === COHORT_MANAGER_ROLE) && (
+                <CreateGroupSheet
+                  cohortId={session.managedCohortId || undefined}
+                />
+              )}
             </div>
 
-            {auth.role === ADMIN_ROLE && (
+            {session.role === ADMIN_ROLE && (
               <Suspense fallback={<CohortNavigator cohorts={[]} />}>
                 <CohortNavigatorWrapper />
               </Suspense>
             )}
             <Suspense key={cohortId} fallback={<CardsListSkeleton />}>
-              <GroupsListSection auth={auth} searchParams={searchParams} />
+              <GroupsListSection auth={session} searchParams={searchParams} />
             </Suspense>
           </div>
         )}

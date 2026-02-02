@@ -14,7 +14,7 @@ import {
   findUserForInvite,
   findUsersBasic,
   findUsersNameOnly,
-  findUserWithRoleAndCohort,
+  findUserWithRoleAndCohortAndGroup,
 } from '../dal';
 import {
   RecentUserDTO,
@@ -25,7 +25,7 @@ import {
   UserDTO,
   UserInviteStatusDTO,
   UserNameDTO,
-  UserWithRoleAndCohortDTO,
+  UserWithRoleAndCohortAndGroupDTO,
 } from '../types';
 import { ServiceReturn } from '@/lib/server/service/types';
 import { Role } from '@prisma/client';
@@ -384,8 +384,8 @@ export async function getUserForInvite(userId: string) {
 }
 
 /** Get user with role and cohort for validation - admin/supervisor only */
-export async function getUserWithRoleAndCohort(userId: string) {
-  return runServiceOperation<UserWithRoleAndCohortDTO>(
+export async function getUserWithRoleAndCohortAndGroup(userId: string) {
+  return runServiceOperation<UserWithRoleAndCohortAndGroupDTO>(
     async (session) => {
       if (!['admin', 'cohort_manager', 'supervisor'].includes(session!.role)) {
         return {
@@ -394,12 +394,12 @@ export async function getUserWithRoleAndCohort(userId: string) {
         };
       }
 
-      const dalResult = await findUserWithRoleAndCohort(userId);
+      const dalResult = await findUserWithRoleAndCohortAndGroup(userId);
 
       if (!dalResult.success) {
         return mapDalToService(
           dalResult,
-        ) as ServiceReturn<UserWithRoleAndCohortDTO>;
+        ) as ServiceReturn<UserWithRoleAndCohortAndGroupDTO>;
       }
 
       if (!dalResult.data) {

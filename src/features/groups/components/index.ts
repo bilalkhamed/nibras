@@ -5,7 +5,7 @@
  */
 
 // Admin-only components
-export { CreateGroupDialog, AddStudentDialog, StudentActions } from './admin';
+export { CreateGroupSheet, AddStudentDialog, StudentActions } from './admin';
 
 // Shared components
 export {

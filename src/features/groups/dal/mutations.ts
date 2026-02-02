@@ -13,10 +13,10 @@ import type { DalReturn } from '@/lib/server/dal/types';
 import { generateSixCharCode } from '@/lib/shared/utils';
 import {
   GroupStudentWithCohortIdDTO,
-  selectGroupStudent,
   selectGroupStudentWithCohortId,
   type GroupStudentEntryDTO,
 } from '../types';
+import { revalidateTag } from 'next/cache';
 
 // ============================================================================
 // Group CRUD Mutations
@@ -53,28 +53,55 @@ export async function insertGroup(data: {
 }
 
 /**
- * Update group basic info
+ * Update group basic info and supervisors
  *
  * @param groupId - The group ID
- * @param data - Data to update
+ * @param data - Data to update (name, cohortId, supervisors)
  * @returns The updated group
  */
 export async function updateGroup(
   groupId: string,
   data: {
     name?: string;
-    supervisorId?: string;
+    cohortId?: string;
+    supervisors?: string[];
   },
 ): Promise<DalReturn<{ id: string; name: string }>> {
   return runDalOperation(async () => {
-    return prisma.group.update({
+    const updateData: {
+      name?: string;
+      cohortId?: string;
+      supervisors?: { set: { id: string }[] };
+    } = {};
+
+    if (data.name !== undefined) {
+      updateData.name = data.name;
+    }
+
+    if (data.cohortId !== undefined) {
+      updateData.cohortId = data.cohortId;
+    }
+
+    if (data.supervisors !== undefined) {
+      // Replace all supervisors: disconnect all, then connect new ones
+      updateData.supervisors = {
+        set: data.supervisors.map((id) => ({ id })),
+      };
+    }
+
+    const updated = await prisma.group.update({
       where: { id: groupId },
-      data,
+      data: updateData,
       select: {
         id: true,
         name: true,
       },
     });
+
+    revalidateTag(`group-${groupId}`, 'max');
+    revalidateTag('groups-list', 'max');
+
+    return updated;
   });
 }
 

@@ -24,7 +24,7 @@ export {
 // Components
 export {
   // Admin
-  CreateGroupDialog,
+  CreateGroupSheet,
   AddStudentDialog,
   StudentActions,
   // Shared
