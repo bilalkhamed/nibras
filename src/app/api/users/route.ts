@@ -36,7 +36,11 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(
-    { message: 'users retreived successfully', users: result.data },
+    {
+      message: 'users retreived successfully',
+      n: result.data.length,
+      users: result.data,
+    },
     { status: 200 },
   );
 }

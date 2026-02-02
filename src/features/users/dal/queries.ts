@@ -157,15 +157,40 @@ export async function findUsersNameOnly(
   filters?: FindUsersWithFiltersParams,
 ): Promise<DalReturn<UserNameDTO[]>> {
   return runDalOperation(async () => {
+    console.log('welcome to dal');
+
+    // 1. Base Filter (Safe defaults)
+    const where: Prisma.UserWhereInput = {
+      role: filters?.role,
+      NOT: { role: 'admin' },
+      groupsAsStudent:
+        filters?.groupStatus === 'inactive'
+          ? { none: { isActive: true } }
+          : undefined,
+      // ❌ REMOVED cohortId from here to prevent "The Student Trap"
+    };
+
+    // 2. Dynamic Cohort Logic
+    if (filters?.cohortId) {
+      if (filters.role === 'supervisor') {
+        // ✅ SUPERVISOR MODE: "My Team" OR "Free Agents"
+        where.OR = [
+          { supervisedGroup: { cohortId: filters.cohortId } }, // Working in my cohort
+          { supervisedGroupId: null }, // Available to hire
+        ];
+      } else {
+        // ✅ STUDENT MODE: Strict
+        where.cohortId = filters.cohortId;
+      }
+    }
+
+    // 3. Strict "Unassigned" Filter (Overrides above if specific)
+    if (filters?.groupStatus === 'inactive') {
+      where.supervisedGroupId = null;
+    }
+
     return await prisma.user.findMany({
-      where: {
-        role: filters?.role,
-        groupsAsStudent:
-          filters?.groupStatus === 'inactive'
-            ? { none: { isActive: true } }
-            : undefined,
-        cohortId: filters?.cohortId,
-      },
+      where: where,
       select: {
         id: true,
         firstName: true,
@@ -182,15 +207,38 @@ export async function findUsersBasic(
   filters?: FindUsersWithFiltersParams,
 ): Promise<DalReturn<UserBasicDTO[]>> {
   return runDalOperation(async () => {
+    // 1. Base Filter (Safe defaults)
+    const where: Prisma.UserWhereInput = {
+      role: filters?.role,
+      NOT: { role: 'admin' },
+      groupsAsStudent:
+        filters?.groupStatus === 'inactive'
+          ? { none: { isActive: true } }
+          : undefined,
+      // ❌ REMOVED cohortId from here to prevent "The Student Trap"
+    };
+
+    // 2. Dynamic Cohort Logic
+    if (filters?.cohortId) {
+      if (filters.role === 'supervisor') {
+        // ✅ SUPERVISOR MODE: "My Team" OR "Free Agents"
+        where.OR = [
+          { supervisedGroup: { cohortId: filters.cohortId } }, // Working in my cohort
+          { supervisedGroupId: null }, // Available to hire
+        ];
+      } else {
+        // ✅ STUDENT MODE: Strict
+        where.cohortId = filters.cohortId;
+      }
+    }
+
+    // 3. Strict "Unassigned" Filter (Overrides above if specific)
+    if (filters?.groupStatus === 'inactive') {
+      where.supervisedGroupId = null;
+    }
+
     return await prisma.user.findMany({
-      where: {
-        role: filters?.role,
-        groupsAsStudent:
-          filters?.groupStatus === 'inactive'
-            ? { none: { isActive: true } }
-            : undefined,
-        cohortId: filters?.cohortId,
-      },
+      where: where,
       select: {
         id: true,
         firstName: true,

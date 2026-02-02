@@ -36,6 +36,7 @@ function ActionButtons({ group, managedCohortId }: ActionButtonsProps) {
     name: group.name,
     cohortId: group.cohortId,
     supervisors: group.supervisors.map((s) => s.id),
+    supervisorsDetails: group.supervisors,
   };
 
   return (

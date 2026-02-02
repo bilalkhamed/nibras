@@ -18,7 +18,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { GroupForm } from './group-form';
-import type { CreateGroupData } from '../../types';
+import type { CreateGroupData, GroupSupervisorDTO } from '../../types';
 import type { UserNameDTO } from '@/features/users/types';
 import { updateGroupAction } from '../../actions';
 import { toast } from 'sonner';
@@ -39,7 +39,7 @@ type EditGroupSheetProps = {
   /** Group ID to edit */
   groupId: string;
   /** Default values from existing group */
-  defaultValues: CreateGroupData;
+  defaultValues: CreateGroupData & { supervisorsDetails: GroupSupervisorDTO[] };
   /** Optional cohort ID restriction for cohort managers */
   cohortId?: string;
 };
@@ -54,7 +54,7 @@ export function EditGroupSheet({
 }: EditGroupSheetProps) {
   const [open, setOpen] = useState(false);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
-  const [supervisors, setSupervisors] = useState<UserNameDTO[]>([]);
+  const [supervisors, setSupervisors] = useState<GroupSupervisorDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +71,7 @@ export function EditGroupSheet({
       try {
         const supervisorParams = new URLSearchParams({
           role: SUPERVISOR_ROLE,
+          groupStatus: 'inactive',
           nameOnly: 'true',
         });
 
@@ -86,7 +87,10 @@ export function EditGroupSheet({
           cohortsPromise,
         ]);
 
-        setSupervisors(supervisorsData.users || []);
+        setSupervisors([
+          ...supervisorsData.users,
+          ...defaultValues.supervisorsDetails,
+        ]);
 
         // Handle single cohort vs multiple cohorts response
         if (cohortId) {
@@ -105,7 +109,7 @@ export function EditGroupSheet({
     };
 
     fetchData();
-  }, [open, dataFetched, cohortId]);
+  }, [open, dataFetched, cohortId, defaultValues.supervisorsDetails]);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -135,6 +139,7 @@ export function EditGroupSheet({
     }
   };
 
+  console.log(supervisors);
   return (
     <Tooltip>
       <Sheet open={open} onOpenChange={handleOpenChange}>

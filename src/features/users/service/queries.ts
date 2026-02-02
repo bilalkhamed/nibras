@@ -167,10 +167,7 @@ export async function getUsersNameOnly(filters?: UserFilters) {
       }
 
       if (session!.role === 'cohort_manager') {
-        filters = {
-          ...filters,
-          cohortId: session?.managedCohortId || undefined,
-        };
+        filters = { ...filters, cohortId: session!.managedCohortId! };
       }
 
       const dalResult = await findUsersNameOnly(filters);
@@ -192,10 +189,7 @@ export async function getUsersBasic(filters?: UserFilters) {
       }
 
       if (session!.role === 'cohort_manager') {
-        filters = {
-          ...filters,
-          cohortId: session?.managedCohortId || undefined,
-        };
+        filters = { ...filters, cohortId: session!.managedCohortId! };
       }
       const dalResult = await findUsersBasic(filters);
       return mapDalToService(dalResult);

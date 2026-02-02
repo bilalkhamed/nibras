@@ -58,6 +58,7 @@ export function CreateGroupSheet({ cohortId }: CreateGroupSheetProps) {
       try {
         const supervisorParams = new URLSearchParams({
           role: SUPERVISOR_ROLE,
+          groupStatus: 'inactive',
           nameOnly: 'true',
         });
 
