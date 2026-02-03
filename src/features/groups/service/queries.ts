@@ -77,6 +77,24 @@ export async function getGroupById(
         }
       }
 
+      if (group && session!.role === GROUP_MANAGER_ROLE) {
+        if (group.managers.some((m) => m.id === session!.userId) === false) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
+      if (group && session!.role === COHORT_MANAGER_ROLE) {
+        if (group.cohort.id !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
       return mapDalToService(dalResult);
     },
     { requireAuth: true },
