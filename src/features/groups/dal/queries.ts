@@ -80,11 +80,13 @@ export async function findGroups(
             }
           : undefined,
         cohortId: options.cohortId,
-        managers: {
-          some: {
-            userId: options.managerId,
-          },
-        },
+        managers: options.managerId
+          ? {
+              some: {
+                userId: options.managerId,
+              },
+            }
+          : undefined,
       },
       select: {
         id: true,
