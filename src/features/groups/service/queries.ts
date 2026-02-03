@@ -29,6 +29,7 @@ import {
   ADMIN_ROLE,
   COHORT_MANAGER_ROLE,
   GROUP_MANAGER_ROLE,
+  STUDENT_ROLE,
   SUPERVISOR_ROLE,
 } from '@/types/types';
 import { findStudentGroups } from '../dal/queries';
@@ -49,6 +50,15 @@ export async function getGroupById(
 ): Promise<ServiceReturn<GroupDetailDTO | null>> {
   return runServiceOperation(
     async (session) => {
+      if (session && session.role === STUDENT_ROLE) {
+        if (session.activeGroupId !== groupId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
       const dalResult = await findGroupById(groupId);
 
       if (!dalResult.success) {
@@ -102,6 +112,7 @@ export async function getGroups(
       // Admins can see all groups (optionally filtered)
       if (role === ADMIN_ROLE) {
         const dalResult = await findGroups(options);
+        console.log(dalResult);
         return mapDalToService(dalResult);
       }
 
