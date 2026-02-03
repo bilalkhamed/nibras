@@ -51,7 +51,7 @@ export async function getAllUsers() {
 
       const dalResult = await findManyUsers(filter);
 
-      return mapDalToService(dalResult);
+      return mapDalToService<UserDTO[]>(dalResult);
     },
     { requireAuth: true },
   );
@@ -76,7 +76,7 @@ export async function getUserById(id: string) {
       const dalResult = await findUserById(id, filter);
 
       if (!dalResult.success) {
-        return mapDalToService(dalResult) as ServiceReturn<UserDTO>;
+        return mapDalToService<UserDTO>(dalResult);
       }
 
       if (!dalResult.data) {
@@ -106,7 +106,7 @@ export async function getCurrentUserData() {
       const dalResult = await findUserById(session.userId);
 
       if (!dalResult.success) {
-        return mapDalToService(dalResult) as ServiceReturn<UserDTO>;
+        return mapDalToService<UserDTO>(dalResult);
       }
 
       if (!dalResult.data) {
@@ -129,7 +129,7 @@ export async function getUserByEmail(email: string) {
       const dalResult = await findUserByEmail(email);
 
       if (!dalResult.success) {
-        return mapDalToService(dalResult) as ServiceReturn<UserByEmail>;
+        return mapDalToService<UserByEmail>(dalResult);
       }
 
       if (!dalResult.data) {
@@ -306,7 +306,7 @@ export async function getStudentBasicInfo() {
       const dalResult = await findStudentBasicInfo(session!.userId);
 
       if (!dalResult.success) {
-        return mapDalToService(dalResult) as ServiceReturn<StudentBasicInfoDTO>;
+        return mapDalToService<StudentBasicInfoDTO>(dalResult);
       }
 
       if (!dalResult.data) {
@@ -361,7 +361,7 @@ export async function getUserForInvite(userId: string) {
       const dalResult = await findUserForInvite(userId);
 
       if (!dalResult.success) {
-        return mapDalToService(dalResult) as ServiceReturn<UserInviteStatusDTO>;
+        return mapDalToService<UserInviteStatusDTO>(dalResult);
       }
 
       if (!dalResult.data) {
@@ -391,9 +391,7 @@ export async function getUserWithRoleAndCohortAndGroup(userId: string) {
       const dalResult = await findUserWithRoleAndCohortAndGroup(userId);
 
       if (!dalResult.success) {
-        return mapDalToService(
-          dalResult,
-        ) as ServiceReturn<UserWithRoleAndCohortAndGroupDTO>;
+        return mapDalToService<UserWithRoleAndCohortAndGroupDTO>(dalResult);
       }
 
       if (!dalResult.data) {
