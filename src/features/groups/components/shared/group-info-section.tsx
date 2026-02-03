@@ -99,6 +99,38 @@ export function GroupInfoSection({ group, user }: GroupInfoSectionProps) {
 
           <Separator />
 
+          {(user.role === ADMIN_ROLE || user.role === COHORT_MANAGER_ROLE) && (
+            <>
+              <h3 className="font-semibold text-foreground">مديرة المجموعة</h3>
+              <div>
+                {group.managers.map((manager) => (
+                  <div
+                    key={manager.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-card p-3 hover:bg-muted transition-colors mb-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">
+                        {manager.firstName} {manager.middleName}{' '}
+                        {manager.lastName}
+                      </span>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link href={`/dashboard/users/${manager.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>عرض صفحة المشرف</TooltipContent>
+                    </Tooltip>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
           {(user.role === ADMIN_ROLE || user.role === COHORT_MANAGER_ROLE) &&
             group.supervisors.length > 0 && (
               <div className="space-y-4">

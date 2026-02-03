@@ -17,6 +17,7 @@ import {
   type GetGroupsOptions,
   type GroupStudentDTO,
   myGroupStudentSelect,
+  selectGroupDetail,
 } from '../types';
 
 // ============================================================================
@@ -39,40 +40,15 @@ export async function findGroupById(
   return runDalOperation(async () => {
     const group = await prisma.group.findUnique({
       where: { id: groupId },
-      include: {
-        supervisors: {
-          select: {
-            id: true,
-            firstName: true,
-            middleName: true,
-            lastName: true,
-            email: true,
-            phone: true,
-          },
-        },
-        students: {
-          where: { isActive: true },
-          select: {
-            student: {
-              select: {
-                id: true,
-                firstName: true,
-                middleName: true,
-                lastName: true,
-              },
-            },
-            joinedAt: true,
-          },
-        },
-        cohort: {
-          include: {
-            currentLevel: true,
-          },
-        },
-      },
+      select: selectGroupDetail,
     });
 
-    return group as GroupDetailDTO | null;
+    if (!group) return null;
+
+    return {
+      ...group,
+      managers: group.managers.map((m) => m.user) || [],
+    };
   });
 }
 
