@@ -23,7 +23,7 @@ import type { UserNameDTO } from '@/features/users/types';
 import { updateGroupAction } from '../../actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { SUPERVISOR_ROLE } from '@/types/types';
+import { SUPERVISOR_ROLE, GROUP_MANAGER_ROLE } from '@/types/types';
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +39,10 @@ type EditGroupSheetProps = {
   /** Group ID to edit */
   groupId: string;
   /** Default values from existing group */
-  defaultValues: CreateGroupData & { supervisorsDetails: GroupSupervisorDTO[] };
+  defaultValues: CreateGroupData & {
+    supervisorsDetails: GroupSupervisorDTO[];
+    managerDetails?: UserNameDTO;
+  };
   /** Optional cohort ID restriction for cohort managers */
   cohortId?: string;
 };
@@ -55,6 +58,7 @@ export function EditGroupSheet({
   const [open, setOpen] = useState(false);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [supervisors, setSupervisors] = useState<GroupSupervisorDTO[]>([]);
+  const [groupManagers, setGroupManagers] = useState<UserNameDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,22 +79,49 @@ export function EditGroupSheet({
           nameOnly: 'true',
         });
 
+        const groupManagerParams = new URLSearchParams({
+          role: GROUP_MANAGER_ROLE,
+          nameOnly: 'true',
+        });
+
         // Always fetch all supervisors and determine cohorts based on cohortId
         const cohortsPromise = cohortId
           ? fetch(`/api/cohorts/${cohortId}`).then((res) => res.json())
           : fetch('/api/cohorts').then((res) => res.json());
 
-        const [supervisorsData, cohortsData] = await Promise.all([
-          fetch(`/api/users?${supervisorParams.toString()}`).then((res) =>
-            res.json(),
-          ),
-          cohortsPromise,
-        ]);
+        const [supervisorsData, groupManagersData, cohortsData] =
+          await Promise.all([
+            fetch(`/api/users?${supervisorParams.toString()}`).then((res) =>
+              res.json(),
+            ),
+            fetch(`/api/users?${groupManagerParams.toString()}`).then((res) =>
+              res.json(),
+            ),
+            cohortsPromise,
+          ]);
 
         setSupervisors([
           ...supervisorsData.users,
           ...defaultValues.supervisorsDetails,
         ]);
+
+        // Merge fetched managers with existing manager (union without duplicates)
+        const fetchedManagers = groupManagersData.users || [];
+        const existingManager = defaultValues.managerDetails;
+
+        // Create a union: if existing manager exists and is not in fetched list, add it
+        const managersUnion = existingManager
+          ? [
+              ...fetchedManagers,
+              ...(fetchedManagers.some(
+                (m: UserNameDTO) => m.id === existingManager.id,
+              )
+                ? []
+                : [existingManager]),
+            ]
+          : fetchedManagers;
+
+        setGroupManagers(managersUnion);
 
         // Handle single cohort vs multiple cohorts response
         if (cohortId) {
@@ -109,7 +140,13 @@ export function EditGroupSheet({
     };
 
     fetchData();
-  }, [open, dataFetched, cohortId, defaultValues.supervisorsDetails]);
+  }, [
+    open,
+    dataFetched,
+    cohortId,
+    defaultValues.supervisorsDetails,
+    defaultValues.managerDetails,
+  ]);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -175,6 +212,7 @@ export function EditGroupSheet({
               submitLabel="حفظ التعديلات"
               cohorts={cohorts}
               supervisors={supervisors}
+              groupManagers={groupManagers}
               defaultValues={defaultValues}
               onSubmit={onSubmit}
               onCancel={handleCancel}

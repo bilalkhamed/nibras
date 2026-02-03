@@ -93,11 +93,7 @@ export async function createGroup(
         }
       }
 
-      const dalResult = await insertGroup({
-        name: data.name,
-        cohortId: data.cohortId,
-        supervisors: data.supervisors,
-      });
+      const dalResult = await insertGroup(data);
 
       if (!dalResult.success) {
         return mapDalToService(dalResult);
@@ -197,11 +193,7 @@ export async function updateGroup(
       }
 
       // Update the group
-      const dalResult = await updateGroupDal(groupId, {
-        name: data.name,
-        cohortId: data.cohortId,
-        supervisors: data.supervisors,
-      });
+      const dalResult = await updateGroupDal(groupId, data);
 
       if (!dalResult.success) {
         return mapDalToService(dalResult);

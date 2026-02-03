@@ -17,6 +17,7 @@ export const createGroupSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),
   cohortId: z.string().min(1, 'الدفعة مطلوبة'),
   supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
+  groupManager: z.string().optional(),
 });
 
 /**
@@ -26,6 +27,7 @@ export const updateGroupSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),
   cohortId: z.string().min(1, 'الدفعة مطلوبة'),
   supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
+  groupManager: z.string().optional(),
 });
 
 /**
@@ -62,45 +64,80 @@ export type RemoveStudentFromGroupData = z.infer<
 /**
  * Basic group supervisor info
  */
-export type GroupSupervisorDTO = {
-  id: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-};
+const selectGroupSupervisor = {
+  id: true,
+  firstName: true,
+  middleName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+} satisfies Prisma.UserSelect;
 
-export type GroupStudentInfoDTO = {
+// 2. Generate the Type automatically 🪄
+export type GroupSupervisorDTO = Prisma.UserGetPayload<{
+  select: typeof selectGroupSupervisor;
+}>;
+
+const selectGroupStudentInfo = {
   student: {
-    id: string;
-    firstName: string;
-    middleName: string | null;
-    lastName: string;
-  };
-  joinedAt: Date;
-};
+    select: {
+      firstName: true,
+      middleName: true,
+      lastName: true,
+      id: true,
+    },
+  },
+  joinedAt: true,
+} satisfies Prisma.GroupStudentSelect;
+export type GroupStudentInfoDTO = Prisma.GroupStudentGetPayload<{
+  select: typeof selectGroupStudentInfo;
+}>;
 
 /**
  * Group with full details (for info page)
  */
-export type GroupDetailDTO = {
-  id: string;
-  name: string;
-  code: string;
-  cohortId: string;
-  createdAt: Date;
-  supervisors: GroupSupervisorDTO[];
-  students: GroupStudentInfoDTO[];
+
+export const selectGroupDetail = {
+  id: true,
+  name: true,
+  cohortId: true,
+  createdAt: true,
+  supervisors: {
+    select: selectGroupSupervisor,
+  },
+  students: {
+    where: { isActive: true },
+    select: selectGroupStudentInfo,
+  },
+  managers: {
+    select: {
+      user: {
+        select: selectGroupSupervisor,
+      },
+    },
+  },
   cohort: {
-    id: string;
-    name: string;
-    currentLevelId: string;
-    currentLevel: {
-      id: string;
-      title: string;
-    };
-  };
+    select: {
+      id: true,
+      name: true,
+      currentLevelId: true,
+      currentLevel: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.GroupSelect;
+
+export type GroupDetailDTO = Omit<
+  Prisma.GroupGetPayload<{
+    select: typeof selectGroupDetail;
+  }>,
+  'managers'
+> & {
+  managers: GroupSupervisorDTO[];
 };
 
 /**

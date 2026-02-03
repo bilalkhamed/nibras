@@ -23,7 +23,7 @@ import type { UserNameDTO } from '@/features/users/types';
 import { createGroupAction } from '../../actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { SUPERVISOR_ROLE } from '@/types/types';
+import { SUPERVISOR_ROLE, GROUP_MANAGER_ROLE } from '@/types/types';
 
 interface Cohort {
   id: string;
@@ -42,6 +42,7 @@ export function CreateGroupSheet({ cohortId }: CreateGroupSheetProps) {
   const [open, setOpen] = useState(false);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [supervisors, setSupervisors] = useState<UserNameDTO[]>([]);
+  const [groupManagers, setGroupManagers] = useState<UserNameDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,19 +63,29 @@ export function CreateGroupSheet({ cohortId }: CreateGroupSheetProps) {
           nameOnly: 'true',
         });
 
+        const groupManagerParams = new URLSearchParams({
+          role: GROUP_MANAGER_ROLE,
+          nameOnly: 'true',
+        });
+
         // Always fetch all supervisors and determine cohorts based on cohortId
         const cohortsPromise = cohortId
           ? fetch(`/api/cohorts/${cohortId}`).then((res) => res.json())
           : fetch('/api/cohorts').then((res) => res.json());
 
-        const [supervisorsData, cohortsData] = await Promise.all([
-          fetch(`/api/users?${supervisorParams.toString()}`).then((res) =>
-            res.json(),
-          ),
-          cohortsPromise,
-        ]);
+        const [supervisorsData, groupManagersData, cohortsData] =
+          await Promise.all([
+            fetch(`/api/users?${supervisorParams.toString()}`).then((res) =>
+              res.json(),
+            ),
+            fetch(`/api/users?${groupManagerParams.toString()}`).then((res) =>
+              res.json(),
+            ),
+            cohortsPromise,
+          ]);
 
         setSupervisors(supervisorsData.users || []);
+        setGroupManagers(groupManagersData.users || []);
 
         // Handle single cohort vs multiple cohorts response
         if (cohortId) {
@@ -158,6 +169,7 @@ export function CreateGroupSheet({ cohortId }: CreateGroupSheetProps) {
             submitLabel="إنشاء المجموعة"
             cohorts={cohorts}
             supervisors={supervisors}
+            groupManagers={groupManagers}
             onSubmit={onSubmit}
             onCancel={handleCancel}
           />

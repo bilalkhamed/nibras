@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, CheckIcon } from 'lucide-react';
+import SearchSelect, {
+  type SearchSelectOption,
+} from '@/components/common/search-select';
 import { useState, useTransition } from 'react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import {
@@ -43,6 +46,8 @@ interface GroupFormProps {
   cohorts: CohortListDTO[];
   /** Available supervisors */
   supervisors: UserNameDTO[];
+  /** Available group managers */
+  groupManagers: UserNameDTO[];
   /** Default values for edit mode */
   defaultValues?: CreateGroupData;
   /** Submit handler */
@@ -56,6 +61,7 @@ export function GroupForm({
   submitLabel,
   cohorts,
   supervisors,
+  groupManagers,
   defaultValues,
   onSubmit,
   onCancel,
@@ -68,6 +74,7 @@ export function GroupForm({
     control,
     handleSubmit,
     watch,
+    register,
     formState: { errors },
   } = useForm<CreateGroupData>({
     resolver: zodResolver(createGroupSchema),
@@ -99,6 +106,21 @@ export function GroupForm({
     .map((s) => `${s.firstName} ${s.middleName} ${s.lastName}`)
     .join('، ');
 
+  const groupManagerOptions: SearchSelectOption[] = [
+    { id: '', label: 'بدون مديرة' },
+    ...groupManagers.map((manager) => ({
+      id: manager.id,
+      label: `${manager.firstName} ${manager.middleName} ${manager.lastName}`,
+    })),
+  ];
+
+  const selectedGroupManager = watch('groupManager');
+  const selectedGroupManagerName = groupManagers.find(
+    (m) => m.id === selectedGroupManager,
+  )
+    ? `${groupManagers.find((m) => m.id === selectedGroupManager)?.firstName} ${groupManagers.find((m) => m.id === selectedGroupManager)?.middleName} ${groupManagers.find((m) => m.id === selectedGroupManager)?.lastName}`
+    : null;
+
   const formName = watch('name');
   const formCohortId = watch('cohortId');
   const formSupervisors = watch('supervisors');
@@ -122,17 +144,13 @@ export function GroupForm({
         {/* Name */}
         <div className="space-y-1">
           <Label className="text-right block">اسم المجموعة</Label>
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <Input
-                placeholder="مثال: مجموعة النور"
-                className="text-right"
-                {...field}
-              />
-            )}
+
+          <Input
+            placeholder="الاسم"
+            className="text-right bg-card"
+            {...register('name')}
           />
+
           {errors.name && (
             <p className="text-right text-sm text-destructive">
               {errors.name.message}
@@ -153,7 +171,7 @@ export function GroupForm({
                 value={field.value}
                 dir="rtl"
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-card  ">
                   <SelectValue placeholder="اختر الدفعة" />
                 </SelectTrigger>
                 <SelectContent className="bg-card text-foreground border border-border">
@@ -213,6 +231,30 @@ export function GroupForm({
           )}
         </div>
 
+        {/* Group Manager Select */}
+        <div className="space-y-1 w-full">
+          <Label className="text-right block">مديرة المجموعة (اختياري)</Label>
+          <Controller
+            control={control}
+            name="groupManager"
+            render={({ field }) => (
+              <SearchSelect
+                options={groupManagerOptions}
+                value={field.value || ''}
+                onChange={field.onChange}
+                placeholder="اختر مديرة المجموعة"
+                searchPlaceholder="ابحث عن مديرة..."
+                emptyMessage="لم يتم العثور على مديرة."
+              />
+            )}
+          />
+          {errors.groupManager && (
+            <p className="text-right text-sm text-destructive">
+              {errors.groupManager.message}
+            </p>
+          )}
+        </div>
+
         {success && (
           <Alert variant="success" className="mx-auto">
             <CheckIcon className="h-5 w-5 text-success" />
@@ -237,6 +279,10 @@ export function GroupForm({
                 </span>{' '}
                 • المشرفات: <br />{' '}
                 <span className="font-medium">{selectedSupervisorsNames}</span>
+                <br />• مديرة المجموعة:{' '}
+                <span className="font-medium">
+                  {selectedGroupManagerName || 'بدون مديرة مجموعة'}
+                </span>
               </p>
             </div>
           )}

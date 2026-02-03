@@ -12,8 +12,10 @@ import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
 import { generateSixCharCode } from '@/lib/shared/utils';
 import {
+  CreateGroupData,
   GroupStudentWithCohortIdDTO,
   selectGroupStudentWithCohortId,
+  UpdateGroupData,
   type GroupStudentEntryDTO,
 } from '../types';
 import { revalidateTag } from 'next/cache';
@@ -28,11 +30,9 @@ import { revalidateTag } from 'next/cache';
  * @param data - Group creation data
  * @returns The created group
  */
-export async function insertGroup(data: {
-  name: string;
-  cohortId: string;
-  supervisors: string[];
-}): Promise<DalReturn<{ id: string; name: string; code: string }>> {
+export async function insertGroup(
+  data: CreateGroupData,
+): Promise<DalReturn<{ id: string; name: string; code: string }>> {
   return runDalOperation(async () => {
     return prisma.group.create({
       data: {
@@ -42,6 +42,13 @@ export async function insertGroup(data: {
           connect: data.supervisors.map((id) => ({ id })),
         },
         code: generateSixCharCode(),
+        managers: data.groupManager
+          ? {
+              create: {
+                userId: data.groupManager,
+              },
+            }
+          : undefined,
       },
       select: {
         id: true,
@@ -61,11 +68,7 @@ export async function insertGroup(data: {
  */
 export async function updateGroup(
   groupId: string,
-  data: {
-    name?: string;
-    cohortId?: string;
-    supervisors?: string[];
-  },
+  data: UpdateGroupData,
 ): Promise<DalReturn<{ id: string; name: string }>> {
   return runDalOperation(async () => {
     const updateData: {
@@ -89,9 +92,25 @@ export async function updateGroup(
       };
     }
 
+    console.log(data);
+
     const updated = await prisma.group.update({
       where: { id: groupId },
-      data: updateData,
+      data: {
+        ...updateData,
+        managers:
+          typeof data.groupManager === 'string'
+            ? {
+                deleteMany: {},
+
+                create: data.groupManager
+                  ? {
+                      userId: data.groupManager,
+                    }
+                  : undefined,
+              }
+            : undefined,
+      },
       select: {
         id: true,
         name: true,
