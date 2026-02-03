@@ -109,6 +109,15 @@ export async function findUserById(
             cohortId: cohortId,
           },
         },
+        {
+          managedGroups: {
+            some: {
+              group: {
+                cohortId: cohortId,
+              },
+            },
+          },
+        },
       ];
     }
     return await prisma.user.findUnique({
