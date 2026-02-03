@@ -93,7 +93,7 @@ model Group {
 model GroupManager {
   id String @id @default(cuid(2))
 
-  groupId String
+  groupId String @unique
   userId  String
 
   group Group @relation("GroupGroupManagers", fields: [groupId], references: [id], onDelete: Cascade)
