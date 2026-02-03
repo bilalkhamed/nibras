@@ -3,6 +3,7 @@ import { CardsListSkeleton } from '@/components/skeletons';
 import {
   ADMIN_ROLE,
   COHORT_MANAGER_ROLE,
+  GROUP_MANAGER_ROLE,
   SUPERVISOR_ROLE,
 } from '@/types/types';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
@@ -22,7 +23,14 @@ export default async function GroupsPage({
 
   return (
     <Suspense fallback={<CardsListSkeleton />}>
-      <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, SUPERVISOR_ROLE]}>
+      <AuthGuard
+        roles={[
+          ADMIN_ROLE,
+          COHORT_MANAGER_ROLE,
+          GROUP_MANAGER_ROLE,
+          SUPERVISOR_ROLE,
+        ]}
+      >
         {(session) => (
           <div className="space-y-6">
             <div className="flex items-center justify-between">

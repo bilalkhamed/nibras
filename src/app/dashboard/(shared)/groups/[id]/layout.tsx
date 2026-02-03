@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   ADMIN_ROLE,
   COHORT_MANAGER_ROLE,
+  GROUP_MANAGER_ROLE,
   SUPERVISOR_ROLE,
 } from '@/types/types';
 
@@ -44,7 +45,14 @@ export default function GroupLayout({
       <Suspense
         fallback={<Skeleton className="h-16 animate-pulse rounded bg-muted" />}
       >
-        <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, SUPERVISOR_ROLE]}>
+        <AuthGuard
+          roles={[
+            ADMIN_ROLE,
+            COHORT_MANAGER_ROLE,
+            GROUP_MANAGER_ROLE,
+            SUPERVISOR_ROLE,
+          ]}
+        >
           <GroupLayoutWrapper params={params} />
         </AuthGuard>
       </Suspense>

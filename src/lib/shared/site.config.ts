@@ -5,9 +5,7 @@ import {
   UserRound,
   LayoutDashboard,
   BookOpen,
-  ListOrdered,
   UsersRound,
-  ChartColumn,
   FolderClock,
 } from 'lucide-react';
 
@@ -83,7 +81,13 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: UsersRound,
     },
   ],
-  group_manager: [],
+  group_manager: [
+    {
+      label: 'المجموعات',
+      href: '/dashboard/groups/',
+      icon: UsersRound,
+    },
+  ],
   media_team: [],
 };
 

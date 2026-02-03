@@ -223,6 +223,7 @@ export type RemoveStudentResult =
 export type GetGroupsOptions = {
   supervisorId?: string;
   cohortId?: string;
+  managerId?: string;
 };
 
 // ============================================================================

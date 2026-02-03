@@ -30,7 +30,7 @@ export default async function DashboardPage() {
             case COHORT_MANAGER_ROLE:
               return <CohortManagerDashboard />;
             case GROUP_MANAGER_ROLE:
-              return <GroupManagerDashboard userId={auth.userId} />;
+              return <GroupManagerDashboard />;
             default:
               redirect('/forbidden');
           }

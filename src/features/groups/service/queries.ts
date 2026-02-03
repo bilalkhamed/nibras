@@ -28,6 +28,7 @@ import type {
 import {
   ADMIN_ROLE,
   COHORT_MANAGER_ROLE,
+  GROUP_MANAGER_ROLE,
   SUPERVISOR_ROLE,
 } from '@/types/types';
 import { findStudentGroups } from '../dal/queries';
@@ -107,6 +108,13 @@ export async function getGroups(
       if (role === COHORT_MANAGER_ROLE) {
         const dalResult = await findGroups({
           cohortId: session!.managedCohortId!,
+        });
+        return mapDalToService(dalResult);
+      }
+
+      if (role === GROUP_MANAGER_ROLE) {
+        const dalResult = await findGroups({
+          managerId: userId,
         });
         return mapDalToService(dalResult);
       }
