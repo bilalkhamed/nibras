@@ -8,6 +8,7 @@ import {
   UsersRound,
   FolderClock,
   FolderKanban,
+  CalendarCog,
 } from 'lucide-react';
 
 export const navItems: NavItem[] = [
@@ -59,6 +60,11 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       label: 'إدارة الدفعات',
       href: '/dashboard/cohorts',
       icon: FolderKanban,
+    },
+    {
+      label: 'إدارة التقويم',
+      href: '/dashboard/calendar',
+      icon: CalendarCog,
     },
     programs,
   ],
