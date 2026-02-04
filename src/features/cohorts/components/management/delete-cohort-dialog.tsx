@@ -61,10 +61,10 @@ export function DeleteCohortDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent className="sm:max-w-[420px] gap-8">
-        <AlertDialogHeader className="flex flex-col items-center gap-2 text-center sm:text-center">
+      <AlertDialogContent className="sm:max-w-105 gap-8">
+        <AlertDialogHeader className="flex flex-col items-center! gap-2 text-center sm:text-center">
           {/* Modern Icon Visual */}
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2 ring-8 ring-destructive/5 animate-in zoom-in-50 duration-300">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-2 ring-8 ring-destructive/5 animate-pulse zoom-in-50 duration-300">
             <AlertTriangle className="h-8 w-8" />
           </div>
 
@@ -85,9 +85,9 @@ export function DeleteCohortDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter className="sm:justify-center flex-col-reverse sm:flex-col-reverse gap-3 w-full sm:space-x-0">
-          <AlertDialogCancel disabled={isDeleting} className="w-full m-0">
-            إلغاء الأمر
+        <AlertDialogFooter className="sm:justify-center flex flex-col! gap-3 w-full sm:space-x-0">
+          <AlertDialogCancel disabled={isDeleting} className="w-full h-10 m-0">
+            تراجع
           </AlertDialogCancel>
 
           <AlertDialogAction
@@ -96,7 +96,8 @@ export function DeleteCohortDialog({
               handleDelete();
             }}
             disabled={isDeleting}
-            className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2 h-10 font-medium transition-all shadow-sm hover:shadow-md"
+            variant={'destructive'}
+            // className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2 h-10 font-medium transition-all shadow-sm hover:shadow-md"
           >
             {isDeleting ? (
               <>
