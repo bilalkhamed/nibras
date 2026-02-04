@@ -17,7 +17,7 @@ import type {
   AssignmentProgress,
   AssignmentProgressStatus,
 } from '../../types';
-import { toggleAssignmentCompletionAction } from '@/features/assignments/actions';
+import { updateStudentAssignmentAction } from '@/features/assignments/actions';
 
 type OptimisticAction = {
   studentId: string;
@@ -81,12 +81,6 @@ function applyOptimisticUpdate(
     if (student.id !== action.studentId) return student;
 
     const newStatuses = { ...student.assignmentStatuses };
-    const currentStatus = newStatuses[action.assignmentId] ?? {
-      isCompleted: false,
-      completedAt: null,
-      markedBy: null,
-      isOverdue: false,
-    };
 
     const completedAt = action.newCompleted ? new Date() : null;
     const isOverdue =
@@ -150,11 +144,13 @@ export function ProgressProvider({
           newCompleted,
         });
 
-        await toggleAssignmentCompletionAction(
+        await updateStudentAssignmentAction({
           assignmentId,
-          newCompleted,
           studentId,
-        );
+          data: {
+            isCompleted: newCompleted,
+          },
+        });
       });
     },
     [updateOptimisticStudents],
