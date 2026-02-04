@@ -11,7 +11,11 @@ import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
-import type { CohortListDTO } from '../types';
+import {
+  CohortListDetailedDTO,
+  cohortListDetailedSelect,
+  type CohortListDTO,
+} from '../types';
 
 // ============================================================================
 // Cohort Queries
@@ -33,6 +37,22 @@ export async function findManyCohorts(): Promise<DalReturn<CohortListDTO[]>> {
         id: true,
         name: true,
       },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+  });
+}
+
+export async function findManyCohortsDetailed(): Promise<
+  DalReturn<CohortListDetailedDTO[]>
+> {
+  'use cache';
+  cacheTag('cohorts-list-detailed');
+
+  return runDalOperation(async () => {
+    return prisma.cohort.findMany({
+      select: cohortListDetailedSelect,
       orderBy: {
         startDate: 'asc',
       },
