@@ -325,6 +325,9 @@ model StudentAssignment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  textSubmission String? @map("text_submission")
+  fileKey        String? @map("file_key")
+
   markedById String?
   markedBy   User?   @relation(fields: [markedById], references: [id], onDelete: SetNull, name: "markedBy")
 
