@@ -128,14 +128,29 @@ async function StudentAssignmentWrapper({
   );
 
   // Handle service errors gracefully
-  const studentAssignments = studentAssignmentsResult.success
+  const baseStudentAssignments = studentAssignmentsResult.success
     ? studentAssignmentsResult.data
     : [];
+
+  // Generate signed URLs for student-uploaded files
+  const studentAssignmentsWithUrls = await Promise.all(
+    baseStudentAssignments.map(async (sa) => {
+      if (sa.fileKey) {
+        const command = new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: sa.fileKey,
+        });
+        const fileUrl = await getSignedUrl(S3, command, { expiresIn: 3600 });
+        return { ...sa, fileUrl };
+      }
+      return { ...sa, fileUrl: null };
+    }),
+  );
 
   return (
     <AssignmentsGrid
       assignments={assignments}
-      studentAssignments={studentAssignments}
+      studentAssignments={studentAssignmentsWithUrls}
       programs={programs}
     />
   );

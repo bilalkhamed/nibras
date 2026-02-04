@@ -21,11 +21,14 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/shared/utils';
-import { toggleAssignmentCompletionAction } from '../../actions';
+import { updateStudentAssignmentAction } from '../../actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AttachmentsPreview } from './attachments-preview';
 import type { AssignmentWithAttachmentsDTO } from '../../types';
+import { SubmissionSheet } from './submission-sheet';
+import { Send } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type AssignmentsGridProps = {
   /** Array of assignments with attachments */
@@ -33,7 +36,9 @@ type AssignmentsGridProps = {
   /** Available programs for filtering */
   programs: Program[];
   /** Student's completion records */
-  studentAssignments: StudentAssignment[];
+  studentAssignments: (StudentAssignment & {
+    fileUrl: string | null;
+  })[];
 };
 
 /**
@@ -64,6 +69,10 @@ export function AssignmentsGrid({
       isCompleted: studentAssignments.some(
         (p) => p.assignmentId === a.id && p.completedAt !== null,
       ),
+      fileKey: studentAssignments.find((p) => p.assignmentId === a.id)?.fileKey,
+      textSubmission: studentAssignments.find((p) => p.assignmentId === a.id)
+        ?.textSubmission,
+      fileUrl: studentAssignments.find((p) => p.assignmentId === a.id)?.fileUrl,
     }));
 
     // Apply status filter
@@ -137,7 +146,12 @@ export function AssignmentsGrid({
             <AssignmentCard
               key={assignment.id}
               assignment={assignment}
-              isCompleted={assignment.isCompleted}
+              data={{
+                isCompleted: assignment.isCompleted,
+                fileKey: assignment.fileKey,
+                textSubmission: assignment.textSubmission,
+                fileUrl: assignment.fileUrl,
+              }}
             />
           ))}
         </div>
@@ -151,13 +165,18 @@ type AssignmentCardProps = {
     program: Program;
     isCompleted: boolean;
   };
-  isCompleted: boolean;
+  data: {
+    isCompleted: boolean;
+    fileKey?: string | null;
+    textSubmission?: string | null;
+    fileUrl?: string | null;
+  };
 };
 
 /**
  * Individual assignment card with completion toggle
  */
-function AssignmentCard({ assignment, isCompleted }: AssignmentCardProps) {
+function AssignmentCard({ assignment, data }: AssignmentCardProps) {
   const badge = typeBadge(assignment.type);
   const hasAttachments = assignment.attachments.length > 0;
 
@@ -182,7 +201,34 @@ function AssignmentCard({ assignment, isCompleted }: AssignmentCardProps) {
       </p>
 
       <div className="mt-4 flex items-center gap-3">
-        <CompleteButton assignment={assignment} isCompleted={isCompleted} />
+        {assignment.allowFileSubmission || assignment.allowTextSubmission ? (
+          <SubmissionSheet
+            assignmentId={assignment.id}
+            assignmentName={assignment.name}
+            allowFileSubmission={assignment.allowFileSubmission}
+            allowTextSubmission={assignment.allowTextSubmission}
+            defaultValues={{
+              fileKey: data.fileKey,
+              textSubmission: data.textSubmission,
+              fileUrl: data.fileUrl,
+            }}
+          >
+            <Button
+              variant={'outlinePrimary'}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+            >
+              <Send className="h-4 w-4" />
+              {data.textSubmission || data.fileKey
+                ? 'تعديل المرفقات'
+                : 'سلمي المرفقات'}
+            </Button>
+          </SubmissionSheet>
+        ) : (
+          <CompleteButton
+            assignment={assignment}
+            isCompleted={data.isCompleted}
+          />
+        )}
 
         {hasAttachments && (
           <AttachmentsPreview attachments={assignment.attachments} />
@@ -219,10 +265,13 @@ function CompleteButton({
     });
 
     // Perform the server action
-    const result = await toggleAssignmentCompletionAction(
-      assignment.id,
-      newValue,
-    );
+    const result = await updateStudentAssignmentAction({
+      assignmentId: assignment.id,
+
+      data: {
+        isCompleted: newValue,
+      },
+    });
 
     if (result.success) {
       // Sync the rest of the app

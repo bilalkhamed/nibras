@@ -1,7 +1,7 @@
-import { FileText, X } from 'lucide-react';
+import { FileTextIcon, Trash2Icon } from 'lucide-react';
 
 import { Button } from '../ui/button';
-import { Card, CardFooter } from '../ui/card';
+import { cn } from '@/lib/shared/utils';
 
 export function FileCard({
   file,
@@ -10,48 +10,60 @@ export function FileCard({
   file: { key: string; name: string; url: string };
   onPressDelete: (key: string) => void;
 }) {
-  const isImage = /(png|jpe?g|gif|webp|avif)$/i.test(file.name);
-  const isPdf = /\.pdf$/i.test(file.name);
+  // Check key, url, or name for file extension (in that order of priority)
+  const sourceToCheck = file.key || file.url || file.name;
+  const isImage = /(png|jpe?g|gif|webp|avif)(\?|$)/i.test(sourceToCheck);
+  const isPdf = /\.pdf(\?|$)/i.test(sourceToCheck);
 
   return (
-    <Card className="group relative overflow-hidden transition-all duration-200 w-28 h-28 sm:w-32 sm:h-32 flex flex-col border-border py-0">
-      <div className="relative flex-1 w-full overflow-hidden bg-muted/20">
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onPressDelete(file.key);
-          }}
-          variant="destructive"
-          size="icon"
-          className="absolute top-1 left-1 z-10 size-5 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-sm"
-          title="حذف الملف"
-        >
-          <X className="size-3" />
-        </Button>
+    <div
+      className={cn(
+        'group relative border rounded-xl overflow-hidden transition-all duration-200',
+        'hover:shadow-md hover:border-primary/50',
+        'border-border bg-card',
+      )}
+    >
+      {/* Delete button */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn(
+          'absolute top-2 left-2 z-10 h-7 w-7 rounded-full',
+          'bg-background/80 backdrop-blur-sm shadow-sm',
+          'opacity-0 group-hover:opacity-100 transition-opacity',
+          'hover:bg-destructive hover:text-destructive-foreground',
+        )}
+        onClick={() => onPressDelete(file.key)}
+      >
+        <Trash2Icon className="h-3.5 w-3.5" />
+      </Button>
 
-        {isImage ? (
-          <div className="relative w-full h-full">
-            <img src={file.url} alt={file.name} className="h-full w-full" />
-          </div>
+      {/* Preview area */}
+      <div className="w-full aspect-video bg-muted/50 flex items-center justify-center relative overflow-hidden">
+        {isPdf ? (
+          <FileTextIcon className="h-14 w-14 text-primary" />
+        ) : isImage ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={file.url}
+            alt={file.name}
+            className="w-full h-full object-contain"
+          />
         ) : (
-          <div className="flex items-center justify-center w-full h-full text-muted-foreground bg-muted/30">
-            {isPdf ? (
-              <FileText className="size-8" />
-            ) : (
-              <FileText className="size-8" />
-            )}
-          </div>
+          <span className="text-sm text-muted-foreground">لا يوجد معاينة</span>
         )}
       </div>
 
-      <div className="border-t bg-card h-2 py-3 px-1 flex items-center justify-between gap-2 shrink-0">
-        <span
-          className="text-xs font-medium truncate max-w-full"
+      {/* File info */}
+      <div className="p-3 space-y-2">
+        <div
+          className="text-sm font-medium text-foreground truncate"
           title={file.name}
         >
           {file.name}
-        </span>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }

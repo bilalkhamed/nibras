@@ -11,9 +11,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (session.role !== Role.admin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  // if (session.role !== Role.admin) {
+  //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // }
 
   try {
     const body = await req.json();
@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest) {
     if (!key) {
       return NextResponse.json(
         { error: 'File key is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

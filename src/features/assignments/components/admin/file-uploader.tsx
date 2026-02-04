@@ -278,16 +278,21 @@ export function FileUploader({
       'image/*': [],
       'application/pdf': [],
     },
+    disabled: files.length >= maxFiles,
   });
+
+  const isDisabled = files.length >= maxFiles;
 
   return (
     <>
       <Card
         className={cn(
           'relative border-2 border-dashed transition-colors duration-200 ease-in-out w-full overflow-hidden',
-          isDragActive
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/25 hover:border-primary/50',
+          isDisabled
+            ? 'border-muted bg-muted/30 cursor-not-allowed opacity-60'
+            : isDragActive
+              ? 'border-primary bg-primary/5'
+              : 'border-muted-foreground/25 hover:border-primary/50',
           compact ? 'h-32' : 'h-64',
         )}
         {...getRootProps()}
@@ -315,9 +320,11 @@ export function FileUploader({
                   compact ? 'text-sm' : 'text-base',
                 )}
               >
-                {isDragActive
-                  ? 'أفلت الملفات هنا'
-                  : 'اضغط للرفع أو اسحب الملفات'}
+                {isDisabled
+                  ? 'وصلت للحد الأقصى من الملفات'
+                  : isDragActive
+                    ? 'أفلت الملفات هنا'
+                    : 'اضغط للرفع أو اسحب الملفات'}
               </p>
               {!compact && (
                 <p className="text-xs text-muted-foreground">
