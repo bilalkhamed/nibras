@@ -153,12 +153,12 @@ export function CohortForm({
             control={control}
             render={({ field }) => (
               <Select value={field.value || ''} onValueChange={field.onChange}>
-                <SelectTrigger className="text-right bg-card">
+                <SelectTrigger className="text-right bg-card w-full" dir="rtl">
                   <SelectValue placeholder="اختر المستوى" />
                 </SelectTrigger>
                 <SelectContent>
                   {levels.map((level) => (
-                    <SelectItem key={level.id} value={level.id}>
+                    <SelectItem key={level.id} value={level.id} dir="rtl">
                       {level.title}
                     </SelectItem>
                   ))}
