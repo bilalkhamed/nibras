@@ -84,7 +84,7 @@ export async function getWeekAssignments(
 export async function getStudentAssignments(
   studentId: string,
   assignmentIds: string[],
-  weekEndDate: Date,
+  weekEndDate: Date | null,
 ): Promise<ServiceReturn<(StudentAssignmentDTO & { isOverdue: boolean })[]>> {
   return runServiceOperation(
     async (session) => {
@@ -104,7 +104,11 @@ export async function getStudentAssignments(
 
       const dataWithOverdue = dalResult.data.map((sa) => ({
         ...sa,
-        isOverdue: sa.completedAt ? sa.completedAt > weekEndDate : false,
+        isOverdue: !weekEndDate
+          ? false
+          : sa.completedAt
+            ? sa.completedAt > weekEndDate
+            : false,
       }));
 
       return {

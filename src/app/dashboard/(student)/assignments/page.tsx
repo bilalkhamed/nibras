@@ -124,6 +124,7 @@ async function StudentAssignmentWrapper({
   const studentAssignmentsResult = await getStudentAssignments(
     userId,
     assignments.map((a) => a.id),
+    null,
   );
 
   // Handle service errors gracefully

@@ -25,9 +25,9 @@ import {
   UserDTO,
   UserInviteStatusDTO,
   UserNameDTO,
+  UserWithCohortDTO,
   UserWithRoleAndCohortAndGroupDTO,
 } from '../types';
-import { ServiceReturn } from '@/lib/server/service/types';
 import { Role } from '@prisma/client';
 
 // ============================================================================
@@ -51,7 +51,7 @@ export async function getAllUsers() {
 
       const dalResult = await findManyUsers(filter);
 
-      return mapDalToService<UserDTO[]>(dalResult);
+      return mapDalToService(dalResult);
     },
     { requireAuth: true },
   );
