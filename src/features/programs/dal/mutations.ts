@@ -11,6 +11,7 @@ import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
 import { revalidateTag } from 'next/cache';
+import { CalendarWeekInput } from '../types';
 
 // ============================================================================
 // Program CRUD Mutations
@@ -42,5 +43,62 @@ export async function insertProgram(data: {
 
     revalidateTag('programs', 'max');
     return result;
+  });
+}
+
+export async function updateCalendarWeeks(
+  academicNumber: number,
+  newWeeks: CalendarWeekInput[],
+): Promise<DalReturn<null>> {
+  return runDalOperation(async () => {
+    await prisma.$transaction(async (tx) => {
+      await tx.calendarWeek.deleteMany({
+        where: { academicYear: academicNumber },
+      });
+
+      await Promise.all(
+        newWeeks.map(async (week) => {
+          const upsertedWeek = await tx.week.upsert({
+            where: { number: week.week.number },
+            create: { title: week.week.title, number: week.week.number },
+            update: { title: week.week.title },
+          });
+
+          await tx.calendarWeek.create({
+            data: {
+              academicYear: academicNumber,
+              startDate: week.startDate,
+              endDate: week.endDate,
+              weekId: upsertedWeek.id,
+            },
+          });
+        }),
+      );
+
+      await prisma.week.deleteMany({
+        where: {
+          AND: [
+            {
+              number: {
+                notIn: newWeeks.map((w) => w.week.number),
+              },
+            },
+            {
+              calendarWeeks: {
+                none: {},
+              },
+            },
+            {
+              assignments: {
+                none: {},
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    revalidateTag('weeks', 'max');
+    return null;
   });
 }

@@ -56,3 +56,10 @@ export type WeekDTO = Prisma.WeekGetPayload<{
 export type CalendarWeekDTO = Prisma.CalendarWeekGetPayload<{
   select: typeof calendarWeekSelect;
 }>;
+
+export type CalendarWeekInput = Pick<
+  Prisma.CalendarWeekCreateInput,
+  'startDate' | 'endDate'
+> & {
+  week: Pick<Prisma.WeekCreateInput, 'number' | 'title'>;
+};

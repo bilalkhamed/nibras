@@ -11,4 +11,4 @@ import 'server-only';
 export * from './queries';
 
 // Mutation operations
-export { insertProgram } from './mutations';
+export { insertProgram, updateCalendarWeeks } from './mutations';

@@ -12,9 +12,13 @@ import {
   runServiceOperation,
 } from '@/lib/server/service/helpers';
 import type { ServiceReturn } from '@/lib/server/service/types';
-import { insertProgram } from '../dal';
-import type { CreateProgramData } from '../types';
+import {
+  insertProgram,
+  updateCalendarWeeks as updateCalendarWeeksDb,
+} from '../dal';
+import type { CalendarWeekInput, CreateProgramData } from '../types';
 import { ADMIN_ROLE } from '@/types/types';
+import { getAcademicYear } from '@/lib/server/academic-year';
 
 // ============================================================================
 // Program CRUD - Admin Only
@@ -50,6 +54,33 @@ export async function createProgram(
       return {
         success: true,
         data: { programId: dalResult.data.id },
+      };
+    },
+    { requireAuth: true },
+  );
+}
+
+export async function updateCalendarWeeks(
+  newWeeks: CalendarWeekInput[],
+): Promise<ServiceReturn<null>> {
+  return runServiceOperation(
+    async (session) => {
+      if (session!.role !== ADMIN_ROLE) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const { year } = getAcademicYear();
+      const dalResult = await updateCalendarWeeksDb(year, newWeeks);
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: null,
       };
     },
     { requireAuth: true },
