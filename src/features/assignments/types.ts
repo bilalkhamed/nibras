@@ -145,6 +145,28 @@ export type ToggleCompletionInput = {
   studentId?: string;
 };
 
+export type UpdateStudentAssignmentInputDal = {
+  assignmentId: string;
+  studentId: string;
+  data: {
+    isCompleted: boolean;
+    markedById: string;
+    textSubmission?: string | null;
+    fileKey?: string | null;
+  };
+};
+
+export type UpdateStudentAssignmentInput = {
+  assignmentId: string;
+  studentId?: string;
+  data: {
+    isCompleted: boolean;
+    markedById?: string;
+    textSubmission?: string | null;
+    fileKey?: string | null;
+  };
+};
+
 /**
  * Result of toggle completion action
  */

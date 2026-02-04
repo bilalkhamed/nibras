@@ -15,6 +15,7 @@ import type {
   CreateAssignmentData,
   StudentAssignmentDTO,
   UpdateAssignmentData,
+  UpdateStudentAssignmentInputDal,
 } from '../types';
 import { revalidateTag } from 'next/cache';
 
@@ -32,12 +33,11 @@ import { revalidateTag } from 'next/cache';
  * @param markedById - User ID of who marked the completion
  * @returns The updated student assignment record
  */
-export async function upsertStudentAssignment(
-  assignmentId: string,
-  studentId: string,
-  isCompleted: boolean,
-  markedById: string,
-) {
+export async function upsertStudentAssignment({
+  assignmentId,
+  studentId,
+  data,
+}: UpdateStudentAssignmentInputDal) {
   return runDalOperation<StudentAssignmentDTO>(async () => {
     return prisma.studentAssignment.upsert({
       where: {
@@ -49,14 +49,18 @@ export async function upsertStudentAssignment(
       create: {
         studentId,
         assignmentId,
-        isCompleted,
-        completedAt: isCompleted ? new Date() : null,
-        markedById,
+        isCompleted: data.isCompleted,
+        completedAt: data.isCompleted ? new Date() : null,
+        markedById: data.markedById,
+        textSubmission: data.textSubmission || null,
+        fileKey: data.fileKey || null,
       },
       update: {
-        isCompleted,
-        completedAt: isCompleted ? new Date() : null,
-        markedById,
+        isCompleted: data.isCompleted,
+        completedAt: data.isCompleted ? new Date() : null,
+        markedById: data.markedById,
+        textSubmission: data.textSubmission || null,
+        fileKey: data.fileKey || null,
       },
     });
   });

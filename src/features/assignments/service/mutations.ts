@@ -22,6 +22,7 @@ import type {
   CreateAssignmentData,
   UpdateAssignmentData,
   StudentAssignmentDTO,
+  UpdateStudentAssignmentInput,
 } from '../types';
 import { createAssignmentSchema, updateAssignmentSchema } from '../types';
 import { updateAssignment } from '../dal/mutations';
@@ -31,7 +32,7 @@ import { updateAssignment } from '../dal/mutations';
 // ============================================================================
 
 /**
- * Toggle assignment completion status for a student
+ * Update student assignment for a student
  * Students can mark their own, supervisors can mark for their groups
  *
  * @param assignmentId - The assignment ID
@@ -39,11 +40,11 @@ import { updateAssignment } from '../dal/mutations';
  * @param studentId - Optional student ID (for supervisors marking on behalf)
  * @returns The updated student assignment
  */
-export async function toggleCompletion(
-  assignmentId: string,
-  isCompleted: boolean,
-  studentId?: string,
-): Promise<ServiceReturn<StudentAssignmentDTO>> {
+export async function updateStudentAssignment({
+  assignmentId,
+  studentId,
+  data,
+}: UpdateStudentAssignmentInput): Promise<ServiceReturn<StudentAssignmentDTO>> {
   return runServiceOperation(
     async (session) => {
       const userId = session!.userId;
@@ -54,7 +55,14 @@ export async function toggleCompletion(
 
       // Students can only toggle their own assignments
       if (role === 'student') {
-        targetStudentId = userId;
+        if (!targetStudentId) {
+          targetStudentId = userId;
+        } else if (targetStudentId !== userId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
       }
 
       // Supervisors and admins can toggle for any student
@@ -65,12 +73,14 @@ export async function toggleCompletion(
         };
       }
 
-      const dalResult = await upsertStudentAssignment(
+      const dalResult = await upsertStudentAssignment({
         assignmentId,
-        targetStudentId,
-        isCompleted,
-        userId, // markedById is always the current user
-      );
+        studentId: targetStudentId,
+        data: {
+          ...data,
+          markedById: userId,
+        },
+      });
 
       return mapDalToService(dalResult);
     },

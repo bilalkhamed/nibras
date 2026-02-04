@@ -9,9 +9,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { toggleCompletion } from '../service';
-import type { ToggleCompletionResult } from '../types';
-
+import { updateStudentAssignment } from '../service';
+import type {
+  ToggleCompletionResult,
+  UpdateStudentAssignmentInput,
+} from '../types';
 /**
  * Toggle assignment completion status
  * Automatically determines paths to revalidate based on user role
@@ -21,15 +23,19 @@ import type { ToggleCompletionResult } from '../types';
  * @param studentId - Optional student ID (for supervisors)
  * @returns Success/error result
  */
-export async function toggleAssignmentCompletionAction(
-  assignmentId: string,
-  isCompleted: boolean,
-  studentId?: string,
-): Promise<ToggleCompletionResult> {
+export async function updateStudentAssignmentAction({
+  assignmentId,
+  studentId,
+  data,
+}: UpdateStudentAssignmentInput): Promise<ToggleCompletionResult> {
   // Artificial delay for better UX feedback (shows loading state)
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const result = await toggleCompletion(assignmentId, isCompleted, studentId);
+  const result = await updateStudentAssignment({
+    assignmentId,
+    studentId,
+    data,
+  });
 
   if (!result.success) {
     return {

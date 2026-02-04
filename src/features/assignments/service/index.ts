@@ -16,7 +16,7 @@ export {
 
 // Mutation operations
 export {
-  toggleCompletion,
+  updateStudentAssignment,
   deleteAssignment,
   modifyAssignment,
   createAssignment,
