@@ -14,6 +14,7 @@ import type {
   AssignmentDTO,
   CreateAssignmentData,
   StudentAssignmentDTO,
+  UpdateAssignmentData,
 } from '../types';
 import { revalidateTag } from 'next/cache';
 
@@ -82,13 +83,7 @@ export async function deleteAssignmentById(assignmentId: string) {
 
 export async function updateAssignment(
   assignmentId: string,
-  data: {
-    name: string;
-    description: string | null;
-    type: AssignmentTypes;
-    links?: { id?: string; url: string; type: typeof AttachmentType.LINK }[];
-    fileKeys: string[];
-  },
+  data: UpdateAssignmentData,
 ) {
   return runDalOperation<AssignmentDTO>(async () => {
     const existingAttachments = await prisma.assignmentAttachment.findMany({
@@ -175,6 +170,8 @@ export async function updateAssignment(
         name: data.name,
         description: data.description,
         type: data.type,
+        requireFileSubmission: data.requireFileSubmission,
+        requireTextSubmission: data.requireTextSubmission,
       },
     });
 
@@ -249,6 +246,8 @@ export async function insertAssignment(data: CreateAssignmentData) {
           levelId: level.id,
           weekId: data.weekId,
           programId: program.id,
+          requireFileSubmission: data.assignment.requireFileSubmission,
+          requireTextSubmission: data.assignment.requireTextSubmission,
           attachments: {
             createMany: {
               data: attachmentsData,

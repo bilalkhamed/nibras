@@ -41,6 +41,8 @@ export const createAssignmentSchema = z.object({
     type: z.enum(AssignmentTypes),
     fileKeys: z.array(z.string()).optional(),
     links: z.array(linkSchema).optional(),
+    requireFileSubmission: z.boolean(),
+    requireTextSubmission: z.boolean(),
   }),
 });
 
@@ -53,6 +55,8 @@ export const updateAssignmentSchema = z.object({
   type: z.enum(AssignmentTypes),
   fileKeys: z.array(z.string()),
   links: z.array(linkSchema).optional(),
+  requireFileSubmission: z.boolean(),
+  requireTextSubmission: z.boolean(),
 });
 
 // ============================================================================
@@ -228,6 +232,8 @@ export const assignmentFormSchema = z.object({
   links: formLinkSchema.array().optional(),
   files: z.array(z.any()).optional(),
   newFileKeys: z.array(z.string()).optional(),
+  requireFileSubmission: z.boolean(),
+  requireTextSubmission: z.boolean(),
 });
 
 export type AssignmentFormData = z.infer<typeof assignmentFormSchema>;

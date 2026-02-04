@@ -40,6 +40,8 @@ import {
   type Link,
   assignmentFormSchema,
 } from '../../types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldLabel } from '@/components/ui/field';
 
 // Re-export for consumers that might need it
 export type { AssignmentFormData, Link } from '../../types';
@@ -60,6 +62,8 @@ type AssignmentFormContentProps = {
     type: AssignmentTypes;
     links?: Link[];
     files?: AttachedFile[];
+    requireFileSubmission: boolean;
+    requireTextSubmission: boolean;
   };
   /** Callback when form is cancelled */
   onCancel: () => void;
@@ -96,9 +100,13 @@ export function AssignmentFormContent({
           links: defaultValues.links || [],
           files: defaultValues.files || [],
           newFileKeys: [],
+          requireFileSubmission: defaultValues.requireFileSubmission,
+          requireTextSubmission: defaultValues.requireTextSubmission,
         }
       : {
           newFileKeys: [],
+          requireFileSubmission: false,
+          requireTextSubmission: false,
         },
   });
 
@@ -108,13 +116,9 @@ export function AssignmentFormContent({
     register('newFileKeys');
   }, [register]);
 
-  const handleFormSubmit: SubmitHandler<AssignmentFormData> = useCallback(
-    async (data) => {
-      await onSubmit(data);
-    },
-    [onSubmit],
-  );
-
+  const handleFormSubmit: SubmitHandler<AssignmentFormData> = async (data) => {
+    await onSubmit(data);
+  };
   const files = watch('files');
 
   return (
@@ -188,6 +192,43 @@ export function AssignmentFormContent({
               )}
             />
             <ErrorMessage message={errors.type?.message} />
+          </div>
+
+          <div className="flex justify-between items-center">
+            <Field orientation="horizontal">
+              <Controller
+                control={control}
+                name="requireTextSubmission"
+                render={({ field }) => (
+                  <Checkbox
+                    id="requireTextSubmission"
+                    className="cursor-pointer"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="requireTextSubmission" className="mb-0">
+                طلب تقديم نص
+              </FieldLabel>
+            </Field>
+            <Field orientation="horizontal">
+              <Controller
+                control={control}
+                name="requireFileSubmission"
+                render={({ field }) => (
+                  <Checkbox
+                    id="requireFileSubmission"
+                    className="cursor-pointer"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="requireFileSubmission" className="mb-0">
+                طلب تقديم ملف
+              </FieldLabel>
+            </Field>
           </div>
         </div>
 

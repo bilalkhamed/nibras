@@ -66,6 +66,8 @@ export function CreateAssignmentSheet({
             id: link.id,
             type: 'LINK' as const,
           })),
+          requireFileSubmission: data.requireFileSubmission,
+          requireTextSubmission: data.requireTextSubmission,
         },
       });
 
