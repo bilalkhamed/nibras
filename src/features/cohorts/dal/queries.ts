@@ -29,7 +29,7 @@ import {
  */
 export async function findManyCohorts(): Promise<DalReturn<CohortListDTO[]>> {
   'use cache';
-  cacheTag('cohorts-list');
+  cacheTag('cohorts');
 
   return runDalOperation(async () => {
     return prisma.cohort.findMany({
@@ -48,7 +48,7 @@ export async function findManyCohortsDetailed(): Promise<
   DalReturn<CohortListDetailedDTO[]>
 > {
   'use cache';
-  cacheTag('cohorts-list-detailed');
+  cacheTag('cohorts');
 
   return runDalOperation(async () => {
     return prisma.cohort.findMany({
@@ -64,7 +64,7 @@ export async function findCohortById(
   id: string,
 ): Promise<DalReturn<CohortListDTO | null>> {
   'use cache';
-  cacheTag('cohorts-list');
+  cacheTag('cohorts');
 
   return runDalOperation(async () => {
     return prisma.cohort.findUnique({

@@ -10,6 +10,7 @@ import 'server-only';
 import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
+import { revalidateTag } from 'next/cache';
 
 // ============================================================================
 // Cohort CRUD Mutations
@@ -31,7 +32,7 @@ export async function insertCohort(data: {
   currentLevelId: string;
 }): Promise<DalReturn<{ id: string; name: string }>> {
   return runDalOperation(async () => {
-    return prisma.cohort.create({
+    const result = await prisma.cohort.create({
       data: {
         name: data.name.trim(),
         slug: data.slug,
@@ -46,5 +47,8 @@ export async function insertCohort(data: {
         name: true,
       },
     });
+
+    revalidateTag('cohorts', 'max');
+    return result;
   });
 }
