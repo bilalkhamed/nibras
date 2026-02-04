@@ -278,6 +278,9 @@ model Assignment {
 
   studentAssignments StudentAssignment[]
 
+  requireTextSubmission Boolean @default(false) @map("require_text_submission")
+  requireFileSubmission Boolean @default(false) @map("require_file_submission")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
