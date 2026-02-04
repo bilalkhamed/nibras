@@ -57,7 +57,7 @@ export function StudentProgressAccordionView({
 }: StudentProgressAccordionViewProps) {
   const {
     students: allStudents,
-    assignments,
+    assignments: allAssignments,
     toggleCompletion,
   } = useProgressContext();
 
@@ -126,7 +126,7 @@ export function StudentProgressAccordionView({
             </AccordionTrigger>
             <AccordionContent className="px-0 pb-0">
               <div className="divide-y divide-border dark:divide-border/50">
-                {assignments.map((assignment) => {
+                {allAssignments.map((assignment) => {
                   const status = student.assignmentStatuses[assignment.id] ?? {
                     isCompleted: false,
                     completedAt: null,
