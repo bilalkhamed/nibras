@@ -1,9 +1,20 @@
+'use client';
+
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, BookOpen, UserCog, GraduationCap } from 'lucide-react';
+import {
+  Users,
+  BookOpen,
+  UserCog,
+  GraduationCap,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { CohortListDetailedDTO } from '../types';
+import { EditCohortSheet } from './management/edit-cohort-sheet';
+import { DeleteCohortDialog } from './management/delete-cohort-dialog';
 
 type CohortCardProps = {
   cohort: CohortListDetailedDTO;
@@ -25,6 +36,22 @@ export function CohortCard({ cohort, hrefBase }: CohortCardProps) {
               <GraduationCap className="h-4 w-4" />
               <span>{cohort.currentLevel.title}</span>
             </div>
+          </div>
+          <div className="flex gap-1">
+            <EditCohortSheet cohort={cohort}>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </EditCohortSheet>
+            <DeleteCohortDialog cohortId={cohort.id} cohortName={cohort.name}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </DeleteCohortDialog>
           </div>
         </div>
       </CardHeader>

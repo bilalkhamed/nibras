@@ -52,3 +52,63 @@ export async function insertCohort(data: {
     return result;
   });
 }
+
+/**
+ * Update a cohort
+ *
+ * @param cohortId - The cohort ID
+ * @param data - Data to update
+ * @returns The updated cohort
+ */
+export async function updateCohort(
+  cohortId: string,
+  data: {
+    name?: string;
+    slug?: string;
+    label?: string;
+    startDate?: Date;
+    endDate?: Date;
+    currentLevelId?: string;
+  },
+): Promise<DalReturn<{ id: string; name: string }>> {
+  return runDalOperation(async () => {
+    const result = await prisma.cohort.update({
+      where: { id: cohortId },
+      data: {
+        ...(data.name && { name: data.name.trim() }),
+        ...(data.slug && { slug: data.slug }),
+        ...(data.label && { label: data.label }),
+        ...(data.startDate && { startDate: data.startDate }),
+        ...(data.endDate && { endDate: data.endDate }),
+        ...(data.currentLevelId && { currentLevelId: data.currentLevelId }),
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    revalidateTag('cohorts', 'max');
+    return result;
+  });
+}
+
+/**
+ * Delete a cohort by ID
+ *
+ * @param cohortId - The cohort ID to delete
+ * @returns The deleted cohort
+ */
+export async function deleteCohort(
+  cohortId: string,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    const result = await prisma.cohort.delete({
+      where: { id: cohortId },
+      select: { id: true },
+    });
+
+    revalidateTag('cohorts', 'max');
+    return result;
+  });
+}

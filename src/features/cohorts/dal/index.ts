@@ -11,4 +11,4 @@ import 'server-only';
 export { findManyCohorts } from './queries';
 
 // Mutation operations
-export { insertCohort } from './mutations';
+export { insertCohort, updateCohort, deleteCohort } from './mutations';

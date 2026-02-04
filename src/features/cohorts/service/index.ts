@@ -10,4 +10,4 @@ import 'server-only';
 export { getAllCohorts, getCohortById } from './queries';
 
 // Mutation operations
-export { createCohort } from './mutations';
+export { createCohort, modifyCohort, removeCohort } from './mutations';

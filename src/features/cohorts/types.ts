@@ -54,8 +54,11 @@ export type CohortListDTO = Prisma.CohortGetPayload<{
 export const cohortListDetailedSelect = {
   id: true,
   name: true,
+  startDate: true,
+  endDate: true,
   currentLevel: {
     select: {
+      id: true,
       title: true,
     },
   },
