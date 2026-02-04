@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,19 +10,15 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { CohortListDetailedDTO } from '../types';
 import { EditCohortSheet } from './management/edit-cohort-sheet';
 import { DeleteCohortDialog } from './management/delete-cohort-dialog';
 
 type CohortCardProps = {
   cohort: CohortListDetailedDTO;
-  hrefBase: string;
 };
 
-export function CohortCard({ cohort, hrefBase }: CohortCardProps) {
-  const href = `${hrefBase}${cohort.id}`;
-
+export function CohortCard({ cohort }: CohortCardProps) {
   return (
     <Card className="group relative border-primary/15 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30">
       <CardHeader className="pb-4">
@@ -78,19 +73,6 @@ export function CohortCard({ cohort, hrefBase }: CohortCardProps) {
               {cohort._count.managers}
             </span>
           </div>
-        </div>
-        <Separator className="my-3" />
-        <div className="flex gap-2">
-          <Button
-            asChild
-            className="flex-1 rounded-full"
-            variant="outline"
-            size="sm"
-          >
-            <Link href={href}>
-              <span className="font-medium">عرض التفاصيل</span>
-            </Link>
-          </Button>
         </div>
       </CardContent>
     </Card>

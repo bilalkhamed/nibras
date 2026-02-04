@@ -34,7 +34,7 @@ export default async function CohortPage() {
           </Button>
         </CreateCohortSheet>
       </div>
-      <CohortList cohorts={cohorts} hrefBase="/dashboard/cohorts/" />
+      <CohortList cohorts={cohorts} />
     </div>
   );
 }

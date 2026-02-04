@@ -5,10 +5,9 @@ import { XCircleIcon } from 'lucide-react';
 
 type CohortListProps = {
   cohorts: CohortListDetailedDTO[];
-  hrefBase: string;
 };
 
-export function CohortList({ cohorts, hrefBase }: CohortListProps) {
+export function CohortList({ cohorts }: CohortListProps) {
   if (!cohorts.length) {
     return (
       <div className="flex items-center justify-center">
@@ -26,7 +25,7 @@ export function CohortList({ cohorts, hrefBase }: CohortListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {cohorts.map((cohort) => (
-        <CohortCard key={cohort.id} cohort={cohort} hrefBase={hrefBase} />
+        <CohortCard key={cohort.id} cohort={cohort} />
       ))}
     </div>
   );
