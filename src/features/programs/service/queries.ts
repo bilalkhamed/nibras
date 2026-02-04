@@ -9,6 +9,7 @@ import {
 import {
   findCalendarWeekByNumber,
   findLevelBySlug,
+  findManyCalendarWeeks,
   findManyLevels,
   findManyPrograms,
   findManyWeeks,
@@ -194,6 +195,22 @@ export async function getAllWeeks(): Promise<ServiceReturn<WeekDTO[]>> {
   return runServiceOperation(
     async () => {
       const dalResult = await findManyWeeks();
+
+      return mapDalToService(dalResult);
+    },
+    {
+      requireAuth: true,
+    },
+  );
+}
+
+export async function getAllCalendarWeeks(): Promise<
+  ServiceReturn<CalendarWeekDTO[]>
+> {
+  return runServiceOperation(
+    async () => {
+      const { year: academicYear } = getAcademicYear();
+      const dalResult = await findManyCalendarWeeks(academicYear);
 
       return mapDalToService(dalResult);
     },

@@ -164,3 +164,30 @@ export async function findManyWeeks(): Promise<DalReturn<WeekDTO[]>> {
     });
   });
 }
+
+export async function findManyCalendarWeeks(
+  academicYear: number,
+): Promise<DalReturn<CalendarWeekDTO[]>> {
+  return runDalOperation(async () => {
+    cacheTag('weeks');
+    return await prisma.calendarWeek.findMany({
+      where: {
+        academicYear,
+      },
+      include: {
+        week: {
+          select: {
+            number: true,
+            title: true,
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        week: {
+          number: 'asc',
+        },
+      },
+    });
+  });
+}

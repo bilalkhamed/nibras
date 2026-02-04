@@ -1,8 +1,8 @@
-import { getWeeksTillDate } from '@/features/programs/service';
+import { getAllCalendarWeeks } from '@/features/programs/service';
 import { WeekManager } from './_components';
 
 export default async function CalendarPage() {
-  const weeks = await getWeeksTillDate();
+  const weeks = await getAllCalendarWeeks();
 
   if (!weeks.success) {
     return (
