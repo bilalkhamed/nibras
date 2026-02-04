@@ -17,7 +17,6 @@ import type {
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
 } from '../types';
-import { getProgramBySlug } from '@/features/programs/service';
 import { Program } from '@prisma/client';
 import { findProgramBySlug } from '@/features/programs/dal';
 
@@ -126,27 +125,29 @@ export async function findManyStudentAssignments(
   studentIds: string[],
   assignmentIds: string[],
 ) {
-  return runDalOperation<StudentAssignmentWithMarkerDTO[]>(async () => {
-    return prisma.studentAssignment.findMany({
-      where: {
-        studentId: {
-          in: studentIds,
-        },
-        assignmentId: {
-          in: assignmentIds,
-        },
-      },
-      include: {
-        markedBy: {
-          select: {
-            firstName: true,
-            middleName: true,
-            lastName: true,
+  return runDalOperation<Omit<StudentAssignmentWithMarkerDTO, 'isOverdue'>[]>(
+    async () => {
+      return prisma.studentAssignment.findMany({
+        where: {
+          studentId: {
+            in: studentIds,
+          },
+          assignmentId: {
+            in: assignmentIds,
           },
         },
-      },
-    });
-  });
+        include: {
+          markedBy: {
+            select: {
+              firstName: true,
+              middleName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+    },
+  );
 }
 
 // ============================================================================

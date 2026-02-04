@@ -34,6 +34,7 @@ import {
 } from '@/features/programs/service';
 import { CalendarWeekDTO } from '@/features/programs/types';
 import { CustomAlert } from '@/components/common/custom-alert';
+import { formatDate } from '@/lib/shared/utils';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
@@ -74,6 +75,7 @@ export default async function StudentHistoryPage({
               <Suspense fallback={<AssignmentsTableSkeleton />}>
                 <AssignmentsList
                   weekId={week.week.id}
+                  weekEndDate={week.endDate}
                   isCurrentWeek={isCurrentWeek}
                 />
               </Suspense>
@@ -142,9 +144,11 @@ async function WeekInfo({ week }: { week: CalendarWeekDTO }) {
 
 async function AssignmentsList({
   weekId,
+  weekEndDate,
   isCurrentWeek,
 }: {
   weekId: string;
+  weekEndDate: Date;
   isCurrentWeek: boolean;
 }) {
   const auth = await getAuthSession();
@@ -205,6 +209,7 @@ async function AssignmentsList({
   const studentAssignmentsResult = await getStudentAssignments(
     auth.userId,
     assignmentsResult.data.map((as) => as.id),
+    weekEndDate,
   );
 
   // Handle service errors gracefully
@@ -212,9 +217,16 @@ async function AssignmentsList({
     ? studentAssignmentsResult.data
     : [];
 
-  const assignmentStatusMap: Record<string, boolean> = {};
+  const assignmentStatusMap: Record<
+    string,
+    { isCompleted: boolean; isOverdue: boolean; completedAt: Date | null }
+  > = {};
   studentAssignments.forEach((sa) => {
-    assignmentStatusMap[sa.assignmentId] = sa.isCompleted;
+    assignmentStatusMap[sa.assignmentId] = {
+      isCompleted: sa.isCompleted,
+      isOverdue: sa.isOverdue,
+      completedAt: sa.completedAt,
+    };
   });
 
   return (
@@ -239,17 +251,24 @@ async function AssignmentsList({
           </TableHeader>
           <TableBody>
             {assignmentsWithUrls.map((assignment) => {
-              const isCompleted = assignmentStatusMap[assignment.id] || false;
-              const statusLabel = isCompleted
-                ? 'مكتمل'
-                : isCurrentWeek
-                  ? 'غير منجز'
-                  : 'فائت';
-              const statusVariant = isCompleted
-                ? 'success'
-                : isCurrentWeek
-                  ? 'outline'
-                  : 'destructive';
+              const isCompleted =
+                assignmentStatusMap[assignment.id]?.isCompleted;
+              const isOverdue = assignmentStatusMap[assignment.id]?.isOverdue;
+              console.log(assignment, isCompleted, isOverdue);
+              const statusLabel = isOverdue
+                ? 'مُدرك'
+                : isCompleted
+                  ? 'مكتمل'
+                  : isCurrentWeek
+                    ? 'غير منجز'
+                    : 'فائت';
+              const statusVariant = isOverdue
+                ? 'warning'
+                : isCompleted
+                  ? 'success'
+                  : isCurrentWeek
+                    ? 'outline'
+                    : 'destructive';
               const gradeLabel = isCompleted
                 ? 'قيد المراجعة'
                 : 'لم يتم التقييم';
@@ -281,7 +300,18 @@ async function AssignmentsList({
                     {programById[assignment.programId] || 'غير محدد'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant}>{statusLabel}</Badge>
+                    <div className="flex items-start">
+                      <div className="flex flex-col items-center">
+                        <Badge variant={statusVariant}>{statusLabel}</Badge>
+                        {assignmentStatusMap[assignment.id]?.completedAt && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {formatDate(
+                              assignmentStatusMap[assignment.id]!.completedAt!,
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="text-foreground/80 text-sm">
                     {gradeLabel}

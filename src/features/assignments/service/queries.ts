@@ -84,7 +84,8 @@ export async function getWeekAssignments(
 export async function getStudentAssignments(
   studentId: string,
   assignmentIds: string[],
-): Promise<ServiceReturn<StudentAssignmentDTO[]>> {
+  weekEndDate: Date,
+): Promise<ServiceReturn<(StudentAssignmentDTO & { isOverdue: boolean })[]>> {
   return runServiceOperation(
     async (session) => {
       // Students can only view their own assignments
@@ -97,7 +98,19 @@ export async function getStudentAssignments(
 
       const dalResult = await findStudentAssignments(studentId, assignmentIds);
 
-      return mapDalToService(dalResult);
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      const dataWithOverdue = dalResult.data.map((sa) => ({
+        ...sa,
+        isOverdue: sa.completedAt ? sa.completedAt > weekEndDate : false,
+      }));
+
+      return {
+        ...dalResult,
+        data: dataWithOverdue,
+      };
     },
     { requireAuth: true },
   );
@@ -135,12 +148,15 @@ export async function getManyStudentAssignments(
         return mapDalToService(dalResult);
       }
 
-      dalResult.data = dalResult.data.map((sa) => ({
+      const dataWithOverdue = dalResult.data.map((sa) => ({
         ...sa,
         isOverdue: sa.completedAt ? sa.completedAt > weekEndDate : false,
       }));
 
-      return mapDalToService(dalResult);
+      return mapDalToService({
+        ...dalResult,
+        data: dataWithOverdue,
+      });
     },
     { requireAuth: true },
   );
