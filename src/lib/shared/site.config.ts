@@ -7,6 +7,7 @@ import {
   BookOpen,
   UsersRound,
   FolderClock,
+  FolderKanban,
 } from 'lucide-react';
 
 export const navItems: NavItem[] = [
@@ -54,6 +55,11 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       isActive: true,
     },
     { label: 'المجموعات', href: '/dashboard/groups/', icon: UsersRound },
+    {
+      label: 'إدارة الدفعات',
+      href: '/dashboard/cohorts',
+      icon: FolderKanban,
+    },
     programs,
   ],
   supervisor: [
