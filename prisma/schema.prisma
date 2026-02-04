@@ -58,6 +58,8 @@ model User {
   studentAssignments StudentAssignment[]
   markedAssignments  StudentAssignment[] @relation("markedBy")
 
+  articles Article[]
+
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
@@ -336,3 +338,30 @@ model StudentAssignment {
   @@index([studentId, isCompleted])
   @@map("student_assignments")
 }
+
+// schema.prisma
+
+model Article {
+  id            String  @id @default(cuid(2))
+  title         String
+  slug          String  @unique
+  content       String  @db.Text
+  coverImageKey String?
+
+  isPublished Boolean @default(true)
+
+  // Who wrote it? (The Media Team)
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  category String @default("GENERAL") // News, Religious, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPublished])
+  @@map("articles")
+}
+
+// Don't forget to add this line inside the User model:
+// articles Article[]
