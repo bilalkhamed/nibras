@@ -1,6 +1,8 @@
 import { CustomAlert } from '@/components/common/custom-alert';
 import { getAllCohortsDetailed } from '@/features/cohorts/service/queries';
-import { CohortList } from '@/features/cohorts';
+import { CohortList, CreateCohortSheet } from '@/features/cohorts';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default async function CohortPage() {
   const cohortsResult = await getAllCohortsDetailed();
@@ -25,6 +27,12 @@ export default async function CohortPage() {
             إدارة الدفعات والمستويات الدراسية
           </p>
         </div>
+        <CreateCohortSheet>
+          <Button>
+            <Plus className="h-4 w-4 ml-2" />
+            إنشاء دفعة جديدة
+          </Button>
+        </CreateCohortSheet>
       </div>
       <CohortList cohorts={cohorts} hrefBase="/dashboard/cohorts/" />
     </div>

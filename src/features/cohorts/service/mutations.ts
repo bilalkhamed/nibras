@@ -15,6 +15,7 @@ import type { ServiceReturn } from '@/lib/server/service/types';
 import { insertCohort } from '../dal';
 import type { CreateCohortData } from '../types';
 import { ADMIN_ROLE } from '@/types/types';
+import { toArabicNumerals } from '@/lib/shared/utils';
 
 // ============================================================================
 // Cohort CRUD - Admin Only
@@ -38,12 +39,22 @@ export async function createCohort(
         };
       }
 
+      const toShortYear = (date: Date) => {
+        return date.getFullYear().toString().slice(-2);
+      };
+
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      const label = toArabicNumerals(
+        `${toShortYear(startDate)}/${toShortYear(endDate)}`,
+      );
+
       const dalResult = await insertCohort({
         name: data.name,
         slug: data.name,
-        label: data.name,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
+        label: label,
+        startDate: startDate,
+        endDate: endDate,
         entryLevelId: data.currentLevelId,
         currentLevelId: data.currentLevelId,
       });
