@@ -58,18 +58,21 @@ interface StudentProgressContainerProps {
   assignments: Assignment[];
   students: StudentProgress[];
   currentUserName: string;
+  weekEndDate: Date;
 }
 
 export function StudentProgressContainer({
   assignments,
   students,
   currentUserName,
+  weekEndDate,
 }: StudentProgressContainerProps) {
   return (
     <ProgressProvider
       initialStudents={students}
       assignments={assignments}
       currentUserName={currentUserName}
+      weekEndDate={weekEndDate}
     >
       <ProgressContent />
     </ProgressProvider>

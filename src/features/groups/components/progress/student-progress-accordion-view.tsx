@@ -129,6 +129,7 @@ export function StudentProgressAccordionView({
                     isCompleted: false,
                     completedAt: null,
                     markedBy: null,
+                    isOverdue: false,
                   };
 
                   const markedByName = status.markedBy
@@ -145,7 +146,11 @@ export function StudentProgressAccordionView({
                         'flex items-center justify-between gap-3 p-4',
                         'bg-warning-soft/50 dark:bg-warning/20',
                         status.isCompleted &&
+                          !status.isOverdue &&
                           'bg-emerald-50/50 dark:bg-emerald-500/20',
+                        status.isCompleted &&
+                          status.isOverdue &&
+                          'bg-amber-50/50 dark:bg-amber-500/20',
                       )}
                     >
                       <div className="flex-1 min-w-0">
@@ -177,15 +182,17 @@ export function StudentProgressAccordionView({
                         }
                         className={cn(
                           'h-8 px-3 rounded-md text-sm font-medium transition-all flex items-center gap-1.5',
-                          status.isCompleted
+                          status.isCompleted && !status.isOverdue
                             ? 'bg-emerald-500 hover:bg-emerald-600 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700'
-                            : 'bg-muted/50 hover:bg-muted text-muted-foreground border border-border hover:text-foreground dark:bg-muted/30 dark:hover:bg-muted/50',
+                            : status.isCompleted && status.isOverdue
+                              ? 'bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700'
+                              : 'bg-muted/50 hover:bg-muted text-muted-foreground border border-border hover:text-foreground dark:bg-muted/30 dark:hover:bg-muted/50',
                         )}
                       >
                         {status.isCompleted ? (
                           <>
                             <CheckCircle2 className="h-3.5 w-3.5" />
-                            مكتمل
+                            {status.isOverdue ? 'تم الادراك' : 'مكتمل'}
                           </>
                         ) : (
                           <>

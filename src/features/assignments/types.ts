@@ -106,6 +106,7 @@ export type StudentAssignmentDTO = StudentAssignment;
  * Student assignment with marker information
  */
 export type StudentAssignmentWithMarkerDTO = StudentAssignment & {
+  isOverdue: boolean;
   markedBy: {
     firstName: string;
     middleName: string;

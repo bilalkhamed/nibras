@@ -13,7 +13,6 @@ import getAuthSession from '@/lib/server/auth-session';
 import {
   getCalendarWeekByNumber,
   getCurrentWeek,
-  getWeekByNumber,
   getWeeksTillDate,
 } from '@/features/programs/service';
 
@@ -97,6 +96,7 @@ async function StudentsAssignmentsList({
   const studentAssignmentsResult = await getManyStudentAssignments(
     group.students.map((gs) => gs.student.id),
     assignments.map((as) => as.id),
+    selectedWeek.endDate,
   );
 
   // Handle service errors gracefully
@@ -112,6 +112,7 @@ async function StudentsAssignmentsList({
       isCompleted: sa.isCompleted,
       completedAt: sa.completedAt,
       markedBy: sa.markedBy,
+      isOverdue: sa.isOverdue,
     };
     return acc;
   }, {});
@@ -172,6 +173,7 @@ async function StudentsAssignmentsList({
           assignments={assignments}
           students={studentsProgress}
           currentUserName={currentUserName}
+          weekEndDate={selectedWeek.endDate}
         />
       )}
     </div>

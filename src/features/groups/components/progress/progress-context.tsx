@@ -75,6 +75,7 @@ function applyOptimisticUpdate(
   students: StudentProgress[],
   action: OptimisticAction,
   currentUserName: string,
+  weekEndDate: Date,
 ): StudentProgress[] {
   return students.map((student) => {
     if (student.id !== action.studentId) return student;
@@ -84,11 +85,17 @@ function applyOptimisticUpdate(
       isCompleted: false,
       completedAt: null,
       markedBy: null,
+      isOverdue: false,
     };
+
+    const completedAt = action.newCompleted ? new Date() : null;
+    const isOverdue =
+      action.newCompleted && completedAt ? completedAt > weekEndDate : false;
 
     newStatuses[action.assignmentId] = {
       isCompleted: action.newCompleted,
-      completedAt: action.newCompleted ? new Date() : null,
+      completedAt,
+      isOverdue,
       markedBy: action.newCompleted
         ? {
             firstName: currentUserName.split(' ')[0] || '',
@@ -116,6 +123,7 @@ interface ProgressProviderProps {
   initialStudents: StudentProgress[];
   assignments: Assignment[];
   currentUserName: string;
+  weekEndDate: Date;
 }
 
 export function ProgressProvider({
@@ -123,11 +131,12 @@ export function ProgressProvider({
   initialStudents,
   assignments,
   currentUserName,
+  weekEndDate,
 }: ProgressProviderProps) {
   const [optimisticStudents, updateOptimisticStudents] = useOptimistic(
     initialStudents,
     (state, action: OptimisticAction) =>
-      applyOptimisticUpdate(state, action, currentUserName),
+      applyOptimisticUpdate(state, action, currentUserName, weekEndDate),
   );
 
   const toggleCompletion = useCallback(
@@ -159,6 +168,7 @@ export function ProgressProvider({
           isCompleted: false,
           completedAt: null,
           markedBy: null,
+          isOverdue: false,
         }
       );
     },
@@ -179,6 +189,7 @@ export function ProgressProvider({
           isCompleted: false,
           completedAt: null,
           markedBy: null,
+          isOverdue: false,
         };
         studentStatuses[student.id] = {
           ...status,

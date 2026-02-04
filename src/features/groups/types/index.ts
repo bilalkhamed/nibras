@@ -235,6 +235,7 @@ import type { Assignment, Prisma } from '@prisma/client';
 export type AssignmentStatus = {
   isCompleted: boolean;
   completedAt: Date | null;
+  isOverdue: boolean;
   markedBy: {
     firstName: string;
     middleName: string | null;

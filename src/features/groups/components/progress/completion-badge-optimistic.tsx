@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { CheckCircle2 } from 'lucide-react';
-import { formatDate, cn } from '@/lib/shared/utils';
+import { formatDate } from '@/lib/shared/utils';
 import { useProgressContext } from './progress-context';
 
 interface CompletionBadgeOptimisticProps {
@@ -36,6 +36,12 @@ export function CompletionBadgeOptimistic({
   const isMarkedByOther = status.markedBy && markedByName !== studentName;
 
   if (status.isCompleted && status.completedAt) {
+    const isOverdue = status.isOverdue;
+    const badgeLabel = isOverdue ? 'تم الادراك' : 'مكتمل';
+    const badgeClass = isOverdue
+      ? 'bg-amber-500 text-amber-50 gap-1.5 cursor-pointer hover:bg-amber-600 transition-all'
+      : 'bg-emerald-500 text-emerald-50 gap-1.5 cursor-pointer hover:bg-emerald-600 transition-all';
+
     return (
       <TooltipProvider>
         <Tooltip>
@@ -43,11 +49,11 @@ export function CompletionBadgeOptimistic({
             <div className="flex flex-col items-center gap-1">
               <Badge
                 variant="default"
-                className="bg-emerald-500 text-emerald-50 gap-1.5 cursor-pointer hover:bg-emerald-600 transition-all"
+                className={badgeClass}
                 onClick={handleClick}
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                مكتمل
+                {badgeLabel}
               </Badge>
               {status.completedAt && (
                 <span
@@ -61,7 +67,7 @@ export function CompletionBadgeOptimistic({
           </TooltipTrigger>
           <TooltipContent side="top" className="text-right">
             <p className="text-sm" suppressHydrationWarning>
-              تم إكماله في{' '}
+              {isOverdue ? 'تم إدراكه في' : 'تم إكماله في'}{' '}
               {new Date(status.completedAt).toLocaleDateString('ar-SA', {
                 year: 'numeric',
                 month: 'long',

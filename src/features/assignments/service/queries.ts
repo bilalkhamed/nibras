@@ -114,6 +114,7 @@ export async function getStudentAssignments(
 export async function getManyStudentAssignments(
   studentIds: string[],
   assignmentIds: string[],
+  weekEndDate: Date,
 ): Promise<ServiceReturn<StudentAssignmentWithMarkerDTO[]>> {
   return runServiceOperation(
     async (session) => {
@@ -129,6 +130,15 @@ export async function getManyStudentAssignments(
         studentIds,
         assignmentIds,
       );
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      dalResult.data = dalResult.data.map((sa) => ({
+        ...sa,
+        isOverdue: sa.completedAt ? sa.completedAt > weekEndDate : false,
+      }));
 
       return mapDalToService(dalResult);
     },
