@@ -17,5 +17,5 @@ export async function GET() {
 
   const levels = await getAllLevels();
 
-  return NextResponse.json({ levels });
+  return NextResponse.json(levels);
 }
