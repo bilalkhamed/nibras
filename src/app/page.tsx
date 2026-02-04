@@ -31,12 +31,12 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant={'hook'} className="w-45 h-15 text-base group">
-              <Link href="/login" className="flex flex-start items-center">
+            <Link href="/login" className="flex flex-start items-center">
+              <Button variant={'hook'} className="w-45 h-15 text-base group">
                 <span>{labels.common.startNow}</span>
                 <Sparkles className="mr-2 h-4 w-4 group-hover:rotate-20 duration-300 transition-transform" />
-              </Link>
-            </Button>
+              </Button>
+            </Link>
             <Button
               variant={'outlinePrimary'}
               className="w-45 h-15 text-base font-semibold outline-primary"
