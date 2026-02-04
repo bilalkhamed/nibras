@@ -18,7 +18,7 @@ export const createCohortSchema = z.object({
   name: z.string().min(1, 'اسم الدفعة مطلوب'),
   startDate: z.string().min(1, 'تاريخ البداية مطلوب'),
   endDate: z.string().min(1, 'تاريخ النهاية مطلوب'),
-  currentLevelId: z.string().min(1, 'المستوى الحالي مطلوب'),
+  currentLevelId: z.string('المستوى الحالي مطلوب'),
 });
 
 // ============================================================================
