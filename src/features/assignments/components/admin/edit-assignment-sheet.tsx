@@ -31,8 +31,8 @@ type EditAssignmentSheetProps = {
     description: string | null;
     type: AssignmentTypes;
     links?: Link[];
-    requireFileSubmission: boolean;
-    requireTextSubmission: boolean;
+    allowFileSubmission: boolean;
+    allowTextSubmission: boolean;
   };
 };
 
@@ -73,8 +73,8 @@ export function EditAssignmentSheet({
           id: link.id,
           type: 'LINK' as const,
         })),
-        requireFileSubmission: data.requireFileSubmission,
-        requireTextSubmission: data.requireTextSubmission,
+        allowFileSubmission: data.allowFileSubmission,
+        allowTextSubmission: data.allowTextSubmission,
       });
 
       if (res.success) {

@@ -33,8 +33,8 @@ export function AssignmentsTableWithActions({
           name: assignment.name,
           description: assignment.description,
           type: assignment.type,
-          requireFileSubmission: assignment.requireFileSubmission,
-          requireTextSubmission: assignment.requireTextSubmission,
+          allowFileSubmission: assignment.allowFileSubmission,
+          allowTextSubmission: assignment.allowTextSubmission,
           files: assignment.attachments
             .filter(
               (

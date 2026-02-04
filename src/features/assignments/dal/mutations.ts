@@ -170,8 +170,8 @@ export async function updateAssignment(
         name: data.name,
         description: data.description,
         type: data.type,
-        requireFileSubmission: data.requireFileSubmission,
-        requireTextSubmission: data.requireTextSubmission,
+        allowFileSubmission: data.allowFileSubmission,
+        allowTextSubmission: data.allowTextSubmission,
       },
     });
 
@@ -246,8 +246,8 @@ export async function insertAssignment(data: CreateAssignmentData) {
           levelId: level.id,
           weekId: data.weekId,
           programId: program.id,
-          requireFileSubmission: data.assignment.requireFileSubmission,
-          requireTextSubmission: data.assignment.requireTextSubmission,
+          allowFileSubmission: data.assignment.allowFileSubmission,
+          allowTextSubmission: data.assignment.allowTextSubmission,
           attachments: {
             createMany: {
               data: attachmentsData,

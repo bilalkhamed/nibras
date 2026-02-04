@@ -62,8 +62,8 @@ type AssignmentFormContentProps = {
     type: AssignmentTypes;
     links?: Link[];
     files?: AttachedFile[];
-    requireFileSubmission: boolean;
-    requireTextSubmission: boolean;
+    allowFileSubmission: boolean;
+    allowTextSubmission: boolean;
   };
   /** Callback when form is cancelled */
   onCancel: () => void;
@@ -100,13 +100,13 @@ export function AssignmentFormContent({
           links: defaultValues.links || [],
           files: defaultValues.files || [],
           newFileKeys: [],
-          requireFileSubmission: defaultValues.requireFileSubmission,
-          requireTextSubmission: defaultValues.requireTextSubmission,
+          allowFileSubmission: defaultValues.allowFileSubmission,
+          allowTextSubmission: defaultValues.allowTextSubmission,
         }
       : {
           newFileKeys: [],
-          requireFileSubmission: false,
-          requireTextSubmission: false,
+          allowFileSubmission: false,
+          allowTextSubmission: false,
         },
   });
 
@@ -198,34 +198,34 @@ export function AssignmentFormContent({
             <Field orientation="horizontal">
               <Controller
                 control={control}
-                name="requireTextSubmission"
+                name="allowTextSubmission"
                 render={({ field }) => (
                   <Checkbox
-                    id="requireTextSubmission"
+                    id="allowTextSubmission"
                     className="cursor-pointer"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 )}
               />
-              <FieldLabel htmlFor="requireTextSubmission" className="mb-0">
+              <FieldLabel htmlFor="allowTextSubmission" className="mb-0">
                 طلب تقديم نص
               </FieldLabel>
             </Field>
             <Field orientation="horizontal">
               <Controller
                 control={control}
-                name="requireFileSubmission"
+                name="allowFileSubmission"
                 render={({ field }) => (
                   <Checkbox
-                    id="requireFileSubmission"
+                    id="allowFileSubmission"
                     className="cursor-pointer"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 )}
               />
-              <FieldLabel htmlFor="requireFileSubmission" className="mb-0">
+              <FieldLabel htmlFor="allowFileSubmission" className="mb-0">
                 طلب تقديم ملف
               </FieldLabel>
             </Field>
