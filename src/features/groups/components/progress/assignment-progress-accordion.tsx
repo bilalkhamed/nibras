@@ -172,35 +172,38 @@ export function AssignmentProgressAccordion({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {status.isCompleted && (() => {
-                          const assignmentDetails = assignments.find(
-                            (a) => a.id === assignment.id,
-                          );
-                          return (
-                            <SubmissionViewerSheet
-                              studentName={student.name}
-                              assignmentName={assignment.name}
-                              textSubmission={status.textSubmission || null}
-                              fileKey={status.fileKey || null}
-                              fileUrl={status.fileUrl || null}
-                              allowTextSubmission={
-                                assignmentDetails?.allowTextSubmission ?? false
-                              }
-                              allowFileSubmission={
-                                assignmentDetails?.allowFileSubmission ?? false
-                              }
-                            >
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 gap-1.5"
+                        {status.isCompleted &&
+                          (() => {
+                            const assignmentDetails = assignments.find(
+                              (a) => a.id === assignment.id,
+                            );
+                            return (
+                              <SubmissionViewerSheet
+                                studentName={student.name}
+                                assignmentName={assignment.name}
+                                textSubmission={status.textSubmission || null}
+                                fileKey={status.fileKey || null}
+                                fileUrl={status.fileUrl || null}
+                                allowTextSubmission={
+                                  assignmentDetails?.allowTextSubmission ??
+                                  false
+                                }
+                                allowFileSubmission={
+                                  assignmentDetails?.allowFileSubmission ??
+                                  false
+                                }
                               >
-                                <Eye className="h-3.5 w-3.5" />
-                                عرض التسليمات
-                              </Button>
-                            </SubmissionViewerSheet>
-                          );
-                        })()}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 gap-1.5"
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                  عرض التسليمات
+                                </Button>
+                              </SubmissionViewerSheet>
+                            );
+                          })()}
                         <button
                           onClick={() =>
                             toggleCompletion(
