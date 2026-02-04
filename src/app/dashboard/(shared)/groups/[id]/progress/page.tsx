@@ -15,6 +15,9 @@ import {
   getCurrentWeek,
   getWeeksTillDate,
 } from '@/features/programs/service';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3 } from '@/lib/server/s3-client';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<{ week?: string }> | { week?: string };
@@ -104,8 +107,33 @@ async function StudentsAssignmentsList({
     ? studentAssignmentsResult.data
     : [];
 
-  const assignmentStatusMap = studentAssignments.reduce<
-    Record<string, Record<string, AssignmentStatus>>
+  // Generate presigned URLs for student submissions with fileKey
+  const studentAssignmentsWithUrls = await Promise.all(
+    studentAssignments.map(async (sa) => {
+      if (sa.fileKey) {
+        const command = new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: sa.fileKey,
+        });
+        const fileUrl = await getSignedUrl(S3, command, { expiresIn: 3600 });
+        return { ...sa, fileUrl };
+      }
+      return { ...sa, fileUrl: null };
+    }),
+  );
+
+  const assignmentStatusMap = studentAssignmentsWithUrls.reduce<
+    Record<
+      string,
+      Record<
+        string,
+        AssignmentStatus & {
+          fileKey?: string | null;
+          fileUrl?: string | null;
+          textSubmission?: string | null;
+        }
+      >
+    >
   >((acc, sa) => {
     if (!acc[sa.studentId]) acc[sa.studentId] = {};
     acc[sa.studentId][sa.assignmentId] = {
@@ -113,6 +141,9 @@ async function StudentsAssignmentsList({
       completedAt: sa.completedAt,
       markedBy: sa.markedBy,
       isOverdue: sa.isOverdue,
+      fileKey: sa.fileKey,
+      fileUrl: sa.fileUrl,
+      textSubmission: sa.textSubmission,
     };
     return acc;
   }, {});

@@ -12,10 +12,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { AlertTriangle, CheckCircle2, Clock3 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock3, Eye } from 'lucide-react';
 import { toArabicNumerals, formatDate, cn } from '@/lib/shared/utils';
 import { useProgressContext } from './progress-context';
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { SubmissionViewerSheet } from './submission-viewer-sheet';
 
 export const STATUS_CONFIG: Record<
   StudentProgressStatus,
@@ -172,35 +174,62 @@ export function StudentProgressAccordionView({
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={() =>
-                          toggleCompletion(
-                            student.id,
-                            assignment.id,
-                            status.isCompleted,
-                          )
-                        }
-                        className={cn(
-                          'h-8 px-3 rounded-md text-sm font-medium transition-all flex items-center gap-1.5',
-                          status.isCompleted && !status.isOverdue
-                            ? 'bg-emerald-500 hover:bg-emerald-600 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700'
-                            : status.isCompleted && status.isOverdue
-                              ? 'bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700'
-                              : 'bg-muted/50 hover:bg-muted text-muted-foreground border border-border hover:text-foreground dark:bg-muted/30 dark:hover:bg-muted/50',
-                        )}
-                      >
-                        {status.isCompleted ? (
-                          <>
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            {status.isOverdue ? 'تم الادراك' : 'مكتمل'}
-                          </>
-                        ) : (
-                          <>
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            غير مكتمل
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {status.isCompleted &&
+                          (status.fileKey || status.textSubmission) && (
+                            <SubmissionViewerSheet
+                              studentName={student.name}
+                              assignmentName={assignment.name}
+                              textSubmission={status.textSubmission || null}
+                              fileKey={status.fileKey || null}
+                              fileUrl={status.fileUrl || null}
+                              allowTextSubmission={
+                                assignment.allowTextSubmission
+                              }
+                              allowFileSubmission={
+                                assignment.allowFileSubmission
+                              }
+                            >
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                عرض التسليمات
+                              </Button>
+                            </SubmissionViewerSheet>
+                          )}
+                        <button
+                          onClick={() =>
+                            toggleCompletion(
+                              student.id,
+                              assignment.id,
+                              status.isCompleted,
+                            )
+                          }
+                          className={cn(
+                            'h-8 px-3 rounded-md text-sm font-medium transition-all flex items-center gap-1.5',
+                            status.isCompleted && !status.isOverdue
+                              ? 'bg-emerald-500 hover:bg-emerald-600 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700'
+                              : status.isCompleted && status.isOverdue
+                                ? 'bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700'
+                                : 'bg-muted/50 hover:bg-muted text-muted-foreground border border-border hover:text-foreground dark:bg-muted/30 dark:hover:bg-muted/50',
+                          )}
+                        >
+                          {status.isCompleted ? (
+                            <>
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              {status.isOverdue ? 'تم الادراك' : 'مكتمل'}
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              غير مكتمل
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}

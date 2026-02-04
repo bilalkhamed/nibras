@@ -1,4 +1,4 @@
-import { FileTextIcon, Trash2Icon } from 'lucide-react';
+import { FileTextIcon, Trash2Icon, Download } from 'lucide-react';
 
 import { Button } from '../ui/button';
 import { cn } from '@/lib/shared/utils';
@@ -23,26 +23,49 @@ export function FileCard({
         'border-border bg-card',
       )}
     >
-      {/* Delete button */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(
-          'absolute top-2 left-2 z-10 h-7 w-7 rounded-full',
-          'bg-background/80 backdrop-blur-sm shadow-sm',
-          'opacity-0 group-hover:opacity-100 transition-opacity',
-          'hover:bg-destructive hover:text-destructive-foreground',
-        )}
-        onClick={() => onPressDelete(file.key)}
-      >
-        <Trash2Icon className="h-3.5 w-3.5" />
-      </Button>
+      {/* Action buttons */}
+      <div className="absolute top-2 left-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Download button */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'h-7 w-7 rounded-full',
+            'bg-background/80 backdrop-blur-sm shadow-sm',
+            'hover:bg-primary hover:text-primary-foreground',
+          )}
+          onClick={() => window.open(file.url, '_blank')}
+        >
+          <Download className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Delete button */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'h-7 w-7 rounded-full',
+            'bg-background/80 backdrop-blur-sm shadow-sm',
+            'text-destructive hover:bg-destructive hover:text-destructive-foreground',
+          )}
+          onClick={() => onPressDelete(file.key)}
+        >
+          <Trash2Icon className="h-3.5 w-3.5" />
+        </Button>
+      </div>
 
       {/* Preview area */}
       <div className="w-full aspect-video bg-muted/50 flex items-center justify-center relative overflow-hidden">
         {isPdf ? (
-          <FileTextIcon className="h-14 w-14 text-primary" />
+          <button
+            type="button"
+            onClick={() => window.open(file.url, '_blank')}
+            className="cursor-pointer hover:scale-110 transition-transform"
+          >
+            <FileTextIcon className="h-14 w-14 text-primary" />
+          </button>
         ) : isImage ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
