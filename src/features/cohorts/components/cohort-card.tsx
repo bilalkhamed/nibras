@@ -67,9 +67,9 @@ export function CohortCard({ cohort }: CohortCardProps) {
             </span>
           </div>
           <div className="flex flex-col items-center justify-center rounded-lg bg-accent/10 border border-accent/30 p-3">
-            <UserCog className="h-5 w-5 text-accent-foreground mb-1" />
+            <UserCog className="h-5 w-5 text-accent-foreground dark:text-accent mb-1" />
             <span className="text-xs text-muted-foreground">مديرة الدفعة</span>
-            <span className="text-lg font-bold text-accent-foreground">
+            <span className="text-lg font-bold text-accent-foreground dark:text-accent">
               {cohort._count.managers}
             </span>
           </div>
