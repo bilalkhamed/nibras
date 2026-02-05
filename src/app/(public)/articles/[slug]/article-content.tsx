@@ -224,7 +224,7 @@ export function ArticleContent({ content, slug }: ArticleContentProps) {
       <ReadingProgress />
 
       {/* Floating Toolbar */}
-      <div className="sticky top-12 z-30 mb-6">
+      <div className="sticky top-17 z-30 mb-6">
         <div className="container mx-auto px-4">
           <div
             className={cn(

@@ -145,7 +145,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <span>العودة لغرفة الأخبار</span>
           </Link>
 
-          <h2 className="font-bold text-xl">{article.title}</h2>
+          <h2 className="font-bold hidden md:block">{article.title}</h2>
 
           <ShareButton title={article.title} />
         </div>
@@ -177,7 +177,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Title & Meta Card - Below image on mobile, overlapping on desktop */}
         <div className="container mx-auto px-4">
-          <div className="relative -mt-8 sm:-mt-16 md:-mt-24 lg:-mt-32 rounded-2xl border border-border bg-card p-5 sm:p-6 md:p-10 lg:p-12 shadow-xl">
+          <div className="relative -mt-8 sm:-mt-16 md:-mt-24 lg:-mt-64 rounded-2xl border border-border bg-card p-5 sm:p-6 md:p-10 lg:p-12 shadow-xl">
             {/* Category */}
             <div className="mb-3 sm:mb-4">
               <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -186,7 +186,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-foreground">
+            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-foreground">
               {article.title}
             </h1>
 
