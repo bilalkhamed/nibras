@@ -52,3 +52,17 @@ export function toArabicNumerals(input: string | number) {
     )
     .join('');
 }
+
+/**
+ * Get the public URL for a file in the public S3 bucket (Tigris)
+ * Uses subdomain-style URL: https://<bucket>.t3.storage.dev/<key>
+ * This is a pure function that doesn't import any server modules.
+ */
+export function getPublicS3Url(key: string): string {
+  // Server-side uses PUBLIC_AWS_BUCKET_NAME, client-side uses NEXT_PUBLIC_S3_PUBLIC_BUCKET
+  const bucket =
+    process.env.PUBLIC_AWS_BUCKET_NAME ??
+    process.env.NEXT_PUBLIC_S3_PUBLIC_BUCKET ??
+    'nebras-public';
+  return `https://${bucket}.t3.storage.dev/${key}`;
+}

@@ -1,5 +1,5 @@
 import getAuthSession from '@/lib/server/auth-session';
-import { S3 } from '@/lib/server/s3-client';
+import { S3, PublicS3 } from '@/lib/server/s3-client';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { Role } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,7 +17,7 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { key } = body;
+    const { key, public: isPublic } = body;
 
     if (!key) {
       return NextResponse.json(
@@ -26,12 +26,18 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // Use appropriate S3 client and bucket based on public flag
+    const s3Client = isPublic ? PublicS3 : S3;
+    const bucket = isPublic
+      ? process.env.PUBLIC_AWS_BUCKET_NAME
+      : process.env.S3_BUCKET_NAME;
+
     const command = new DeleteObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
+      Bucket: bucket!,
       Key: key,
     });
 
-    await S3.send(command);
+    await s3Client.send(command);
     return NextResponse.json({ message: 'File deleted successfully' });
   } catch (error) {
     return NextResponse.json({ error: 'Error deleting file' }, { status: 500 });
