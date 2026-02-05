@@ -98,6 +98,7 @@ function ArticleCard({
           <Image
             src={coverUrl}
             alt=""
+            loading="eager"
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
             sizes={
@@ -238,7 +239,7 @@ export default async function ArticlesPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm bg-image bg-[url('/articles-header-bg.png')] bg-cover bg-center">
         <div className="container mx-auto px-4 py-8 md:py-12">
           {/* Back Link */}
           <Link
