@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Menu } from 'lucide-react';
+import { Sparkles, Menu, UserRoundIcon } from 'lucide-react';
 
 import labels from '@/lib/labels.json';
 import { navItems, hideNavbarOnRoutes } from '@/lib/shared/site.config';
@@ -71,12 +71,10 @@ export function Navbar({ extraRight, user }: NavbarProps) {
             <div className="hidden md:flex items-center gap-3">
               {user == null ? (
                 <>
-                  <Button variant="primary" asChild>
+                  <Button variant="ghost" asChild>
                     <Link href="/login">{labels.common.login}</Link>
                   </Button>
-                  <Button variant="ghost" asChild>
-                    <Link href="/signup">{labels.common.signup}</Link>
-                  </Button>
+                  <ThemeSwitch />
                 </>
               ) : (
                 <div className="flex items-center gap-2 text-sm font-medium">
@@ -131,26 +129,16 @@ export function Navbar({ extraRight, user }: NavbarProps) {
                       >
                         <Link
                           href="/login"
-                          className="flex justify-between items-center px-4 py-2 w-full"
+                          className="flex justify-between items-center gap-2 px-4 py-2 w-full"
                         >
                           <span>{labels.common.login}</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        asChild
-                        className="cursor-pointer w-full hover:bg-primary/10 rounded-md"
-                      >
-                        <Link
-                          href="/signup"
-                          className="flex justify-between items-center px-4 py-2 w-full"
-                        >
-                          <span>{labels.common.signup}</span>
+                          <UserRoundIcon className="h-4 w-4 text-foreground/70" />
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        asChild
-                        className="cursor-pointer w-full flex justify-center"
+                        dir="rtl"
+                        className="cursor-pointer flex justify-start px-1 py-0"
                       >
                         <ThemeSwitch />
                       </DropdownMenuItem>

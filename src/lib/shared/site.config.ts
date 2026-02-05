@@ -24,17 +24,15 @@ export const navItems: NavItem[] = [
     icon: NotebookPen,
   },
   {
-    label: 'حسابي',
-    href: '/account',
-    icon: UserRound,
-    auth: true,
+    label: 'الأخبار',
+    href: '/articles',
+    icon: Newspaper,
   },
   {
-    label: 'الإدارة',
+    label: 'لوحة التحكم',
     href: '/dashboard',
     icon: LayoutDashboard,
     auth: true,
-    role: 'admin',
   },
 ];
 
