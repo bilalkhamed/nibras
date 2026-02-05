@@ -13,6 +13,8 @@ const publicRoutes = [
   '/invite/*',
   '/suspended',
   '/plan',
+  '/articles',
+  '/articles/*',
 ];
 
 type RouteRule = {
