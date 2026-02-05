@@ -3,7 +3,7 @@ import { FileQuestion, ArrowLeft } from 'lucide-react';
 
 export default function ArticleNotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+    <div className="absolute top-0 right-0 min-w-screen min-h-screen flex flex-col items-center justify-center px-4">
       <div className="text-center">
         {/* Icon */}
         <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-muted">

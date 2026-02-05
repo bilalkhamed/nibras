@@ -1,9 +1,5 @@
 import { ReactNode } from 'react';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  return (
-    <main id="main-content" className="min-h-screen bg-background">
-      {children}
-    </main>
-  );
+  return <main id="main-content">{children}</main>;
 }
