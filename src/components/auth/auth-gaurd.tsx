@@ -1,7 +1,7 @@
 import getAuthSession from '@/lib/server/auth-session';
 import { AccessTokenPayload } from '@/types/types';
 import { Role } from '@prisma/client';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 export async function AuthGuard({
   children,
@@ -19,7 +19,7 @@ export async function AuthGuard({
   if (roles.length > 0) {
     const hasRole = roles.includes(auth.role);
     if (!hasRole) {
-      return notFound();
+      return redirect('/dashboard');
     }
   }
 
