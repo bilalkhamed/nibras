@@ -3,6 +3,7 @@
  *
  * Image upload component specifically for article cover images.
  * Uses the existing FileUploader component with customizations.
+ * Uploads to the public S3 bucket for direct URL access.
  */
 
 'use client';
@@ -11,7 +12,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { FileUploader } from '@/features/assignments/components/admin/file-uploader';
 import { ImageIcon, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/shared/utils';
+import { cn, getPublicS3Url } from '@/lib/shared/utils';
 
 type ArticleCoverUploaderProps = {
   /** Current cover image key */
@@ -23,27 +24,19 @@ type ArticleCoverUploaderProps = {
 };
 
 /**
- * Fetch presigned URL from API
+ * Fetch public URL from API (for public bucket, returns direct URL)
  */
-async function fetchPresignedUrl(key: string): Promise<string | null> {
+async function fetchPublicUrl(key: string): Promise<string | null> {
   try {
-    const response = await fetch('/api/s3/view', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key }),
-    });
-
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    return data.success ? data.url : null;
+    console.log(getPublicS3Url(key));
+    return getPublicS3Url(key);
   } catch {
     return null;
   }
 }
 
 /**
- * Cover image uploader for articles
+ * Cover image uploader for articles (uses public S3 bucket)
  */
 export function ArticleCoverUploader({
   value,
@@ -55,7 +48,7 @@ export function ArticleCoverUploader({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
 
-  // Fetch presigned URL when value changes
+  // Fetch public URL when value changes
   useEffect(() => {
     let cancelled = false;
 
@@ -68,7 +61,7 @@ export function ArticleCoverUploader({
       setIsLoadingUrl(true);
       setImageError(false);
 
-      const url = await fetchPresignedUrl(value);
+      const url = await fetchPublicUrl(value);
 
       if (!cancelled) {
         setPreviewUrl(url);
@@ -173,6 +166,7 @@ export function ArticleCoverUploader({
         maxFiles={1}
         maxSize={5 * 1024 * 1024} // 5MB
         compact={true}
+        isPublic={true}
         onFileUpload={handleFileUpload}
         onFileDelete={handleFileDelete}
       />

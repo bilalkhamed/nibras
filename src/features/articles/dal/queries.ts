@@ -7,6 +7,8 @@ import {
   FilterArticlesParams,
   ArticleListDTO,
   articleListSelect,
+  PublicArticleListDTO,
+  publicArticleListSelect,
 } from '../types';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import prisma from '@/lib/server/prisma';
@@ -59,6 +61,38 @@ export async function findArticleBySlugDal(
   return runDalOperation(async () => {
     return prisma.article.findUnique({
       where: { slug },
+    });
+  });
+}
+
+// ============================================================================
+// Public Queries (No Authentication Required)
+// ============================================================================
+
+export async function findPublishedArticles(): Promise<
+  DalReturn<PublicArticleListDTO[]>
+> {
+  cacheTag('articles', 'public-articles');
+  return runDalOperation(async () => {
+    const articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      select: publicArticleListSelect,
+      orderBy: { createdAt: 'desc' },
+    });
+    return articles;
+  });
+}
+
+export async function findPublishedArticleBySlug(
+  slug: string,
+): Promise<DalReturn<Article | null>> {
+  cacheTag('articles', `article-${slug}`);
+  return runDalOperation(async () => {
+    return prisma.article.findFirst({
+      where: {
+        slug,
+        isPublished: true,
+      },
     });
   });
 }

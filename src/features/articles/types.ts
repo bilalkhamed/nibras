@@ -100,6 +100,27 @@ export type ArticleListDTO = Prisma.ArticleGetPayload<{
   select: typeof articleListSelect;
 }>;
 
+// Public article list select (includes content for word count estimation)
+export const publicArticleListSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  content: true,
+  category: true,
+  coverImageKey: true,
+  createdAt: true,
+  author: {
+    select: {
+      firstName: true,
+      lastName: true,
+    },
+  },
+} satisfies Prisma.ArticleSelect;
+
+export type PublicArticleListDTO = Prisma.ArticleGetPayload<{
+  select: typeof publicArticleListSelect;
+}>;
+
 // ============================================================================
 // Action Result Types
 // ============================================================================
