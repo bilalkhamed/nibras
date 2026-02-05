@@ -57,6 +57,7 @@ model User {
 
   studentAssignments StudentAssignment[]
   markedAssignments  StudentAssignment[] @relation("markedBy")
+  gradedAssignments  StudentAssignment[] @relation("gradedBy")
 
   articles Article[]
 
@@ -332,6 +333,13 @@ model StudentAssignment {
 
   markedById String?
   markedBy   User?   @relation(fields: [markedById], references: [id], onDelete: SetNull, name: "markedBy")
+
+  //grading
+  score   Int?
+  comment String? @db.Text
+
+  gradedById String?
+  gradedBy   User?   @relation(fields: [gradedById], references: [id], onDelete: SetNull, name: "gradedBy")
 
   @@unique([studentId, assignmentId])
   @@index([assignmentId, isCompleted])
