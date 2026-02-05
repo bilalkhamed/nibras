@@ -3,12 +3,15 @@ import { CustomAlert } from '@/components/common/custom-alert';
 import { getAllArticlesAdmin } from '@/features/articles/service/queries';
 import { ArticlesTable } from '@/features/articles/components';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AuthGuard } from '@/components/auth/auth-gaurd';
 
 export default async function ArticlesPage() {
   return (
-    <Suspense fallback={<ArticlesPageSkeleton />}>
-      <ArticlesContent />
-    </Suspense>
+    <AuthGuard roles={['media_team', 'admin']}>
+      <Suspense fallback={<ArticlesPageSkeleton />}>
+        <ArticlesContent />
+      </Suspense>
+    </AuthGuard>
   );
 }
 

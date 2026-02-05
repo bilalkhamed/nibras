@@ -31,6 +31,8 @@ export default async function DashboardPage() {
               return <CohortManagerDashboard />;
             case GROUP_MANAGER_ROLE:
               return <GroupManagerDashboard />;
+            case 'media_team':
+              return <h3>hi media</h3>;
             default:
               redirect('/forbidden');
           }
