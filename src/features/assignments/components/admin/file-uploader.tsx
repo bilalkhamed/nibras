@@ -26,6 +26,8 @@ type FileUploaderProps = {
   maxFiles?: number;
   /** Use compact layout (default: true) */
   compact?: boolean;
+  /** Upload to public bucket (default: false) */
+  isPublic?: boolean;
   /** Callback when a file is successfully uploaded */
   onFileUpload: (fileKey: string) => void;
   /** Callback when a file is deleted */
@@ -39,6 +41,7 @@ export function FileUploader({
   maxSize = 10 * 1024 * 1024,
   maxFiles = 3,
   compact = true,
+  isPublic = false,
   onFileUpload,
   onFileDelete,
 }: FileUploaderProps) {
@@ -82,6 +85,7 @@ export function FileUploader({
         },
         body: JSON.stringify({
           key: fileToRemove.key,
+          public: isPublic,
         }),
       });
 
@@ -133,6 +137,7 @@ export function FileUploader({
               fileName: file.name,
               contentType: file.type,
               size: file.size,
+              public: isPublic,
             }),
           });
 
