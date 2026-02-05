@@ -204,7 +204,7 @@ export function AssignmentProgressAccordion({
                               </SubmissionViewerSheet>
                             );
                           })()}
-                        <button
+                        <Button
                           onClick={() =>
                             toggleCompletion(
                               student.id,
@@ -212,6 +212,7 @@ export function AssignmentProgressAccordion({
                               status.isCompleted,
                             )
                           }
+                          disabled={!!(status.fileKey || status.textSubmission)}
                           className={cn(
                             'h-8 px-3 rounded-md text-sm font-medium transition-all flex items-center gap-1.5',
                             status.isCompleted && !status.isOverdue
@@ -232,7 +233,7 @@ export function AssignmentProgressAccordion({
                               غير مكتمل
                             </>
                           )}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   );

@@ -45,6 +45,8 @@ export async function upsertStudentAssignment({
           studentId,
           assignmentId,
         },
+        fileKey: null,
+        textSubmission: null,
       },
       create: {
         studentId,
