@@ -46,9 +46,9 @@
   --color-warning-soft: #fef3c7;
   --color-warning-foreground: #451a03;
 
-  --color-destructive: #f97373;
+  --color-destructive: #dc2626;
   --color-destructive-soft: #fee2e2;
-  --color-destructive-foreground: #7f1d1d;
+  --color-destructive-foreground: #ffffff;
 }
 
 /* 2) Dark theme tokens – scoped to .dark */
@@ -95,9 +95,9 @@
     --color-warning-soft: #3d2d13;
     --color-warning-foreground: #fff4cc;
 
-    --color-destructive: #ff8fa3;
+    --color-destructive: #ef4444;
     --color-destructive-soft: #37131b;
-    --color-destructive-foreground: #ffe5ea;
+    --color-destructive-foreground: #ffffff;
 
     --sidebar: var(--color-accent-foreground) !important;
   }

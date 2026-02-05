@@ -5,12 +5,15 @@ import {
   articleWithoutContent,
   ArticleWithoutContentDTO,
   FilterArticlesParams,
+  ArticleListDTO,
+  articleListSelect,
 } from '../types';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import prisma from '@/lib/server/prisma';
 import { cacheTag } from 'next/cache';
+import { Article } from '@prisma/client';
 
-export function findManyArticles({
+export async function findManyArticles({
   isPublished,
   category,
 }: FilterArticlesParams): Promise<DalReturn<ArticleWithoutContentDTO[]>> {
@@ -24,5 +27,38 @@ export function findManyArticles({
       select: articleWithoutContent,
     });
     return articles;
+  });
+}
+
+export async function findAllArticlesForAdmin(): Promise<
+  DalReturn<ArticleListDTO[]>
+> {
+  cacheTag('articles', 'max');
+  return runDalOperation(async () => {
+    const articles = await prisma.article.findMany({
+      select: articleListSelect,
+      orderBy: { createdAt: 'desc' },
+    });
+    return articles;
+  });
+}
+
+export async function findArticleByIdDal(
+  id: string,
+): Promise<DalReturn<Article | null>> {
+  return runDalOperation(async () => {
+    return prisma.article.findUnique({
+      where: { id },
+    });
+  });
+}
+
+export async function findArticleBySlugDal(
+  slug: string,
+): Promise<DalReturn<Article | null>> {
+  return runDalOperation(async () => {
+    return prisma.article.findUnique({
+      where: { slug },
+    });
   });
 }

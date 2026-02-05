@@ -9,6 +9,7 @@ import {
   FolderClock,
   FolderKanban,
   CalendarCog,
+  Newspaper,
 } from 'lucide-react';
 
 export const navItems: NavItem[] = [
@@ -47,6 +48,12 @@ const programs: SidebarNavItem = {
   ],
 };
 
+const articles: SidebarNavItem = {
+  label: 'المقالات',
+  href: '/dashboard/articles',
+  icon: Newspaper,
+};
+
 export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
   admin: [
     {
@@ -67,6 +74,7 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: CalendarCog,
     },
     programs,
+    articles,
   ],
   supervisor: [
     {
@@ -100,7 +108,7 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: UsersRound,
     },
   ],
-  media_team: [],
+  media_team: [articles],
 };
 
 export const hideNavbarOnRoutes: string[] = [

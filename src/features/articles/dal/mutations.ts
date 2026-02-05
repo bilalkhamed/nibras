@@ -1,5 +1,5 @@
 import { runDalOperation } from '@/lib/server/dal/helpers';
-import { ArticleData } from '../types';
+import { ArticleData, UpdateArticleData } from '../types';
 import prisma from '@/lib/server/prisma';
 import { Article } from '@prisma/client';
 import { DalReturn } from '@/lib/server/dal/types';
@@ -12,5 +12,31 @@ export function insertArticle(data: ArticleData): Promise<DalReturn<Article>> {
     });
     revalidateTag('articles', 'max');
     return newArticle;
+  });
+}
+
+export async function updateArticle(
+  id: string,
+  data: UpdateArticleData,
+): Promise<DalReturn<Article>> {
+  return runDalOperation(async () => {
+    const updatedArticle = await prisma.article.update({
+      where: { id },
+      data,
+    });
+    revalidateTag('articles', 'max');
+    return updatedArticle;
+  });
+}
+
+export async function deleteArticle(
+  id: string,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    await prisma.article.delete({
+      where: { id },
+    });
+    revalidateTag('articles', 'max');
+    return { id };
   });
 }
