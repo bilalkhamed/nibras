@@ -145,6 +145,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <span>العودة لغرفة الأخبار</span>
           </Link>
 
+          <h2 className="font-bold text-xl">{article.title}</h2>
+
           <ShareButton title={article.title} />
         </div>
       </nav>
@@ -168,7 +170,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </figure>
         ) : (
-          <div className="relative flex aspect-4/3 sm:aspect-video md:aspect-21/9 w-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
+          <div className="relative flex aspect-4/3 sm:aspect-video md:aspect-21/9 w-full items-center justify-center bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
             <Newspaper className="size-16 sm:size-20 md:size-24 text-muted-foreground/20" />
           </div>
         )}
