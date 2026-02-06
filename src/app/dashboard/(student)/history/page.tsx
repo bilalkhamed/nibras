@@ -20,13 +20,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { BookOpen, PlayCircle, ClipboardList, HelpCircle } from 'lucide-react';
+import {
+  BookOpen,
+  PlayCircle,
+  ClipboardList,
+  HelpCircle,
+  CheckCheckIcon,
+  ClockIcon,
+} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AssignmentsTableSkeleton } from '@/components/skeletons';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { AttachmentsCell } from '@/features/assignments/components';
+import {
+  AttachmentsCell,
+  SubmissionViewerSheet,
+} from '@/features/assignments/components';
 import {
   getAllPrograms,
   getCalendarWeekByNumber,
@@ -35,6 +45,7 @@ import {
 import { CalendarWeekDTO } from '@/features/programs/types';
 import { CustomAlert } from '@/components/common/custom-alert';
 import { formatDate } from '@/lib/shared/utils';
+import { Button } from '@/components/ui/button';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
@@ -231,15 +242,46 @@ async function AssignmentsList({
 
   const assignmentStatusMap: Record<
     string,
-    { isCompleted: boolean; isOverdue: boolean; completedAt: Date | null }
+    {
+      isCompleted: boolean;
+      isOverdue: boolean;
+      completedAt: Date | null;
+      score: number | null;
+      comment: string | null;
+      fileKey: string | null;
+      fileUrl: string | null;
+      textSubmission: string | null;
+    }
   > = {};
-  studentAssignments.forEach((sa) => {
-    assignmentStatusMap[sa.assignmentId] = {
-      isCompleted: sa.isCompleted,
-      isOverdue: sa.isOverdue,
-      completedAt: sa.completedAt,
-    };
-  });
+
+  // Generate signed URLs for student submission files
+  await Promise.all(
+    studentAssignments.map(async (sa) => {
+      let fileUrl: string | null = null;
+      if (sa.fileKey) {
+        try {
+          const command = new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: sa.fileKey,
+          });
+          fileUrl = await getSignedUrl(S3, command, { expiresIn: 3600 });
+        } catch (error) {
+          console.error('Failed to generate signed URL for submission:', error);
+        }
+      }
+
+      assignmentStatusMap[sa.assignmentId] = {
+        isCompleted: sa.isCompleted,
+        isOverdue: sa.isOverdue,
+        completedAt: sa.completedAt,
+        score: sa.score,
+        comment: sa.comment,
+        fileKey: sa.fileKey,
+        fileUrl,
+        textSubmission: sa.textSubmission,
+      };
+    }),
+  );
 
   return (
     <div className="space-y-3">
@@ -263,9 +305,9 @@ async function AssignmentsList({
           </TableHeader>
           <TableBody>
             {assignmentsWithUrls.map((assignment) => {
-              const isCompleted =
-                assignmentStatusMap[assignment.id]?.isCompleted;
-              const isOverdue = assignmentStatusMap[assignment.id]?.isOverdue;
+              const studentAssignment = assignmentStatusMap[assignment.id];
+              const isCompleted = studentAssignment?.isCompleted;
+              const isOverdue = studentAssignment?.isOverdue;
               const statusLabel = isOverdue
                 ? 'مُدرك'
                 : isCompleted
@@ -280,9 +322,12 @@ async function AssignmentsList({
                   : isCurrentWeek
                     ? 'outline'
                     : 'destructive';
-              const gradeLabel = isCompleted
-                ? 'قيد المراجعة'
-                : 'لم يتم التقييم';
+              const GradeIcon = studentAssignment?.score
+                ? CheckCheckIcon
+                : ClockIcon;
+              const gradeLabel = studentAssignment?.score
+                ? 'تم التقييم'
+                : 'قيد المراجعة';
 
               return (
                 <TableRow
@@ -314,18 +359,46 @@ async function AssignmentsList({
                     <div className="flex items-start">
                       <div className="flex flex-col items-center">
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
-                        {assignmentStatusMap[assignment.id]?.completedAt && (
+                        {studentAssignment?.completedAt && (
                           <div className="text-xs text-muted-foreground mt-1">
-                            {formatDate(
-                              assignmentStatusMap[assignment.id]!.completedAt!,
-                            )}
+                            {formatDate(studentAssignment.completedAt)}
                           </div>
                         )}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground/80 text-sm">
-                    {gradeLabel}
+                  <TableCell className="text-foreground/80 text-sm flex-col items-center justify-start">
+                    {assignment.allowFileSubmission ||
+                    assignment.allowTextSubmission ? (
+                      <SubmissionViewerSheet
+                        allowFileSubmission={assignment.allowFileSubmission}
+                        allowTextSubmission={assignment.allowTextSubmission}
+                        fileKey={studentAssignment?.fileKey || null}
+                        fileUrl={studentAssignment?.fileUrl || null}
+                        textSubmission={
+                          studentAssignment?.textSubmission || null
+                        }
+                        currentScore={studentAssignment?.score || null}
+                        currentComment={studentAssignment?.comment || null}
+                        assignmentId={assignment.id}
+                        assignmentName={assignment.name}
+                        studentId={auth.userId}
+                        studentName={auth.firstName + ' ' + auth.lastName}
+                        canEditGrade={false}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!studentAssignment}
+                          className="gap-1"
+                        >
+                          <GradeIcon className="h-4 w-4" />
+                          {gradeLabel}
+                        </Button>
+                      </SubmissionViewerSheet>
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                   <TableCell>
                     <AttachmentsCell attachments={assignment.attachments} />
