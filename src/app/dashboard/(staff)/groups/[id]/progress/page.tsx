@@ -144,6 +144,8 @@ async function StudentsAssignmentsList({
       fileKey: sa.fileKey,
       fileUrl: sa.fileUrl,
       textSubmission: sa.textSubmission,
+      score: sa.score,
+      comment: sa.comment,
     };
     return acc;
   }, {});

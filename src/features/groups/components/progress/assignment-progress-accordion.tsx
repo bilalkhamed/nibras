@@ -12,7 +12,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { AlertTriangle, CheckCircle2, Clock3, Eye } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCheckIcon,
+  CheckCircle2,
+  Clock3,
+  Eye,
+} from 'lucide-react';
 import { toArabicNumerals, formatDate, cn } from '@/lib/shared/utils';
 import { useProgressContext } from './progress-context';
 import React from 'react';
@@ -177,10 +183,20 @@ export function AssignmentProgressAccordion({
                             const assignmentDetails = assignments.find(
                               (a) => a.id === assignment.id,
                             );
+                            if (
+                              !(
+                                assignmentDetails?.allowFileSubmission ||
+                                assignmentDetails?.allowTextSubmission
+                              )
+                            ) {
+                              return null;
+                            }
                             return (
                               <SubmissionViewerSheet
                                 studentName={student.name}
+                                studentId={student.id}
                                 assignmentName={assignment.name}
+                                assignmentId={assignment.id}
                                 textSubmission={status.textSubmission || null}
                                 fileKey={status.fileKey || null}
                                 fileUrl={status.fileUrl || null}
@@ -192,14 +208,25 @@ export function AssignmentProgressAccordion({
                                   assignmentDetails?.allowFileSubmission ??
                                   false
                                 }
+                                currentScore={status.score}
+                                currentComment={status.comment}
                               >
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   className="h-8 gap-1.5"
                                 >
-                                  <Eye className="h-3.5 w-3.5" />
-                                  عرض التسليمات
+                                  {status.score ? (
+                                    <>
+                                      <CheckCheckIcon className="h-3.5 w-3.5" />
+                                      تم التقييم
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Eye className="h-3.5 w-3.5" />
+                                      عرض التسليمات
+                                    </>
+                                  )}
                                 </Button>
                               </SubmissionViewerSheet>
                             );
