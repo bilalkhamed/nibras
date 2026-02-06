@@ -9,3 +9,4 @@ export { updateStudentAssignmentAction } from './update-completion';
 export { deleteAssignmentAction } from './delete';
 export { updateAssignmentAction } from './update';
 export { createAssignmentAction } from './create';
+export { addGradeAction } from './add-grade';

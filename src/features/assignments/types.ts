@@ -150,9 +150,12 @@ export type UpdateStudentAssignmentInputDal = {
   studentId: string;
   data: {
     isCompleted: boolean;
-    markedById: string;
+    markedById?: string;
+    gradedById?: string;
     textSubmission?: string | null;
     fileKey?: string | null;
+    score?: number | null;
+    comment?: string | null;
   };
 };
 
@@ -164,6 +167,8 @@ export type UpdateStudentAssignmentInput = {
     markedById?: string;
     textSubmission?: string | null;
     fileKey?: string | null;
+    score?: number | null;
+    comment?: string | null;
   };
 };
 

@@ -26,6 +26,12 @@ import type {
 } from '../types';
 import { createAssignmentSchema, updateAssignmentSchema } from '../types';
 import { updateAssignment } from '../dal/mutations';
+import {
+  ADMIN_ROLE,
+  COHORT_MANAGER_ROLE,
+  GROUP_MANAGER_ROLE,
+  SUPERVISOR_ROLE,
+} from '@/types/types';
 
 // ============================================================================
 // Student Assignment Mutations
@@ -81,6 +87,52 @@ export async function updateStudentAssignment({
           markedById: userId,
         },
       });
+
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true },
+  );
+}
+
+export async function addGradingToStudentAssignment({
+  assignmentId,
+  studentId,
+  data,
+}: {
+  assignmentId: string;
+  studentId: string;
+  data: { grade: number; comment?: string };
+}): Promise<ServiceReturn<StudentAssignmentDTO>> {
+  return runServiceOperation(
+    async (session) => {
+      const role = session!.role;
+
+      if (
+        ![
+          ADMIN_ROLE,
+          SUPERVISOR_ROLE,
+          COHORT_MANAGER_ROLE,
+          GROUP_MANAGER_ROLE,
+        ].includes(role)
+      ) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await upsertStudentAssignment({
+        assignmentId,
+        studentId,
+        data: {
+          score: data.grade,
+          comment: data.comment,
+          gradedById: session!.userId,
+          isCompleted: true,
+        },
+      });
+
+      console.log(dalResult);
 
       return mapDalToService(dalResult);
     },

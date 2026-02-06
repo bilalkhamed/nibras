@@ -18,6 +18,7 @@ import type {
   UpdateStudentAssignmentInputDal,
 } from '../types';
 import { revalidateTag } from 'next/cache';
+import { DalReturn } from '@/lib/server/dal/types';
 
 // ============================================================================
 // Student Assignment Mutations
@@ -37,7 +38,7 @@ export async function upsertStudentAssignment({
   assignmentId,
   studentId,
   data,
-}: UpdateStudentAssignmentInputDal) {
+}: UpdateStudentAssignmentInputDal): Promise<DalReturn<StudentAssignmentDTO>> {
   return runDalOperation<StudentAssignmentDTO>(async () => {
     return prisma.studentAssignment.upsert({
       where: {
@@ -45,8 +46,10 @@ export async function upsertStudentAssignment({
           studentId,
           assignmentId,
         },
-        fileKey: null,
-        textSubmission: null,
+        ...(data.isCompleted === false && {
+          fileKey: null,
+          textSubmission: null,
+        }),
       },
       create: {
         studentId,
@@ -54,15 +57,19 @@ export async function upsertStudentAssignment({
         isCompleted: data.isCompleted,
         completedAt: data.isCompleted ? new Date() : null,
         markedById: data.markedById,
+        gradedById: data.markedById,
         textSubmission: data.textSubmission || null,
         fileKey: data.fileKey || null,
       },
       update: {
         isCompleted: data.isCompleted,
         completedAt: data.isCompleted ? new Date() : null,
-        markedById: data.markedById,
-        textSubmission: data.textSubmission || null,
-        fileKey: data.fileKey || null,
+        ...(data.markedById && { markedById: data.markedById }),
+        ...(data.textSubmission && { textSubmission: data.textSubmission }),
+        ...(data.fileKey && { fileKey: data.fileKey }),
+        ...(data.gradedById && { gradedById: data.gradedById }),
+        ...(data.score && { score: data.score }),
+        ...(data.comment && { comment: data.comment }),
       },
     });
   });

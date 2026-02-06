@@ -244,6 +244,8 @@ export type AssignmentStatus = {
   fileKey?: string | null;
   fileUrl?: string | null;
   textSubmission?: string | null;
+  score?: number | null;
+  comment?: string | null;
 };
 
 export type StudentProgressStatus = 'warning' | 'pending' | 'done';
