@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Plus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
 import { createProgramAction } from '@/features/programs/actions';
@@ -24,6 +24,8 @@ import {
   createProgramSchema,
   type CreateProgramData,
 } from '@/features/programs/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldLabel } from '@/components/ui/field';
 
 export default function CreateProgramDialog({
   buttonVariant = 'primary',
@@ -35,13 +37,14 @@ export default function CreateProgramDialog({
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateProgramData>({
     mode: 'onTouched',
     resolver: zodResolver(createProgramSchema),
   });
 
-  const { name, description } = watch();
+  const { name, description, isSupervisorsOnly } = watch();
 
   const [open, setOpen] = useState(false);
 
@@ -86,9 +89,9 @@ export default function CreateProgramDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 mt-3">
             {/* Name Field */}
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="program-name" className="text-right">
                 اسم البرنامج
               </Label>
@@ -103,7 +106,7 @@ export default function CreateProgramDialog({
             </div>
 
             {/* Description Field */}
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="program-description" className="text-right">
                 الوصف <span className="text-muted-foreground">(اختياري)</span>
               </Label>
@@ -116,6 +119,25 @@ export default function CreateProgramDialog({
               />
             </div>
 
+            <div className="gap-2">
+              <Field orientation="horizontal">
+                <Controller
+                  control={control}
+                  name="isSupervisorsOnly"
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isSupervisorsOnly"
+                      className="cursor-pointer"
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <FieldLabel htmlFor="isSupervisorsOnly" className="mb-0">
+                  برنامج مشرفات
+                </FieldLabel>
+              </Field>
+            </div>
+
             {/* Confirmation Message */}
             {name && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-right">
@@ -123,6 +145,8 @@ export default function CreateProgramDialog({
                   <span className="font-semibold">سيتم إضافة:</span>
                   <br />
                   <span className="font-medium text-primary">{name}</span>
+                  <span>{isSupervisorsOnly ? ' (برنامج مشرفات)' : ''}</span>
+                  {}
                   {description && (
                     <>
                       <br />

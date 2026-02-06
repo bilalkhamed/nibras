@@ -11,6 +11,7 @@ import { z } from 'zod';
 export const createProgramSchema = z.object({
   name: z.string().min(1, 'يرجى إدخال اسم البرنامج'),
   description: z.string().optional(),
+  isSupervisorsOnly: z.boolean(),
 });
 
 // ============================================================================

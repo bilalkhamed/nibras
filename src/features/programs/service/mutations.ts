@@ -43,8 +43,9 @@ export async function createProgram(
       }
 
       const dalResult = await insertProgram({
-        name: data.name,
-        description: data.description,
+        name: data.name.trim(),
+        description: data.description?.trim(),
+        isSupervisorsOnly: data.isSupervisorsOnly,
       });
 
       if (!dalResult.success) {

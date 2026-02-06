@@ -26,6 +26,7 @@ import { CalendarWeekInput } from '../types';
 export async function insertProgram(data: {
   name: string;
   description?: string;
+  isSupervisorsOnly: boolean;
 }): Promise<DalReturn<{ id: string; name: string; slug: string }>> {
   return runDalOperation(async () => {
     const result = await prisma.program.create({
@@ -33,6 +34,7 @@ export async function insertProgram(data: {
         name: data.name.trim(),
         description: data.description?.trim() || null,
         slug: data.name,
+        isSupervisorOnly: data.isSupervisorsOnly,
       },
       select: {
         id: true,
