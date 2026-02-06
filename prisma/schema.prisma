@@ -217,6 +217,8 @@ model Program {
   description String?
   slug        String  @unique
 
+  isSupervisorOnly Boolean @default(false) @map("is_supervisor_only")
+
   assignments Assignment[]
 
   createdAt DateTime @default(now()) @map("created_at")
