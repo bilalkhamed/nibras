@@ -38,5 +38,12 @@ async function WeekNavigatorContainer() {
     );
   }
 
-  return <WeekNavigator weeks={mappedWeeks} />;
+  return (
+    <WeekNavigator
+      weeks={mappedWeeks}
+      currentWeekNumber={
+        weeksResult.data[weeksResult.data.length - 1].week.number
+      }
+    />
+  );
 }

@@ -55,11 +55,7 @@ export default async function StudentHistoryPage({
 }: {
   searchParams: { week?: string };
 }) {
-  const week = (await searchParams).week || 1;
-
-  if (isNaN(Number(week)) || Number(week) < 1) {
-    redirect('/dashboard/history?week=1');
-  }
+  const weekNumber = (await searchParams).week || undefined;
 
   return (
     <div className="space-y-6">
@@ -68,11 +64,14 @@ export default async function StudentHistoryPage({
           <Skeleton className="h-32 w-full  animate-pulse rounded-2xl bg-muted" />
         }
       >
-        <WeekProvider weekNumber={Number(week)}>
+        <WeekProvider weekNumber={Number(weekNumber)}>
           {(week, isCurrentWeek) => (
             <div>
               <WeekInfo week={week} />
-              <Suspense fallback={<AssignmentsTableSkeleton />}>
+              <Suspense
+                fallback={<AssignmentsTableSkeleton />}
+                key={weekNumber}
+              >
                 <AssignmentsList
                   weekId={week.week.id}
                   weekEndDate={week.endDate}
@@ -97,9 +96,18 @@ async function WeekProvider({
 }) {
   const currentWeekResult = await getCurrentWeek();
 
+  if (!currentWeekResult.success) {
+    return (
+      <CustomAlert
+        variant="destructive"
+        title="عذراً، حدث خطأ ما."
+        description="فشل في جلب بيانات الأسبوع الحالي من الخادم."
+      />
+    );
+  }
+
   // If the requested week is in the future, show no data
   if (
-    currentWeekResult.success &&
     currentWeekResult.data &&
     weekNumber > currentWeekResult.data.week.number
   ) {
@@ -108,6 +116,10 @@ async function WeekProvider({
         لا توجد معلومات متاحة لهذا الأسبوع
       </div>
     );
+  }
+
+  if (isNaN(weekNumber) || weekNumber < 1) {
+    redirect(`/dashboard/history?week=${currentWeekResult.data?.week.number}`);
   }
 
   const weekResult = await getCalendarWeekByNumber(weekNumber);
@@ -254,7 +266,6 @@ async function AssignmentsList({
               const isCompleted =
                 assignmentStatusMap[assignment.id]?.isCompleted;
               const isOverdue = assignmentStatusMap[assignment.id]?.isOverdue;
-              console.log(assignment, isCompleted, isOverdue);
               const statusLabel = isOverdue
                 ? 'مُدرك'
                 : isCompleted
