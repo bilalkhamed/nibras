@@ -6,3 +6,4 @@
 
 export { AssignmentsTable } from './assignments-table';
 export { AttachmentsCell } from './attachments-cell';
+export { SubmissionViewerSheet } from './submission-viewer-sheet';

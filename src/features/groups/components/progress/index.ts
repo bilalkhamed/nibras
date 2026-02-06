@@ -17,4 +17,3 @@ export {
 export { ViewModeToggle } from './view-mode-toggle';
 export { CompletionBadgeOptimistic } from './completion-badge-optimistic';
 export { ProgressProvider, useProgressContext } from './progress-context';
-export { SubmissionViewerSheet } from './submission-viewer-sheet';

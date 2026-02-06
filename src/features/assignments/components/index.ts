@@ -30,4 +30,8 @@ export { FileUploader, FilesCardsList, LinkManager } from './admin';
 export type { AttachedFile, UploadingFile, FileCardItem } from './admin';
 
 // Shared components
-export { AssignmentsTable, AttachmentsCell } from './shared';
+export {
+  AssignmentsTable,
+  AttachmentsCell,
+  SubmissionViewerSheet,
+} from './shared';

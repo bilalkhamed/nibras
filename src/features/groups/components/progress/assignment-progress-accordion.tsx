@@ -23,7 +23,7 @@ import { toArabicNumerals, formatDate, cn } from '@/lib/shared/utils';
 import { useProgressContext } from './progress-context';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { SubmissionViewerSheet } from './submission-viewer-sheet';
+import { SubmissionViewerSheet } from '@/features/assignments/components';
 
 export const ASSIGNMENT_STATUS_CONFIG: Record<
   AssignmentProgressStatus,

@@ -54,6 +54,8 @@ type SubmissionViewerSheetProps = {
   currentScore?: number | null;
   /** Current comment from database */
   currentComment?: string | null;
+  /** Whether the user can edit the grade and comment */
+  canEditGrade?: boolean;
   /** Trigger button element */
   children: React.ReactNode;
 };
@@ -78,6 +80,7 @@ export function SubmissionViewerSheet({
   allowFileSubmission,
   currentScore,
   currentComment,
+  canEditGrade = true,
   children,
 }: SubmissionViewerSheetProps) {
   const [open, setOpen] = useState(false);
@@ -97,16 +100,17 @@ export function SubmissionViewerSheet({
   });
 
   const score = watch('score');
-  const comment = watch('comment');
 
   const hasTextSubmission = textSubmission && textSubmission.trim().length > 0;
   const hasFileSubmission = fileKey && fileUrl;
   const hasSubmission = hasTextSubmission || hasFileSubmission;
 
   const isScoreMissing = !score || score.trim() === '';
-  const canSave = isDirty && !isScoreMissing;
+  const canSave = canEditGrade && isDirty && !isScoreMissing;
 
   const onSubmit = async (data: GradeFormData) => {
+    if (!canEditGrade) return;
+
     setIsSaving(true);
     try {
       const result = await addGradeAction({
@@ -220,68 +224,129 @@ export function SubmissionViewerSheet({
 
             {/* Comment Section */}
             <Separator />
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <h3 className="text-sm font-semibold text-right">
-                التقييم والملاحظات
-              </h3>
+            {canEditGrade ? (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <h3 className="text-sm font-semibold text-right">
+                  التقييم والملاحظات
+                </h3>
 
-              <div className="space-y-2">
-                <Label htmlFor="score" className="text-right">
-                  الدرجة
-                  <span className="text-destructive mr-1">*</span>
-                </Label>
-                <Input
-                  id="score"
-                  type="number"
-                  placeholder="أدخلي الدرجة"
-                  {...register('score', { required: true })}
-                  className="text-right"
-                  dir="rtl"
-                  min={0}
-                  max={100}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="score" className="text-right">
+                    الدرجة
+                    <span className="text-destructive mr-1">*</span>
+                  </Label>
+                  <Input
+                    id="score"
+                    type="number"
+                    placeholder="أدخلي الدرجة"
+                    {...register('score', { required: true })}
+                    className="text-right"
+                    dir="rtl"
+                    min={0}
+                    max={100}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="comment" className="text-right">
+                    ملاحظات (اختياري)
+                  </Label>
+                  <Textarea
+                    id="comment"
+                    placeholder="اكتبي ملاحظاتك هنا..."
+                    {...register('comment')}
+                    className="min-h-25 resize-none text-right"
+                    dir="rtl"
+                  />
+                </div>
+
+                {/* Hidden submit for keyboard enter */}
+                <button type="submit" className="sr-only" aria-hidden="true" />
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-right">
+                  التقييم والملاحظات
+                </h3>
+
+                {/* Score Display for Students */}
+                {currentScore !== null && currentScore !== undefined ? (
+                  <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-linear-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-800">
+                    <div className="text-6xl">
+                      {currentScore > 8 ? '⭐' : currentScore > 5 ? '😊' : '😔'}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-bold text-amber-600 dark:text-amber-400">
+                        {toArabicNumerals(currentScore)}
+                      </span>
+                      <span className="text-2xl text-amber-600/70 dark:text-amber-400/70">
+                        / {toArabicNumerals(100)}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                      {currentScore > 8
+                        ? 'أحسنتِ! عمل ممتاز! 🎉'
+                        : currentScore > 5
+                          ? 'عمل جيد! استمري 💪'
+                          : 'يمكنك التحسن المرة القادمة 🌟'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center rounded-xl bg-muted/30 border border-dashed border-muted-foreground/30">
+                    <p className="text-sm text-muted-foreground">
+                      لم يتم تقييم هذه المهمة بعد
+                    </p>
+                  </div>
+                )}
+
+                {/* Comment Display for Students */}
+                {currentComment && currentComment.trim().length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-right flex items-center gap-2">
+                      <span>💬</span>
+                      <span>ملاحظات المشرفة</span>
+                    </Label>
+                    <div className="p-4 rounded-xl bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 dark:border-purple-800">
+                      <p className="text-sm whitespace-pre-wrap text-right leading-relaxed text-purple-900 dark:text-purple-100">
+                        {currentComment}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="comment" className="text-right">
-                  ملاحظات (اختياري)
-                </Label>
-                <Textarea
-                  id="comment"
-                  placeholder="اكتبي ملاحظاتك هنا..."
-                  {...register('comment')}
-                  className="min-h-25 resize-none text-right"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Hidden submit for keyboard enter */}
-              <button type="submit" className="sr-only" aria-hidden="true" />
-            </form>
+            )}
           </div>
         </ScrollArea>
 
-        <SheetFooter className="gap-2 px-3 py-3 shrink-0 border-t grid grid-cols-2">
+        <SheetFooter
+          className={`gap-2 px-3 py-3 shrink-0 border-t ${canEditGrade ? 'grid grid-cols-2' : ''}`}
+        >
           <SheetClose asChild>
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              className={canEditGrade ? '' : 'w-full'}
+            >
               <X className="h-4 w-4 ml-2" />
               إغلاق
             </Button>
           </SheetClose>
-          <Button
-            onClick={handleSubmit(onSubmit)}
-            disabled={!canSave || isSaving}
-            className="gap-2"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                جاري الحفظ...
-              </>
-            ) : (
-              'حفظ التقييم'
-            )}
-          </Button>
+          {canEditGrade && (
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              disabled={!canSave || isSaving}
+              className="gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                'حفظ التقييم'
+              )}
+            </Button>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>
