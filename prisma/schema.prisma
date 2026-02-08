@@ -29,6 +29,11 @@ enum CohortStatus {
   archived
 }
 
+enum SupervisorStatus {
+  in_training
+  trained
+}
+
 model User {
   id             String     @id @default(cuid(2))
   firstName      String
@@ -45,7 +50,8 @@ model User {
   groupsAsStudent GroupStudent[] @relation("StudentGroups")
 
   supervisedGroupId String?
-  supervisedGroup   Group?  @relation("GroupSupervisors", fields: [supervisedGroupId], references: [id])
+  supervisedGroup   Group?            @relation("GroupSupervisors", fields: [supervisedGroupId], references: [id])
+  supervisorStatus  SupervisorStatus?
 
   managedGroups  GroupManager[]  @relation("UserGroupManagers")
   managedCohorts CohortManager[] @relation("UserCohortManagers")
