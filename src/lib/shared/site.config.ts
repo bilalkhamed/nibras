@@ -97,6 +97,12 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: BookOpen,
       canView: (session) => canAccessStudentAssignments(session),
     },
+    {
+      label: 'مساري',
+      href: '/dashboard/history',
+      icon: FolderClock,
+      canView: (session) => canAccessStudentAssignments(session),
+    },
   ],
   student: [
     { label: 'مجموعتي', href: '/dashboard/my-group', icon: UsersRound },
