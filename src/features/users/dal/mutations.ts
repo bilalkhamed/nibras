@@ -61,6 +61,45 @@ export async function createUserWithInvite(
 // Update Operations
 // ============================================================================
 
+export async function updateUser({
+  data,
+  where,
+}: {
+  data: Prisma.UserUpdateInput;
+  where: Prisma.UserWhereUniqueInput;
+}) {
+  return runDalOperation(async () => {
+    const updatedUser = await prisma.user.update({
+      where,
+      data,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        cohortId: true,
+      },
+    });
+    return updatedUser;
+  });
+}
+
+export async function updateManyUsers({
+  data,
+  where,
+}: {
+  data: Prisma.UserUpdateManyArgs['data'];
+  where: Prisma.UserWhereInput;
+}) {
+  return runDalOperation(async () => {
+    const updatedUsers = await prisma.user.updateMany({
+      where,
+      data,
+    });
+    return updatedUsers;
+  });
+}
+
 // TODO: Add update user functions as needed
 
 // ============================================================================
