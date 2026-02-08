@@ -47,12 +47,48 @@ export async function getProgramBySlug(
   );
 }
 
-export async function getAllPrograms(): Promise<ServiceReturn<Program[]>> {
+export async function getAllPrograms({
+  filter,
+}: {
+  filter: 'all' | 'student' | 'supervisor';
+}): Promise<ServiceReturn<Program[]>> {
   return runServiceOperation(
-    async () => {
-      const dalResult = await findManyPrograms();
+    async (session) => {
+      if (!session) {
+        return {
+          success: false,
+          error: { type: 'unauthorized', statusCode: 401 },
+        };
+      }
 
-      return mapDalToService(dalResult);
+      const dalResult = await findManyPrograms({ filter });
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      const { role, supervisorStatus } = session;
+
+      console.log(
+        role === 'admin' ||
+          role === 'cohort_manager' ||
+          (role === 'supervisor' && supervisorStatus === 'in_training'),
+      );
+
+      if (
+        role === 'admin' ||
+        role === 'cohort_manager' ||
+        (role === 'supervisor' && supervisorStatus === 'in_training')
+      ) {
+        return mapDalToService(dalResult);
+      }
+
+      return mapDalToService({
+        ...dalResult,
+        data: dalResult.data.filter(
+          (program) => program.isSupervisorOnly !== true,
+        ),
+      });
     },
     {
       requireAuth: true,

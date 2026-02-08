@@ -57,6 +57,7 @@ export default async function ProgramWeekPage({
     weekId: weekData.id,
     programSlug: slug,
     withAttachments: true,
+    programFilter: 'all',
   });
 
   // Handle service errors

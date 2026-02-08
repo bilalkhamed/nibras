@@ -45,8 +45,12 @@ export default async function StudentAssignmentsPage({}: {
       weekId: currentWeek.week.id,
       withAttachments: true,
       programSlug: session.role === SUPERVISOR_ROLE ? 'training' : undefined,
+      programFilter:
+        session.role === SUPERVISOR_ROLE ? 'supervisor' : 'student',
     }),
-    getAllPrograms(),
+    getAllPrograms({
+      filter: session.role === SUPERVISOR_ROLE ? 'supervisor' : 'student',
+    }),
   ]);
 
   // Handle service errors

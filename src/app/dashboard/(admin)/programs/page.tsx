@@ -15,7 +15,6 @@ import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
 import { getAllPrograms } from '@/features/programs/service';
 import { CustomAlert } from '@/components/common/custom-alert';
-import { Program } from '@prisma/client';
 
 export default async function ProgramsPage() {
   return (
@@ -41,7 +40,7 @@ export default async function ProgramsPage() {
 
 async function Wrapper() {
   // await connection();
-  const result = await getAllPrograms();
+  const result = await getAllPrograms({ filter: 'all' });
 
   if (!result.success) {
     return (

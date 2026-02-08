@@ -49,9 +49,15 @@ export async function getWeekAssignments(
 ): Promise<ServiceReturn<AssignmentWithRawAttachmentsDTO[] | AssignmentDTO[]>> {
   return runServiceOperation(
     async (session) => {
+      if (!session) {
+        return {
+          success: false,
+          error: { type: 'unauthorized', statusCode: 401 },
+        };
+      }
       // Students can only access their own level
-      if (session!.role === 'student') {
-        if (session!.currentLevelId !== options.levelId) {
+      if (session.role === 'student') {
+        if (session.currentLevelId !== options.levelId) {
           return {
             success: false,
             error: { type: 'forbidden', statusCode: 403 },

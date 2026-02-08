@@ -49,6 +49,7 @@ export async function findWeekAssignments({
   levelId,
   weekId,
   programSlug,
+  programFilter,
   withAttachments = true,
 }: WeekAssignmentsOptions): Promise<AssignmentWithRawAttachmentsDTO[]> {
   'use cache';
@@ -74,6 +75,11 @@ export async function findWeekAssignments({
   const assignments = await prisma.assignment.findMany({
     where: {
       programId: program?.id,
+      ...(programFilter === 'student'
+        ? { program: { isSupervisorOnly: false } }
+        : programFilter === 'supervisor'
+          ? { program: { isSupervisorOnly: true } }
+          : {}),
       levelId: levelId || undefined,
       weekId: weekId,
     },

@@ -106,13 +106,6 @@ export function SubmissionSheet({
     }
   };
 
-  console.log(
-    'Uploaded File Key:',
-    uploadedFileKey,
-    'Default File Key:',
-    defaultValues.fileKey,
-  );
-
   const canSubmit =
     (allowTextSubmission && textContent.trim()) ||
     (allowFileSubmission && uploadedFileKey !== null);

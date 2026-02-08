@@ -21,10 +21,19 @@ export async function findProgramBySlug(
   });
 }
 
-export async function findManyPrograms(): Promise<DalReturn<Program[]>> {
+export async function findManyPrograms({
+  filter,
+}: {
+  filter: 'all' | 'student' | 'supervisor';
+}): Promise<DalReturn<Program[]>> {
   return runDalOperation(async () => {
     cacheTag('programs');
-    return await prisma.program.findMany();
+    return await prisma.program.findMany({
+      where: {
+        ...(filter === 'student' ? { isSupervisorOnly: false } : {}),
+        ...(filter === 'supervisor' ? { isSupervisorOnly: true } : {}),
+      },
+    });
   });
 }
 

@@ -91,6 +91,7 @@ async function StudentsAssignmentsList({
     levelId: group.cohort.currentLevelId,
     weekId: weekId,
     withAttachments: false,
+    programFilter: 'student',
   });
 
   // Handle service errors

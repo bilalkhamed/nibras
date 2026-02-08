@@ -130,6 +130,7 @@ export type WeekAssignmentsOptions = {
   weekId: string;
   programSlug?: string;
   withAttachments?: boolean;
+  programFilter: 'student' | 'supervisor' | 'all';
 };
 
 // ============================================================================

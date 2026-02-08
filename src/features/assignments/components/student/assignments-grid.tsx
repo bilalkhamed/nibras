@@ -63,9 +63,9 @@ export function AssignmentsGrid({
   // Merge completion status and apply filters
   const processedAssignments = useMemo(() => {
     // Merge with completion status
-    const merged = assignmentsByProgram.map((a) => ({
+    const mappedAssignments = assignmentsByProgram.map((a) => ({
       ...a,
-      program: programs.find((p) => p.id === a.programId)!,
+      program: programs.find((p) => p.id === a.programId),
       isCompleted: studentAssignments.some(
         (p) => p.assignmentId === a.id && p.completedAt !== null,
       ),
@@ -74,6 +74,14 @@ export function AssignmentsGrid({
         ?.textSubmission,
       fileUrl: studentAssignments.find((p) => p.assignmentId === a.id)?.fileUrl,
     }));
+
+    const merged = mappedAssignments.filter(
+      (
+        a,
+      ): a is (typeof mappedAssignments)[0] & {
+        program: NonNullable<(typeof mappedAssignments)[0]['program']>;
+      } => a.program !== undefined,
+    );
 
     // Apply status filter
     let filtered = merged;

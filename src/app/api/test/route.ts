@@ -1,41 +1,29 @@
-import { createArticle } from '@/features/articles/service';
-import { getArticles } from '@/features/articles/service/queries';
-import { ArticleData } from '@/features/articles/types';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { findWeekAssignments } from '@/features/assignments/dal'; // Update this path to where your function is
 
-export async function GET(request: NextRequest) {
-  const articles = await getArticles({
-    category: 'undefined',
-    isPublished: undefined,
-  });
+export async function GET() {
+  console.log('🚧 STARTING MANUAL TEST 🚧');
 
-  if (!articles.success) {
+  try {
+    const assignments = await findWeekAssignments({
+      levelId: null, // Replace with a real ID from your DB
+      weekId: 'kz6j4sz8y68zxrz006edqors', // Replace with a real ID
+      programSlug: undefined, // or 'some-slug'
+      programFilter: 'supervisor',
+    });
+
+    console.log('✅ RESULT:', JSON.stringify(assignments, null, 2));
+
+    return NextResponse.json({
+      success: true,
+      count: assignments.length,
+      data: assignments,
+    });
+  } catch (error) {
+    console.error('❌ ERROR:', error);
     return NextResponse.json(
-      { success: false, error: articles.error.type },
-      { status: articles.error.statusCode },
+      { success: false, error: String(error) },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json({ success: true, data: articles.data });
-}
-
-export async function POST(request: NextRequest) {
-  const articleDummyData: Omit<ArticleData, 'authorId'> = {
-    title: 'Sample Article Title',
-    slug: 'sample-article-title',
-    content: 'This is the content of the sample article.',
-    isPublished: true,
-    category: 'GENERAL',
-  };
-
-  const articleRes = await createArticle(articleDummyData);
-
-  if (!articleRes.success) {
-    return NextResponse.json(
-      { success: false, error: articleRes.error.type },
-      { status: articleRes.error.statusCode },
-    );
-  }
-
-  return NextResponse.json({ success: true, data: articleRes.data });
 }

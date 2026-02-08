@@ -46,6 +46,7 @@ import { CalendarWeekDTO } from '@/features/programs/types';
 import { CustomAlert } from '@/components/common/custom-alert';
 import { formatDate } from '@/lib/shared/utils';
 import { Button } from '@/components/ui/button';
+import { SUPERVISOR_ROLE } from '@/types/types';
 
 const ASSIGNMENT_TYPE_LABELS: Record<AssignmentTypes, string> = {
   lecture: 'محاضرة',
@@ -174,13 +175,14 @@ async function AssignmentsList({
   weekEndDate: Date;
   isCurrentWeek: boolean;
 }) {
-  const auth = await getAuthSession();
-  if (!auth) return null;
+  const session = await getAuthSession();
+  if (!session) return null;
 
   const assignmentsResult = await getWeekAssignments({
-    levelId: auth.currentLevelId!,
+    levelId: session.currentLevelId,
     weekId: weekId,
     withAttachments: true,
+    programFilter: session.role === SUPERVISOR_ROLE ? 'supervisor' : 'student',
   });
 
   // Handle service errors
@@ -209,7 +211,9 @@ async function AssignmentsList({
     }),
   );
 
-  const programsResult = await getAllPrograms();
+  const programsResult = await getAllPrograms({
+    filter: session.role === SUPERVISOR_ROLE ? 'supervisor' : 'student',
+  });
   if (!programsResult.success) {
     return (
       <CustomAlert
@@ -230,7 +234,7 @@ async function AssignmentsList({
   );
 
   const studentAssignmentsResult = await getStudentAssignments(
-    auth.userId,
+    session.userId,
     assignmentsResult.data.map((as) => as.id),
     weekEndDate,
   );
@@ -382,8 +386,8 @@ async function AssignmentsList({
                         currentComment={studentAssignment?.comment || null}
                         assignmentId={assignment.id}
                         assignmentName={assignment.name}
-                        studentId={auth.userId}
-                        studentName={auth.firstName + ' ' + auth.lastName}
+                        studentId={session.userId}
+                        studentName={session.firstName + ' ' + session.lastName}
                         canEditGrade={false}
                       >
                         <Button
