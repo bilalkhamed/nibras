@@ -73,10 +73,14 @@ export async function updateStudentAssignment({
 
       // Supervisors and admins can toggle for any student
       if (!targetStudentId) {
-        return {
-          success: false,
-          error: { type: 'bad-request', statusCode: 400 },
-        };
+        if (session?.supervisorStatus == 'in_training') {
+          targetStudentId = userId; // Allow supervisors in training to update their own assignments
+        } else {
+          return {
+            success: false,
+            error: { type: 'bad-request', statusCode: 400 },
+          };
+        }
       }
 
       const dalResult = await upsertStudentAssignment({
