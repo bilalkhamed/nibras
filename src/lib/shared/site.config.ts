@@ -68,6 +68,16 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: FolderKanban,
     },
     {
+      label: 'المشرفات',
+      href: '/dashboard/supervisors',
+      items: [
+        {
+          label: 'البرنامج التدريبي',
+          href: '/dashboard/supervisors/training',
+        },
+      ],
+    },
+    {
       label: 'إدارة التقويم',
       href: '/dashboard/calendar',
       icon: CalendarCog,
