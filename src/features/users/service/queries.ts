@@ -25,7 +25,6 @@ import {
   UserDTO,
   UserInviteStatusDTO,
   UserNameDTO,
-  UserWithCohortDTO,
   UserWithRoleAndCohortAndGroupDTO,
 } from '../types';
 import { Role } from '@prisma/client';
@@ -153,6 +152,7 @@ export type UserFilters = {
   role?: Role;
   groupStatus?: 'inactive';
   cohortId?: string;
+  isTraining?: boolean;
 };
 
 /** Get users with name only (for dropdowns) - admin only */

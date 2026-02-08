@@ -159,6 +159,7 @@ export type FindUsersWithFiltersParams = {
   role?: Role;
   groupStatus?: 'inactive';
   cohortId?: string;
+  isTraining?: boolean;
 };
 
 /** Find users with name-only fields (for dropdowns) */
@@ -217,6 +218,7 @@ export async function findUsersBasic(
     // 1. Base Filter (Safe defaults)
     const where: Prisma.UserWhereInput = {
       role: filters?.role,
+      supervisorStatus: filters?.isTraining ? 'in_training' : undefined,
       NOT: { role: 'admin' },
       groupsAsStudent:
         filters?.groupStatus === 'inactive'
