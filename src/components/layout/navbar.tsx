@@ -18,19 +18,19 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-import { UserDTO } from '@/features/users/types';
+import { AccessTokenPayload } from '@/types/types';
 
 interface NavbarProps {
   extraRight?: React.ReactNode;
-  user: UserDTO | null;
+  session: AccessTokenPayload | null;
 }
 
-export function Navbar({ extraRight, user }: NavbarProps) {
+export function Navbar({ extraRight, session }: NavbarProps) {
   const pathname = usePathname();
   if (hideNavbarOnRoutes.some((route) => pathname?.startsWith(route)))
     return null;
 
-  const items = getVisibleNavItems(navItems, user);
+  const items = getVisibleNavItems(navItems, session);
 
   return (
     <header className="border-b border-border bg-card backdrop-blur-s">
@@ -69,7 +69,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
 
             {/* DESKTOP USER */}
             <div className="hidden md:flex items-center gap-3">
-              {user == null ? (
+              {session == null ? (
                 <>
                   <Button variant="ghost" asChild>
                     <Link href="/login">{labels.common.login}</Link>
@@ -79,7 +79,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
               ) : (
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <span>
-                    {user.firstName} {user.lastName}
+                    {session.firstName} {session.lastName}
                   </span>
                   <ThemeSwitch />
                 </div>
@@ -121,7 +121,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
 
                   <DropdownMenuSeparator />
 
-                  {user == null ? (
+                  {session == null ? (
                     <>
                       <DropdownMenuItem
                         asChild
@@ -146,7 +146,7 @@ export function Navbar({ extraRight, user }: NavbarProps) {
                   ) : (
                     <div className="flex items-center justify-between px-4 py-2 text-sm hover:bg-primary/10 rounded-md">
                       <span className="truncate">
-                        {user.firstName} {user.lastName}
+                        {session.firstName} {session.lastName}
                       </span>
                       <ThemeSwitch />
                     </div>
