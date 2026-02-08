@@ -39,10 +39,7 @@ export async function DashboardSidebar({}: React.ComponentProps<
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain
-          role={session.role}
-          supervisedGroupId={session.supervisedGroupId}
-        />
+        <NavMain session={session} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

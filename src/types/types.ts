@@ -105,6 +105,7 @@ export type SidebarNavItem = {
   icon?: React.ElementType;
   items?: Omit<SidebarNavItem, 'items' | 'icon' | 'isActive'>[];
   isActive?: boolean;
+  canView?: (user: AccessTokenPayload | null) => boolean;
 };
 
 export type AssignmentWithAttachments = Assignment & {
