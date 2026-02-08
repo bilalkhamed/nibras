@@ -11,6 +11,7 @@ import {
   CalendarCog,
   Newspaper,
 } from 'lucide-react';
+import { canAccessStudentAssignments } from '../permissions/helpers';
 
 export const navItems: NavItem[] = [
   {
@@ -79,6 +80,12 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       label: 'مجموعتي',
       href: '/dashboard/groups/[groupId]/info',
       icon: UsersRound,
+    },
+    {
+      label: 'مهامي',
+      href: '/dashboard/assignments',
+      icon: BookOpen,
+      canView: (session) => canAccessStudentAssignments(session),
     },
   ],
   student: [

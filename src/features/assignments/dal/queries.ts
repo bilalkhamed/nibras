@@ -74,7 +74,7 @@ export async function findWeekAssignments({
   const assignments = await prisma.assignment.findMany({
     where: {
       programId: program?.id,
-      levelId: levelId,
+      levelId: levelId || undefined,
       weekId: weekId,
     },
     orderBy: {

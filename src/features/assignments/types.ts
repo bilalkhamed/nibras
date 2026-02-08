@@ -126,7 +126,7 @@ export type StudentAssignmentWithMarkerDTO = StudentAssignment & {
  * Options for querying week assignments
  */
 export type WeekAssignmentsOptions = {
-  levelId: string;
+  levelId: string | null;
   weekId: string;
   programSlug?: string;
   withAttachments?: boolean;

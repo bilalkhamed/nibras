@@ -1,5 +1,5 @@
 import { requireRoles } from '@/lib/server/require-roles';
-import { STUDENT_ROLE } from '@/types/types';
+import { STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { notFound } from 'next/navigation';
 import { Program } from '@prisma/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -19,22 +19,21 @@ import {
 } from '@/features/assignments/service';
 import type { AssignmentWithAttachmentsDTO } from '@/features/assignments/types';
 import { getAllPrograms, getCurrentWeek } from '@/features/programs/service';
+import { canAccessStudentAssignments } from '@/lib/permissions/helpers';
 
-export default async function StudentAssignmentsPage({
-  children,
-}: {
+export default async function StudentAssignmentsPage({}: {
   children: React.ReactNode;
 }) {
-  const auth = await requireRoles(STUDENT_ROLE);
-  if (!auth) {
+  const session = await requireRoles(STUDENT_ROLE, SUPERVISOR_ROLE);
+  if (!session || !canAccessStudentAssignments(session)) {
     return notFound();
   }
 
-  const levelId = auth.currentLevelId;
+  const levelId = session.currentLevelId;
 
   const currentWeekResult = await getCurrentWeek();
 
-  if (!levelId || !currentWeekResult.success || !currentWeekResult.data) {
+  if (!currentWeekResult.success || !currentWeekResult.data) {
     return <NoData />;
   }
 
@@ -45,6 +44,7 @@ export default async function StudentAssignmentsPage({
       levelId,
       weekId: currentWeek.week.id,
       withAttachments: true,
+      programSlug: session.role === SUPERVISOR_ROLE ? 'training' : undefined,
     }),
     getAllPrograms(),
   ]);
@@ -105,7 +105,7 @@ export default async function StudentAssignmentsPage({
         <StudentAssignmentWrapper
           programs={programsResult.data}
           assignments={assignmentsWithUrls}
-          userId={auth.userId}
+          userId={session.userId}
         />
       </Suspense>
     </div>
