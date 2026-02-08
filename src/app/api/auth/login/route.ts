@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       : null,
     foundUser.supervisedGroupId,
     foundUser.managedCohorts[0]?.cohortId || null,
+    foundUser.supervisorStatus,
   );
   return NextResponse.json({ success: true }, { status: 200 });
 }

@@ -22,6 +22,7 @@ export async function setAccessToken(
   activeGroupId: string | null,
   supervisedGroupId: string | null,
   managedCohortId: string | null,
+  supervisorStatus: string | null,
 ) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
   const token = await signAccessToken({
@@ -35,6 +36,7 @@ export async function setAccessToken(
     activeGroupId,
     supervisedGroupId,
     managedCohortId,
+    supervisorStatus,
   });
   (await cookies()).set('accessToken', token, {
     httpOnly: true,
@@ -63,7 +65,7 @@ export async function verifyAccessToken(token: string | undefined = '') {
       algorithms: ['HS256'],
     });
     return payload as AccessTokenPayload;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

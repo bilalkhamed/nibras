@@ -93,6 +93,7 @@ export const userByEmailSelect = {
   firstName: true,
   lastName: true,
   supervisedGroupId: true,
+  supervisorStatus: true,
   groupsAsStudent: {
     where: { isActive: true },
   },

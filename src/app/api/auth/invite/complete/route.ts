@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     ) {
       throw new Error('missing values');
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: 'Invalid request body' },
       { status: 400 },
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
           firstName: true,
           lastName: true,
           supervisedGroupId: true,
+          supervisorStatus: true,
           cohort: {
             select: {
               currentLevelId: true,
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
         : null,
       updatedUser.supervisedGroupId,
       updatedUser.managedCohorts[0]?.cohortId || null,
+      updatedUser.supervisorStatus,
     );
 
     return NextResponse.json(
