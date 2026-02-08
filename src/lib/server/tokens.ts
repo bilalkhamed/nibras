@@ -2,6 +2,7 @@ import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { AccessTokenPayload, Role, UserStatus } from '@/types/types';
+import { SupervisorStatus } from '@prisma/client';
 
 const secretKey = process.env.SESSION_SECRET;
 if (!secretKey) {
@@ -22,7 +23,7 @@ export async function setAccessToken(
   activeGroupId: string | null,
   supervisedGroupId: string | null,
   managedCohortId: string | null,
-  supervisorStatus: string | null,
+  supervisorStatus: SupervisorStatus | null,
 ) {
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXP_MINUTES * 60 * 1000);
   const token = await signAccessToken({
