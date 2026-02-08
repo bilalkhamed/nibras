@@ -7,6 +7,7 @@ import {
   AssignmentTypes,
   Assignment,
   AssignmentAttachment,
+  SupervisorStatus,
 } from '@prisma/client';
 import labels from '@/lib/labels.json';
 
@@ -34,7 +35,7 @@ export type AccessTokenPayload = {
   activeGroupId: string | null;
   supervisedGroupId: string | null;
   managedCohortId: string | null;
-  supervisorStatus: string | null;
+  supervisorStatus: SupervisorStatus | null;
 };
 
 export type CountryCode = keyof typeof labels.countries;
