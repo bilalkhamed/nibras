@@ -28,7 +28,7 @@ async function GroupLayoutWrapper({ params }: { params: Params }) {
         </h1>
       </div>
 
-      <GroupTabsNav groupId={id} />
+      <GroupTabsNav hrefBase={`/dashboard/groups/${id}`} />
     </div>
   );
 }

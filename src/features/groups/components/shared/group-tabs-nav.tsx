@@ -6,10 +6,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/shared/utils';
 
 interface GroupTabsNavProps {
-  groupId: string;
+  hrefBase: string;
 }
 
-export function GroupTabsNav({ groupId }: GroupTabsNavProps) {
+export function GroupTabsNav({ hrefBase }: GroupTabsNavProps) {
   const pathname = usePathname();
 
   const isProgressTab = pathname.includes('/progress');
@@ -43,7 +43,7 @@ export function GroupTabsNav({ groupId }: GroupTabsNavProps) {
                   'data-[state=inactive]:hover:bg-background/60',
                 )}
               >
-                <Link href={`/dashboard/groups/${groupId}/${tab.value}`}>
+                <Link href={`${hrefBase}/${tab.value}`}>
                   <span className="truncate">{tab.label}</span>
                   <span
                     className={cn(
