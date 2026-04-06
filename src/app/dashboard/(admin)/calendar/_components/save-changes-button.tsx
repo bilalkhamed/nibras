@@ -5,7 +5,6 @@ import { SaveIcon, CheckIcon } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 import { Button } from '@/components/ui/button';
 import { useWeekManager } from './week-manager-context';
-import { updateCalendarWeeksAction } from '@/features/programs/actions/update-weeks';
 import { toast } from 'sonner';
 
 export function SaveChangesButton() {
@@ -20,7 +19,6 @@ export function SaveChangesButton() {
       setIsSaving(false);
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 2000);
-      await updateCalendarWeeksAction(weeks);
     } catch (error) {
       console.error('Error saving changes:', error);
       toast.error('حدث خطأ أثناء حفظ التغييرات. حاول مرة أخرى.');

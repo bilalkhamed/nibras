@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { toast } from 'sonner';
+import { updateCalendarWeeksAction } from '@/features/programs/actions/update-weeks';
 import { CalendarWeekItem } from './types';
 
 // Helper to check if two date ranges overlap
@@ -267,20 +268,19 @@ export function WeekManagerProvider({
   }, []);
 
   const saveChanges = React.useCallback(async () => {
-    // Log the state in the requested format
-    console.log(
-      'حفظ التغييرات - الحالة:',
-      weeks.map((w) => ({
-        startDate: w.startDate,
-        endDate: w.endDate,
-        week: {
-          number: w.week.number,
-          id: w.week.id,
-          title: w.week.title,
-        },
-      })),
-    );
-    setHasChanges(false);
+    try {
+      const result = await updateCalendarWeeksAction(weeks);
+      console.log(result);
+
+      if (!result.success) {
+        throw new Error(result.error?.type || 'unknown');
+      }
+      setHasChanges(false);
+      initialWeeksRef.current = weeks;
+    } catch (error) {
+      console.error('Error saving weeks:', error);
+      throw error; // Re-throw to be handled by the UI
+    }
   }, [weeks]);
 
   const value = React.useMemo(
