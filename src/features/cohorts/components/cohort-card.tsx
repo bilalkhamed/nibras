@@ -31,6 +31,18 @@ export function CohortCard({ cohort }: CohortCardProps) {
               <GraduationCap className="h-4 w-4" />
               <span>{cohort.currentLevel.title}</span>
             </div>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <UserCog className="h-4 w-4" />
+              <span>
+                {cohort.managers.length > 0 &&
+                  'مدير الدفعة: ' +
+                    cohort.managers[0].user.firstName +
+                    ' ' +
+                    cohort.managers[0].user.middleName +
+                    ' ' +
+                    cohort.managers[0].user.lastName}
+              </span>
+            </div>
           </div>
           <div className="flex gap-1">
             <EditCohortSheet cohort={cohort}>

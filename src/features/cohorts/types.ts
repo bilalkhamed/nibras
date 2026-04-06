@@ -62,6 +62,18 @@ export const cohortListDetailedSelect = {
       title: true,
     },
   },
+  managers: {
+    select: {
+      id: true,
+      user: {
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        },
+      },
+    },
+  },
   _count: {
     select: {
       students: true,
