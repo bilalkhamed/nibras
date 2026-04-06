@@ -77,7 +77,7 @@ export async function updateCalendarWeeks(
         }),
       );
 
-      await prisma.week.deleteMany({
+      await tx.week.deleteMany({
         where: {
           AND: [
             {
