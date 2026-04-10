@@ -33,7 +33,12 @@ export function InviteSuccessForm({
     setError,
   } = useForm<InvitedUserData>({
     resolver: zodResolver(invitedUserSchema),
-    mode: 'onTouched',
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    mode: 'onBlur',
   });
 
   const onSubmit: SubmitHandler<InvitedUserData> = async (data) => {
@@ -46,12 +51,29 @@ export function InviteSuccessForm({
     });
 
     if (!res.ok) {
-      setError('root', {
-        message:
-          res.status === 409
-            ? 'هذا البريد الإلكتروني مستخدم بالفعل. يرجى استخدام بريد إلكتروني مختلف.'
-            : 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
-      });
+      const errorData = await res.json();
+
+      if (res.status === 409) {
+        if (errorData.field === 'email') {
+          setError('email', {
+            message:
+              'هذا البريد الإلكتروني مستخدم بالفعل. يرجى استخدام بريد إلكتروني مختلف.',
+          });
+          return;
+        }
+        if (errorData.field === 'username') {
+          setError('username', {
+            message:
+              'اسم المستخدم هذا مستخدم بالفعل. يرجى اختيار اسم مستخدم مختلف.',
+          });
+          return;
+        }
+      } else {
+        setError('root', {
+          message: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+        });
+      }
+
       return;
     }
 
@@ -66,11 +88,29 @@ export function InviteSuccessForm({
           مرحبًا بك، {user.firstName}!
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          أدخلي بريدك الإلكتروني وكلمة المرور لإكمال التسجيل.
+          أدخلي اسم المعرف وكلمة المرور لإكمال التسجيل.
+          <br />
+          يستخدم اسم المعرف لتسجيل دخولك لاحقًا.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          <Controller
+            control={control}
+            name="username"
+            render={({ field: { onChange, value, onBlur } }) => (
+              <FormField
+                field="username"
+                type="text"
+                value={value || ''}
+                error={errors.username?.message}
+                handleOnBlur={onBlur}
+                handleChange={onChange}
+                label={`المعرف`}
+              />
+            )}
+          />
+
           <Controller
             control={control}
             name="email"
@@ -82,7 +122,7 @@ export function InviteSuccessForm({
                 error={errors.email?.message}
                 handleOnBlur={onBlur}
                 handleChange={onChange}
-                label={labels.common.email}
+                label={`${labels.common.email} (اختياري)`}
               />
             )}
           />

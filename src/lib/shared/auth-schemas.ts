@@ -62,7 +62,18 @@ export const createUserSchema = z.object({
 
 export const invitedUserSchema = z
   .object({
-    email: z.email({ error: 'يجب إدخال بريد إلكتروني صحيح وفعّال' }),
+    email: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.email({ error: 'يجب إدخال بريد إلكتروني صحيح وفعّال' }).optional(),
+    ) as z.ZodType<string | undefined, string | undefined>,
+    username: z
+      .string('يجب إدخال المعرف')
+      .min(3, { error: 'يجب أن يكون المعرف ثلاث حروف على الأقل' })
+      .max(20, { error: 'يجب ألا يزيد المعرف عن ٢٠ حرفًا' })
+      .regex(
+        /^[a-zA-Z0-9_.]+$/,
+        'يمكن أن يحتوي المعرف على: حروف إنجليزية، أرقام، نقاط، شرطات سفلية (underscores "_")',
+      ),
     password: z
       .string('يجب إدخال كلمة سر')
       .min(1, { error: 'يجب إدخال كلمة سر' })

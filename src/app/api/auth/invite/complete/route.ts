@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
     if (
-      !body.email ||
+      !body.username ||
       !body.password ||
       !body.confirmPassword ||
       !body.inviteCode
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
         data: {
           email: data.email,
           hashedPassword,
+          username: data.username,
           status: ACTIVE_STATUS,
         },
         select: {
@@ -110,8 +111,28 @@ export async function POST(request: NextRequest) {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        const target = (error.meta?.target as string[]) || [];
+
+        const driverAdapterError = error.meta?.driverAdapterError as
+          | {
+              cause?: { originalMessage?: string };
+            }
+          | undefined;
+        const originalMessage =
+          driverAdapterError?.cause?.originalMessage || '';
+        // get the field that caused the unique constraint violation from the error metadata
+
         return NextResponse.json(
-          { message: 'Email already in use' },
+          {
+            message:
+              target.includes('email') || originalMessage.includes('email')
+                ? 'Email already in use'
+                : 'Username already in use',
+            field:
+              target.includes('email') || originalMessage.includes('email')
+                ? 'email'
+                : 'username',
+          },
           { status: 409 },
         );
       }
