@@ -43,7 +43,11 @@ export const signupSchema = userSchema
   });
 
 export const loginSchema = z.object({
-  email: z.email({ error: 'يجب إدخال بريد إلكتروني صحيح' }),
+  identifier: z
+    .string({
+      error: 'يرجى إدخال المعرف (اسم المستخدم) أو البريد الإلكتروني',
+    })
+    .min(1, { error: 'يرجى إدخال المعرف (اسم المستخدم) أو البريد الإلكتروني' }),
   password: z.string().min(1, { error: 'يجب إدخال كلمة السر' }),
 });
 

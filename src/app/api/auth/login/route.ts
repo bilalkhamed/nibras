@@ -3,7 +3,7 @@ import { comparePasswords } from '@/lib/server/hash';
 import { setAccessToken } from '@/lib/server/tokens';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getUserByEmail } from '@/features/users/service';
+import { getUserByIdentifier } from '@/features/users/service';
 
 export async function POST(req: NextRequest) {
   let body;
@@ -19,25 +19,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(z.treeifyError(error), { status: 422 });
   }
 
-  const { email, password } = data;
+  const { identifier, password } = data;
 
-  const res = await getUserByEmail(email);
+  const res = await getUserByIdentifier(identifier);
 
   console.log(res);
   if (!res.success) {
-    return NextResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   const foundUser = res.data;
 
   if (!foundUser.hashedPassword) {
-    return NextResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   const passwordMatch = await comparePasswords(
@@ -48,7 +42,7 @@ export async function POST(req: NextRequest) {
   if (!passwordMatch) {
     return NextResponse.json(
       {
-        error: 'Invalid email or password',
+        error: 'Invalid credentials',
       },
       { status: 401 },
     );

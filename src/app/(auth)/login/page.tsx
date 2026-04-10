@@ -31,7 +31,7 @@ export default function LoginPage() {
     mode: 'onTouched',
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      identifier: '',
       password: '',
     },
   });
@@ -49,7 +49,8 @@ export default function LoginPage() {
         router.push('/dashboard');
       } else if (res.status === 401) {
         setError('root', {
-          message: 'البريد الإلكتروني أو كلمة السر غير صحيحة',
+          message:
+            'البيانات المدخلة غير صحيحة. يرجى التحقق من المعرف وكلمة السر.',
         });
       } else {
         setError('root', {
@@ -90,15 +91,16 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <Controller
                 control={control}
-                name="email"
+                name="identifier"
                 render={({ field: { onBlur, onChange, value } }) => (
                   <FormField
-                    field="email"
-                    label={labels.common.email}
-                    type="email"
+                    field="identifier"
+                    label={labels.common.identifier}
+                    placeholder="أدخلي المعرف"
+                    type="text"
                     handleChange={onChange}
                     handleOnBlur={onBlur}
-                    error={errors.email?.message || ''}
+                    error={errors.identifier?.message || ''}
                     value={value}
                   />
                 )}
@@ -160,15 +162,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-type FormFieldProps = {
-  field: keyof LoginValues;
-  label: string;
-  type?: 'text' | 'password' | 'email';
-  error: string;
-  value: string;
-  handleChange: (
-    field: keyof LoginValues
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleOnBlur: (field: keyof LoginValues) => () => void;
-};

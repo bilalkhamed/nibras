@@ -13,6 +13,7 @@ import { InfoIcon } from 'lucide-react';
 type FormFieldProps = {
   field: string;
   label: string;
+  placeholder?: string;
   type?: 'text' | 'password' | 'email' | 'number';
   leftSlot?: ReactNode;
   error?: string | null;
@@ -28,6 +29,7 @@ export function FormField({
   leftSlot,
   error,
   value,
+  placeholder,
   handleChange,
   handleOnBlur,
 }: FormFieldProps) {
@@ -41,7 +43,7 @@ export function FormField({
         <Input
           id={field}
           type={type}
-          placeholder={`أدخلي  ${label}`}
+          placeholder={placeholder || `أدخلي ${label}`}
           value={value}
           className="border-border focus:border-primary focus:ring-primary"
           onChange={handleChange}
@@ -54,7 +56,7 @@ export function FormField({
 }
 
 export function PasswordField(
-  props: Omit<FormFieldProps, 'type' | 'leftSlot'>
+  props: Omit<FormFieldProps, 'type' | 'leftSlot'>,
 ) {
   return (
     <FormField

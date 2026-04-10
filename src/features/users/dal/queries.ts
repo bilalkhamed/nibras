@@ -139,13 +139,17 @@ export async function findUserById(
   });
 }
 
-/** Find user by email (for authentication) */
-export async function findUserByEmail(
-  email: string,
+/** Find user by identifier (for authentication) */
+export async function findUserByIdentifier(
+  identifier: string,
 ): Promise<DalReturn<UserByEmail | null>> {
   return runDalOperation(async () => {
+    const isEmail = identifier.includes('@');
+    const where: Prisma.UserWhereUniqueInput = isEmail
+      ? { email: identifier }
+      : { username: identifier };
     return await prisma.user.findUnique({
-      where: { email },
+      where,
       select: userByEmailSelect,
     });
   });

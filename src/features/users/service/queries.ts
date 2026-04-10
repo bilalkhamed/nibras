@@ -9,7 +9,7 @@ import {
   findRecentUsers,
   findStudentBasicInfo,
   findStudentsBySupervisorWithAssignments,
-  findUserByEmail,
+  findUserByIdentifier,
   findUserById,
   findUserForInvite,
   findUsersBasic,
@@ -122,10 +122,10 @@ export async function getCurrentUserData() {
 }
 
 /** Get user by email - no auth required (for login) */
-export async function getUserByEmail(email: string) {
+export async function getUserByIdentifier(identifier: string) {
   return runServiceOperation<UserByEmail>(
     async () => {
-      const dalResult = await findUserByEmail(email);
+      const dalResult = await findUserByIdentifier(identifier);
 
       if (!dalResult.success) {
         return mapDalToService<UserByEmail>(dalResult);
