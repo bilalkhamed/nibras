@@ -53,52 +53,48 @@ export async function updateCalendarWeeks(
   newWeeks: CalendarWeekInput[],
 ): Promise<DalReturn<null>> {
   return runDalOperation(async () => {
-    await prisma.$transaction(async (tx) => {
-      await tx.calendarWeek.deleteMany({
-        where: { academicYear: academicNumber },
+    // 1. PREP: Ensure all Week records exist and grab their IDs first.
+    // Doing this outside the main transaction prevents the transaction from timing out.
+    const weekIdsByNumber = new Map<number, string>();
+
+    for (const week of newWeeks) {
+      const upsertedWeek = await prisma.week.upsert({
+        where: { number: week.week.number },
+        create: { title: week.week.title, number: week.week.number },
+        update: { title: week.week.title },
       });
+      weekIdsByNumber.set(week.week.number, upsertedWeek.id);
+    }
 
-      await Promise.all(
-        newWeeks.map(async (week) => {
-          const upsertedWeek = await tx.week.upsert({
-            where: { number: week.week.number },
-            create: { title: week.week.title, number: week.week.number },
-            update: { title: week.week.title },
-          });
+    // 2. EXECUTE: Use an Array Transaction.
+    // This sends all queries in ONE single network request. It is practically impossible to timeout.
+    await prisma.$transaction([
+      // Step A: Clear old calendar weeks
+      prisma.calendarWeek.deleteMany({
+        where: { academicYear: academicNumber },
+      }),
 
-          await tx.calendarWeek.create({
-            data: {
-              academicYear: academicNumber,
-              startDate: week.startDate,
-              endDate: week.endDate,
-              weekId: upsertedWeek.id,
-            },
-          });
-        }),
-      );
+      // Step B: Bulk create all new calendar weeks in one go
+      prisma.calendarWeek.createMany({
+        data: newWeeks.map((week) => ({
+          academicYear: academicNumber,
+          startDate: week.startDate,
+          endDate: week.endDate,
+          weekId: weekIdsByNumber.get(week.week.number) as string, // Map the ID we grabbed earlier
+        })),
+      }),
 
-      await tx.week.deleteMany({
+      // Step C: Cleanup orphaned weeks
+      prisma.week.deleteMany({
         where: {
           AND: [
-            {
-              number: {
-                notIn: newWeeks.map((w) => w.week.number),
-              },
-            },
-            {
-              calendarWeeks: {
-                none: {},
-              },
-            },
-            {
-              assignments: {
-                none: {},
-              },
-            },
+            { number: { notIn: newWeeks.map((w) => w.week.number) } },
+            { calendarWeeks: { none: {} } },
+            { assignments: { none: {} } },
           ],
         },
-      });
-    });
+      }),
+    ]);
 
     revalidateTag('weeks', 'max');
     return null;
