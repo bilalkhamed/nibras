@@ -11,7 +11,12 @@ import { startTransition, useMemo, useOptimistic, useState } from 'react';
 import type { Assignment, Program, StudentAssignment } from '@prisma/client';
 import { ProgramFilter } from './program-filter';
 import { Toggle } from '@/components/ui/toggle';
-import { CheckCircleIcon, CheckLineIcon } from 'lucide-react';
+import {
+  CheckCircleIcon,
+  CheckLineIcon,
+  CheckCheckIcon,
+  ClockIcon,
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 import {
@@ -20,7 +25,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { cn } from '@/lib/shared/utils';
+import { cn, formatDate } from '@/lib/shared/utils';
 import { updateStudentAssignmentAction } from '../../actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -29,6 +34,22 @@ import type { AssignmentWithAttachmentsDTO } from '../../types';
 import { SubmissionSheet } from './submission-sheet';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { SubmissionViewerSheet } from '../shared/submission-viewer-sheet';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+type StudentAssignmentWithFileUrl = StudentAssignment & {
+  fileUrl: string | null;
+  isOverdue?: boolean;
+};
 
 type AssignmentsGridProps = {
   /** Array of assignments with attachments */
@@ -36,9 +57,14 @@ type AssignmentsGridProps = {
   /** Available programs for filtering */
   programs: Program[];
   /** Student's completion records */
-  studentAssignments: (StudentAssignment & {
-    fileUrl: string | null;
-  })[];
+  studentAssignments: StudentAssignmentWithFileUrl[];
+  /** View mode for cards */
+  view?: 'active' | 'history';
+  /** Student information for read-only submission viewer (history mode only) */
+  studentInfo?: {
+    id: string;
+    name: string;
+  };
 };
 
 /**
@@ -48,6 +74,8 @@ export function AssignmentsGrid({
   assignments,
   programs,
   studentAssignments,
+  view = 'active',
+  studentInfo,
 }: AssignmentsGridProps) {
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<
@@ -62,17 +90,19 @@ export function AssignmentsGrid({
 
   // Merge completion status and apply filters
   const processedAssignments = useMemo(() => {
+    const studentAssignmentById = new Map(
+      studentAssignments.map((sa) => [sa.assignmentId, sa]),
+    );
+
     // Merge with completion status
     const mappedAssignments = assignmentsByProgram.map((a) => ({
       ...a,
       program: programs.find((p) => p.id === a.programId),
-      isCompleted: studentAssignments.some(
-        (p) => p.assignmentId === a.id && p.completedAt !== null,
-      ),
-      fileKey: studentAssignments.find((p) => p.assignmentId === a.id)?.fileKey,
-      textSubmission: studentAssignments.find((p) => p.assignmentId === a.id)
-        ?.textSubmission,
-      fileUrl: studentAssignments.find((p) => p.assignmentId === a.id)?.fileUrl,
+      studentAssignment: studentAssignmentById.get(a.id),
+      isCompleted: studentAssignmentById.get(a.id)?.isCompleted ?? false,
+      fileKey: studentAssignmentById.get(a.id)?.fileKey,
+      textSubmission: studentAssignmentById.get(a.id)?.textSubmission,
+      fileUrl: studentAssignmentById.get(a.id)?.fileUrl,
     }));
 
     const merged = mappedAssignments.filter(
@@ -154,8 +184,11 @@ export function AssignmentsGrid({
             <AssignmentCard
               key={assignment.id}
               assignment={assignment}
+              view={view}
+              studentInfo={studentInfo}
               data={{
                 isCompleted: assignment.isCompleted,
+                studentAssignment: assignment.studentAssignment,
                 fileKey: assignment.fileKey,
                 textSubmission: assignment.textSubmission,
                 fileUrl: assignment.fileUrl,
@@ -173,8 +206,17 @@ type AssignmentCardProps = {
     program: Program;
     isCompleted: boolean;
   };
+  view: 'active' | 'history';
+  studentInfo?: {
+    id: string;
+    name: string;
+  };
   data: {
     isCompleted: boolean;
+    studentAssignment?: StudentAssignment & {
+      fileUrl: string | null;
+      isOverdue?: boolean;
+    };
     fileKey?: string | null;
     textSubmission?: string | null;
     fileUrl?: string | null;
@@ -184,65 +226,161 @@ type AssignmentCardProps = {
 /**
  * Individual assignment card with completion toggle
  */
-function AssignmentCard({ assignment, data }: AssignmentCardProps) {
+function AssignmentCard({
+  assignment,
+  view,
+  studentInfo,
+  data,
+}: AssignmentCardProps) {
   const badge = typeBadge(assignment.type);
   const hasAttachments = assignment.attachments.length > 0;
+  const requiresSubmission =
+    assignment.allowFileSubmission || assignment.allowTextSubmission;
+  const isCompleted = data.studentAssignment?.isCompleted ?? false;
+
+  const GradeIcon = data.studentAssignment?.score ? CheckCheckIcon : ClockIcon;
+  const gradeLabel = data.studentAssignment?.score
+    ? 'تم التقييم'
+    : 'لا يوجد تقييم';
 
   return (
-    <article className="group rounded-2xl border border-primary/15 bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className={`text-xs font-semibold px-2 py-1 rounded-full border ${badge.style}`}
-        >
-          {badge.label}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {assignment.program.name}
-        </span>
-      </div>
-
-      <h2 className="mt-3 text-lg font-bold text-foreground line-clamp-2">
-        {assignment.name}
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-        {assignment.description || 'ابدئي عند جاهزيتك، ننتظر إبداعك.'}
-      </p>
-
-      <div className="mt-4 flex items-center gap-3">
-        {assignment.allowFileSubmission || assignment.allowTextSubmission ? (
-          <SubmissionSheet
-            assignmentId={assignment.id}
-            assignmentName={assignment.name}
-            allowFileSubmission={assignment.allowFileSubmission}
-            allowTextSubmission={assignment.allowTextSubmission}
-            defaultValues={{
-              fileKey: data.fileKey,
-              textSubmission: data.textSubmission,
-              fileUrl: data.fileUrl,
-            }}
+    <Card className="group h-full rounded-2xl border border-primary/15 bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <CardHeader className="pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`text-xs font-semibold px-2 py-1 rounded-full border ${badge.style}`}
           >
-            <Button
-              variant={'outlinePrimary'}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
-            >
-              <Send className="h-4 w-4" />
-              {data.textSubmission || data.fileKey
-                ? 'تعديل المرفقات'
-                : 'سلمي المرفقات'}
-            </Button>
-          </SubmissionSheet>
-        ) : (
-          <CompleteButton
-            assignment={assignment}
-            isCompleted={data.isCompleted}
-          />
-        )}
+            {badge.label}
+          </span>
+        </div>
+        <CardAction>
+          <Badge variant="outline" className="text-xs font-normal">
+            {assignment.program.name}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        <CardTitle className="text-lg font-bold text-foreground line-clamp-2 leading-6">
+          {assignment.name}
+        </CardTitle>
+        <CardDescription className="line-clamp-3">
+          {assignment.description || 'ابدئي عند جاهزيتك، ننتظر إبداعك.'}
+        </CardDescription>
 
         {hasAttachments && (
-          <AttachmentsPreview attachments={assignment.attachments} />
+          <div>
+            <AttachmentsPreview attachments={assignment.attachments} />
+          </div>
         )}
-      </div>
-    </article>
+      </CardContent>
+
+      <CardFooter
+        className={cn('mt-auto', view === 'history' && 'border-t pt-4')}
+      >
+        {view === 'active' ? (
+          <div className="flex items-center gap-3">
+            {requiresSubmission ? (
+              <SubmissionSheet
+                assignmentId={assignment.id}
+                assignmentName={assignment.name}
+                allowFileSubmission={assignment.allowFileSubmission}
+                allowTextSubmission={assignment.allowTextSubmission}
+                defaultValues={{
+                  fileKey: data.fileKey,
+                  textSubmission: data.textSubmission,
+                  fileUrl: data.fileUrl,
+                }}
+              >
+                <Button
+                  variant={'outlinePrimary'}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <Send className="h-4 w-4" />
+                  {data.textSubmission || data.fileKey
+                    ? 'تعديل المرفقات'
+                    : 'سلمي المرفقات'}
+                </Button>
+              </SubmissionSheet>
+            ) : (
+              <CompleteButton
+                assignment={assignment}
+                isCompleted={data.isCompleted}
+              />
+            )}
+          </div>
+        ) : (
+          <div className="grid w-full grid-cols-2 gap-4">
+            <div className="space-y-1 border-l border-border/80 pl-4">
+              <p className="text-xs text-muted-foreground">الحالة</p>
+              {isCompleted ? (
+                <Badge variant="success" className="w-fit">
+                  مكتمل
+                </Badge>
+              ) : (
+                <CompleteButton
+                  assignment={assignment}
+                  isCompleted={data.isCompleted}
+                />
+              )}
+              {data.studentAssignment?.completedAt && (
+                <p className="text-xs text-muted-foreground">
+                  {formatDate(data.studentAssignment.completedAt)}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                {requiresSubmission ? 'المراجعة' : 'الدرجة'}
+              </p>
+              {requiresSubmission && !isCompleted ? (
+                <SubmissionSheet
+                  assignmentId={assignment.id}
+                  assignmentName={assignment.name}
+                  allowFileSubmission={assignment.allowFileSubmission}
+                  allowTextSubmission={assignment.allowTextSubmission}
+                  defaultValues={{
+                    fileKey: data.fileKey,
+                    textSubmission: data.textSubmission,
+                    fileUrl: data.fileUrl,
+                  }}
+                >
+                  <Button variant="outlinePrimary" size="sm" className="gap-1">
+                    <Send className="h-4 w-4" />
+                    سلمي المرفقات
+                  </Button>
+                </SubmissionSheet>
+              ) : requiresSubmission && studentInfo ? (
+                <SubmissionViewerSheet
+                  allowFileSubmission={assignment.allowFileSubmission}
+                  allowTextSubmission={assignment.allowTextSubmission}
+                  fileKey={data.fileKey || null}
+                  fileUrl={data.fileUrl || null}
+                  textSubmission={data.textSubmission || null}
+                  currentScore={data.studentAssignment?.score || null}
+                  currentComment={data.studentAssignment?.comment || null}
+                  assignmentId={assignment.id}
+                  assignmentName={assignment.name}
+                  studentId={studentInfo.id}
+                  studentName={studentInfo.name}
+                  canEditGrade={false}
+                >
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <GradeIcon className="h-4 w-4" />
+                    {gradeLabel}
+                  </Button>
+                </SubmissionViewerSheet>
+              ) : (
+                <p className="text-sm font-medium text-foreground">
+                  {data.studentAssignment?.score ?? '-'}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -379,9 +517,6 @@ function EmptyState() {
     <article className="rounded-2xl border border-dashed border-primary/30 bg-card p-6 text-center shadow-sm">
       <p className="text-lg font-semibold text-foreground">
         لا توجد مهام لهذا الاختيار
-      </p>
-      <p className="mt-2 text-sm text-muted-foreground">
-        جرّبي برنامجاً آخر أو عودي لاحقاً ✨
       </p>
     </article>
   );
