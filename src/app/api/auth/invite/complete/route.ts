@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
           role: true,
           firstName: true,
           lastName: true,
+          username: true,
           supervisedGroupId: true,
           supervisorStatus: true,
           cohort: {

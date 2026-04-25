@@ -18,6 +18,7 @@ export type UserDTO = Pick<
   | 'country'
   | 'status'
   | 'phone'
+  | 'username'
 >;
 
 /** Extended user DTO with timestamps */
@@ -92,6 +93,7 @@ export const userByEmailSelect = {
   hashedPassword: true,
   firstName: true,
   lastName: true,
+  username: true,
   supervisedGroupId: true,
   supervisorStatus: true,
   groupsAsStudent: {

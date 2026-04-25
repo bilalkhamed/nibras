@@ -58,6 +58,7 @@ export async function findManyUsers({
         country: true,
         status: true,
         phone: true,
+        username: true,
         cohort: { select: { id: true, name: true } },
       },
     });
@@ -85,6 +86,7 @@ export async function findManyUsersWithTimestamps(): Promise<
         country: true,
         status: true,
         phone: true,
+        username: true,
         createdAt: true,
         updatedAt: true,
         cohort: { select: { id: true, name: true } },
@@ -133,6 +135,7 @@ export async function findUserById(
         country: true,
         status: true,
         phone: true,
+        username: true,
         cohort: { select: { id: true, name: true } },
       },
     });
@@ -259,6 +262,7 @@ export async function findUsersBasic(
         lastName: true,
         email: true,
         role: true,
+        username: true,
         birthYear: true,
       },
       orderBy: { createdAt: 'desc' },

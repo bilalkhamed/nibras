@@ -70,7 +70,7 @@ export default async function UserInfoSection() {
             />
             <InfoField
               label="المعرف"
-              value={user.id}
+              value={user.username || user.id}
               icon={<IdCard className="h-4 w-4" />}
             />
           </div>

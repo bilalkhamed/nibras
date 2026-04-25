@@ -115,6 +115,7 @@ export type StudentAssignmentWithMarkerDTO = StudentAssignment & {
     firstName: string;
     middleName: string;
     lastName: string;
+    username: string | null;
   } | null;
 };
 

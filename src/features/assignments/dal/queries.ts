@@ -148,6 +148,7 @@ export async function findManyStudentAssignments(
               firstName: true,
               middleName: true,
               lastName: true,
+              username: true,
             },
           },
         },
