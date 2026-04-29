@@ -68,6 +68,8 @@ model User {
 
   articles Article[]
 
+  studentProfile StudentProfile?
+
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
@@ -76,6 +78,41 @@ model User {
   @@index([cohortId, role])
   @@index([supervisedGroupId])
   @@map("users")
+}
+
+enum GradeLevel {
+  first_grade
+  second_grade
+  third_grade
+  fourth_grade
+  fifth_grade
+  sixth_grade
+  seventh_grade
+  eighth_grade
+  ninth_grade
+  tenth_grade
+  eleventh_grade
+  twelfth_grade
+  bachelor
+}
+
+model StudentProfile {
+  id String @id @default(cuid(2))
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Additional fields for student profile
+  address        String?
+  motherFullName String?
+  motherPhone    String?
+  gradeLevel     GradeLevel?
+  skills         String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("student_profiles")
 }
 
 model Group {
