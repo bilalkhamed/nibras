@@ -14,6 +14,7 @@ import {
 
 import Link from 'next/link';
 import getAuthSession from '@/lib/server/auth-session';
+import Image from 'next/image';
 
 export async function DashboardSidebar({}: React.ComponentProps<
   typeof Sidebar
@@ -30,9 +31,15 @@ export async function DashboardSidebar({}: React.ComponentProps<
             <SidebarMenuButton size="lg" asChild>
               <Link href={'/dashboard'}>
                 <div className=" text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <img src="/logo.svg" alt="Logo" className="h-12 w-12" />
+                  <Image
+                    src="/logo.svg"
+                    alt="Logo"
+                    width={48}
+                    height={48}
+                    className="h-12 w-12"
+                  />
                 </div>
-                <span className="truncate font-bold ">برنامج نبراس</span>
+                <span className="truncate font-bold ">نبراس</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Menu, UserRoundIcon } from 'lucide-react';
+import { Menu, UserRoundIcon } from 'lucide-react';
 
 import labels from '@/lib/labels.json';
 import { navItems, hideNavbarOnRoutes } from '@/lib/shared/site.config';
@@ -19,6 +19,7 @@ import {
 } from '../ui/dropdown-menu';
 
 import { AccessTokenPayload } from '@/types/types';
+import Image from 'next/image';
 
 interface NavbarProps {
   extraRight?: React.ReactNode;
@@ -39,10 +40,7 @@ export function Navbar({ extraRight, session }: NavbarProps) {
           {/* LEFT */}
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {labels.common.appName}
-              </span>
+              <Image src="/logo.svg" alt="Logo" height={50} width={80} />
             </Link>
 
             {/* DESKTOP NAV */}

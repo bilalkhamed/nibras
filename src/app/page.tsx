@@ -10,13 +10,6 @@ export default function Home() {
       {/* Hero Section */}
       <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary/10 to-secondary/20 px-5 py-2.5 text-primary border border-border">
-            <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-medium">
-              {labels.common.platformName}
-            </span>
-          </div>
-
           <h2 className="mb-6 text-5xl sm:text-6xl font-bold tracking-tight">
             <span className="inline-block bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent leading-[1.2] pt-1">
               {labels.home.heroTitle}
@@ -64,7 +57,7 @@ export default function Home() {
             {/* Reading Program */}
             <div className="group relative overflow-hidden rounded-3xl bg-card p-8 shadow-md transition-all hover:shadow-2xl hover:-translate-y-2 border border-border">
               <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-blue-600"></div>
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-blue-400 to-blue-600 text-white shadow-lg group-hover:scale-110 transition-transform">
                 <BookOpen className="h-8 w-8" />
               </div>
               <h4 className="mb-3 text-2xl font-bold text-foreground">
@@ -86,7 +79,7 @@ export default function Home() {
             {/* Lecture Program */}
             <div className="group relative overflow-hidden rounded-3xl bg-card p-8 shadow-md transition-all hover:shadow-2xl hover:-translate-y-2 border border-border">
               <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-purple-400 to-purple-600"></div>
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-purple-400 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform">
                 <Video className="h-8 w-8" />
               </div>
               <h4 className="mb-3 text-2xl font-bold text-foreground">
@@ -108,7 +101,7 @@ export default function Home() {
             {/* Heart Reassurance Program */}
             <div className="group relative overflow-hidden rounded-3xl bg-card p-8 shadow-md transition-all hover:shadow-2xl hover:-translate-y-2 border border-border">
               <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-pink-400 to-rose-500"></div>
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-lg group-hover:scale-110 transition-transform">
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-pink-400 to-rose-500 text-white shadow-lg group-hover:scale-110 transition-transform">
                 <Heart className="h-8 w-8" />
               </div>
               <h4 className="mb-3 text-2xl font-bold text-foreground">
