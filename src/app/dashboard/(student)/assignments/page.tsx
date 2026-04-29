@@ -88,7 +88,8 @@ export default async function StudentAssignmentsPage({}: {
   const streakText = 'حافظي على السلسلة';
 
   const deadlineLabel = currentWeek?.endDate
-    ? new Date(currentWeek.endDate).toLocaleDateString('ar-SA', {
+    ? 'ينتهي الأسبوع: ' +
+      new Date(currentWeek.endDate).toLocaleDateString('ar-SA', {
         weekday: 'long',
         month: 'long',
         day: 'numeric',

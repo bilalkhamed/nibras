@@ -5,9 +5,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   StudentGroupInfoSection,
   SupervisorSection,
-  GroupStudentsSection,
+  // GroupStudentsSection,
   getGroupById,
-  type GroupDetailDTO,
+  // type GroupDetailDTO,
 } from '@/features/groups';
 import { getCurrentWeek } from '@/features/programs/service';
 
@@ -32,13 +32,13 @@ export default async function StudentGroupPage() {
 
   const weekResult = await getCurrentWeek();
 
-  const students = group.students.map(
-    (gs: GroupDetailDTO['students'][number]) => ({
-      id: gs.student.id,
-      name: `${gs.student.firstName} ${gs.student.middleName || ''} ${gs.student.lastName}`.trim(),
-      isMe: gs.student.id === auth.userId,
-    }),
-  );
+  // const students = group.students.map(
+  //   (gs: GroupDetailDTO['students'][number]) => ({
+  //     id: gs.student.id,
+  //     name: `${gs.student.firstName} ${gs.student.middleName || ''} ${gs.student.lastName}`.trim(),
+  //     isMe: gs.student.id === auth.userId,
+  //   }),
+  // );
 
   return (
     <div className="space-y-6">
@@ -59,7 +59,8 @@ export default async function StudentGroupPage() {
       )}
 
       {/* Students Grid */}
-      <GroupStudentsSection students={students} />
+      {/* <GroupStudentsSection students={students} /> */}
+      {/* HIDDEN FOR NOW */}
     </div>
   );
 }

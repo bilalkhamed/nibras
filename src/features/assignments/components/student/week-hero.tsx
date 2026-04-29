@@ -20,7 +20,7 @@ export function WeekHero({
   heroTitle,
   primaryMessage,
   deadlineLabel,
-  streakText,
+  // streakText,
 }: WeekHeroProps) {
   return (
     <section className="rounded-3xl border border-primary/20 bg-linear-to-r from-primary/5 via-background to-secondary/5 p-6 shadow-md dark:from-primary/10 dark:via-background dark:to-secondary/10 dark:border-primary/30">
@@ -42,9 +42,9 @@ export function WeekHero({
               📅 {deadlineLabel}
             </span>
           </div>
-          <div className="rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold dark:bg-primary/85">
+          {/* <div className="rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold dark:bg-primary/85">
             {streakText} 🔥
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
