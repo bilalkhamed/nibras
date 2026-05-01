@@ -37,12 +37,19 @@ export async function POST(
 
   const { selector, validatorHash, expiresAt, fullCode } = generateInvite();
 
-  await prisma.invite.update({
+  await prisma.invite.upsert({
     where: {
       userId: user.id,
     },
-    data: {
-      createdAt: new Date(),
+    update: {
+      selector,
+      validatorHash,
+      expiresAt,
+      attempts: 0,
+      usedAt: null,
+    },
+    create: {
+      userId: user.id,
       selector,
       validatorHash,
       expiresAt,
