@@ -69,6 +69,7 @@ export function AssignmentsTableWithActions({
               url: link.url,
               type: link.type,
             })),
+          maxScore: assignment.maxScore,
         };
 
         return (

@@ -185,6 +185,7 @@ export async function updateAssignment(
         type: data.type,
         allowFileSubmission: data.allowFileSubmission,
         allowTextSubmission: data.allowTextSubmission,
+        maxScore: data.maxScore,
       },
     });
 
@@ -261,6 +262,7 @@ export async function insertAssignment(data: CreateAssignmentData) {
           programId: program.id,
           allowFileSubmission: data.assignment.allowFileSubmission,
           allowTextSubmission: data.assignment.allowTextSubmission,
+          maxScore: data.assignment.maxScore,
           attachments: {
             createMany: {
               data: attachmentsData,

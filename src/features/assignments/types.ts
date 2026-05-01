@@ -24,7 +24,7 @@ import { z } from 'zod';
  */
 export const linkSchema = z.object({
   id: z.string().optional(),
-  url: z.url('يرجى إدخال رابط صالح'),
+  url: z.url('يرجى إدخال رابط صحيح'),
   type: z.literal(AttachmentType.LINK),
 });
 
@@ -43,6 +43,7 @@ export const createAssignmentSchema = z.object({
     links: z.array(linkSchema).optional(),
     allowFileSubmission: z.boolean(),
     allowTextSubmission: z.boolean(),
+    maxScore: z.number(),
   }),
 });
 
@@ -57,6 +58,7 @@ export const updateAssignmentSchema = z.object({
   links: z.array(linkSchema).optional(),
   allowFileSubmission: z.boolean(),
   allowTextSubmission: z.boolean(),
+  maxScore: z.number(),
 });
 
 // ============================================================================
@@ -245,7 +247,7 @@ export type FileCardItem = AttachedFile | UploadingFile;
  */
 export const formLinkSchema = z.object({
   id: z.string().optional(),
-  url: z.url('يرجى إدخال رابط صالح'),
+  url: z.url('يرجى إدخال رابط صحيح'),
   type: z.literal('LINK'),
 });
 
@@ -263,6 +265,7 @@ export const assignmentFormSchema = z.object({
   newFileKeys: z.array(z.string()).optional(),
   allowFileSubmission: z.boolean(),
   allowTextSubmission: z.boolean(),
+  maxScore: z.number().min(0, 'يرجى إدخال درجة صحيحة'),
 });
 
 export type AssignmentFormData = z.infer<typeof assignmentFormSchema>;

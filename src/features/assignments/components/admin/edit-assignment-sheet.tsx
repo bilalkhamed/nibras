@@ -33,6 +33,7 @@ type EditAssignmentSheetProps = {
     links?: Link[];
     allowFileSubmission: boolean;
     allowTextSubmission: boolean;
+    maxScore: number;
   };
 };
 
@@ -75,6 +76,7 @@ export function EditAssignmentSheet({
         })),
         allowFileSubmission: data.allowFileSubmission,
         allowTextSubmission: data.allowTextSubmission,
+        maxScore: data.maxScore,
       });
 
       if (res.success) {

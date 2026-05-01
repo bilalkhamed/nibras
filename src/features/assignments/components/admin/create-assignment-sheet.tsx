@@ -68,6 +68,7 @@ export function CreateAssignmentSheet({
           })),
           allowFileSubmission: data.allowFileSubmission,
           allowTextSubmission: data.allowTextSubmission,
+          maxScore: data.maxScore,
         },
       });
 

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
@@ -64,6 +64,7 @@ type AssignmentFormContentProps = {
     files?: AttachedFile[];
     allowFileSubmission: boolean;
     allowTextSubmission: boolean;
+    maxScore: number;
   };
   /** Callback when form is cancelled */
   onCancel: () => void;
@@ -102,6 +103,7 @@ export function AssignmentFormContent({
           newFileKeys: [],
           allowFileSubmission: defaultValues.allowFileSubmission,
           allowTextSubmission: defaultValues.allowTextSubmission,
+          maxScore: defaultValues.maxScore,
         }
       : {
           newFileKeys: [],
@@ -194,6 +196,20 @@ export function AssignmentFormContent({
             <ErrorMessage message={errors.type?.message} />
           </div>
 
+          <div className="grid">
+            <Label htmlFor="maxScore" className="text-right">
+              الدرجة
+            </Label>
+            <Input
+              id="maxScore"
+              placeholder="الدرجة..."
+              {...register('maxScore', { valueAsNumber: true })}
+              className="text-right mb-2"
+              disabled={isSubmitting}
+              type="number"
+            />
+            <ErrorMessage message={errors.maxScore?.message} />
+          </div>
           <div className="flex justify-between items-center">
             <Field orientation="horizontal">
               <Controller
