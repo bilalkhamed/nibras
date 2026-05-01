@@ -14,6 +14,8 @@ import {
   userByEmailSelect,
   UserInviteStatusDTO,
   UserNameDTO,
+  UserWithCohortAndStudentProfileDTO,
+  userWithCohortAndStudentProfileSelect,
   UserWithCohortAndTimestampsDTO,
   UserWithCohortDTO,
   UserWithRoleAndCohortAndGroupDTO,
@@ -99,7 +101,7 @@ export async function findManyUsersWithTimestamps(): Promise<
 export async function findUserById(
   id: string,
   { cohortId }: { cohortId?: string } = {},
-): Promise<DalReturn<UserWithCohortDTO | null>> {
+): Promise<DalReturn<UserWithCohortAndStudentProfileDTO | null>> {
   return runDalOperation(async () => {
     const where: Prisma.UserWhereUniqueInput = { id };
 
@@ -124,20 +126,7 @@ export async function findUserById(
     }
     return await prisma.user.findUnique({
       where,
-      select: {
-        id: true,
-        firstName: true,
-        middleName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        birthYear: true,
-        country: true,
-        status: true,
-        phone: true,
-        username: true,
-        cohort: { select: { id: true, name: true } },
-      },
+      select: userWithCohortAndStudentProfileSelect,
     });
   });
 }

@@ -25,6 +25,7 @@ import {
   UserDTO,
   UserInviteStatusDTO,
   UserNameDTO,
+  UserWithCohortAndStudentProfileDTO,
   UserWithRoleAndCohortAndGroupDTO,
 } from '../types';
 import { Role } from '@prisma/client';
@@ -58,7 +59,7 @@ export async function getAllUsers() {
 
 /** Get user by ID - admin only */
 export async function getUserById(id: string) {
-  return runServiceOperation<UserDTO>(
+  return runServiceOperation<UserWithCohortAndStudentProfileDTO>(
     async (session) => {
       if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
         return {
@@ -75,7 +76,7 @@ export async function getUserById(id: string) {
       const dalResult = await findUserById(id, filter);
 
       if (!dalResult.success) {
-        return mapDalToService<UserDTO>(dalResult);
+        return mapDalToService<UserWithCohortAndStudentProfileDTO>(dalResult);
       }
 
       if (!dalResult.data) {

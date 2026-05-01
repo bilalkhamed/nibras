@@ -6,20 +6,24 @@ import z from 'zod';
 // ============================================================================
 
 /** Core user fields for display purposes */
-export type UserDTO = Pick<
-  User,
-  | 'id'
-  | 'firstName'
-  | 'middleName'
-  | 'lastName'
-  | 'email'
-  | 'role'
-  | 'birthYear'
-  | 'country'
-  | 'status'
-  | 'phone'
-  | 'username'
->;
+
+export const userSelect = {
+  id: true,
+  firstName: true,
+  middleName: true,
+  lastName: true,
+  email: true,
+  role: true,
+  birthYear: true,
+  country: true,
+  status: true,
+  phone: true,
+  username: true,
+} satisfies Prisma.UserSelect;
+
+export type UserDTO = Prisma.UserGetPayload<{
+  select: typeof userSelect;
+}>;
 
 /** Extended user DTO with timestamps */
 export type UserWithTimestampsDTO = UserDTO & {
@@ -27,10 +31,33 @@ export type UserWithTimestampsDTO = UserDTO & {
   updatedAt: Date;
 };
 
+export const studentProfileSelect = {
+  address: true,
+  gradeLevel: true,
+  motherFullName: true,
+  motherPhone: true,
+  skills: true,
+} satisfies Prisma.StudentProfileSelect;
+
+export const userWithCohortSelect = {
+  ...userSelect,
+  cohort: { select: { id: true, name: true } },
+} satisfies Prisma.UserSelect;
+
 /** User with cohort information */
-export type UserWithCohortDTO = UserDTO & {
-  cohort: Pick<Cohort, 'id' | 'name'> | null;
-};
+export type UserWithCohortDTO = Prisma.UserGetPayload<{
+  select: typeof userWithCohortSelect;
+}>;
+
+export const userWithCohortAndStudentProfileSelect = {
+  ...userWithCohortSelect,
+  studentProfile: { select: studentProfileSelect },
+} satisfies Prisma.UserSelect;
+
+/** User with cohort and student profile info */
+export type UserWithCohortAndStudentProfileDTO = Prisma.UserGetPayload<{
+  select: typeof userWithCohortAndStudentProfileSelect;
+}>;
 
 /** User with timestamps and cohort */
 export type UserWithCohortAndTimestampsDTO = UserWithTimestampsDTO & {

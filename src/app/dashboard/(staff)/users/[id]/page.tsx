@@ -1,14 +1,13 @@
-import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CopyValue } from '@/components/common/copy-value';
 import { InfoField } from '@/components/common/info-field';
 import {
-  Snowflake,
-  Trash2,
-  KeyRound,
-  Pencil,
+  // Snowflake,
+  // Trash2,
+  // KeyRound,
+  // Pencil,
   ExternalLink,
 } from 'lucide-react';
 import labels from '@/lib/labels.json';
@@ -37,7 +36,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 
   if (!res.success) {
     if (res.error.type === 'not-found') {
-      return notFound();
+      return <UserNotFound />;
     }
     return <div>حدث خطأ غير متوقع. الرجاء المحاولة لاحقاً.</div>;
   }
@@ -107,17 +106,57 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 label="الدولة"
                 value={user.country || labels.common.null}
               />
-              {/* <InfoField
-                label="تاريخ الإنشاء"
-                value={formatDate(user.createdAt)}
-              />
-              <InfoField label="آخر تحديث" value={formatDate(user.updatedAt)} /> */}
+
+              <h2 className="text-xl font-semibold text-foreground mb-3">
+                معلومات الملف الشخصي
+              </h2>
+              <Card className="border-border bg-card/80">
+                <CardContent className="p-4 md:p-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoField
+                      label="المرحلة الدراسية"
+                      value={
+                        user.studentProfile?.gradeLevel || labels.common.null
+                      }
+                    />
+                    <InfoField
+                      label="العنوان"
+                      value={user.studentProfile?.address || labels.common.null}
+                    />
+                    <InfoField
+                      label="اسم الأم"
+                      value={
+                        user.studentProfile?.motherFullName ||
+                        labels.common.null
+                      }
+                    />
+                    <CopyValue
+                      label="رقم هاتف الأم"
+                      value={
+                        user.studentProfile?.motherPhone || labels.common.null
+                      }
+                    />
+                  </div>
+                  {user.studentProfile?.skills &&
+                    user.studentProfile.skills.length > 0 && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          المهارات
+                        </p>
+                        <InfoField
+                          label="اسم الأم"
+                          value={user.studentProfile?.skills}
+                        />
+                      </div>
+                    )}
+                </CardContent>
+              </Card>
             </div>
           </CardContent>
         </Card>
       </section>
 
-      <section>
+      {/* <section>
         <h2 className="text-xl font-semibold text-foreground mb-3">
           إجراءات إدارية
         </h2>
@@ -150,7 +189,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             </Button>
           </CardContent>
         </Card>
-      </section>
+      </section> */}
 
       {/* Role-specific */}
       {user.role === 'student' ? (
@@ -345,4 +384,20 @@ function StatusBadge({
 
   const cfg = map[status];
   return <Badge className={`border ${cfg.className}`}>{cfg.label}</Badge>;
+}
+
+function UserNotFound() {
+  return (
+    <div className="text-center py-20">
+      <h2 className="text-3xl font-bold mb-4 text-destructive">
+        المستخدم غير موجود
+      </h2>
+      <p className="text-muted-foreground mb-6">
+        عذراً، لم نتمكن من العثور على هذا المستخدم.
+      </p>
+      <Link href="/dashboard/users">
+        <Button variant="outline">العودة إلى قائمة المستخدمين</Button>
+      </Link>
+    </div>
+  );
 }
