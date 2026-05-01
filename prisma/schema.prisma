@@ -330,6 +330,8 @@ model Assignment {
   allowTextSubmission Boolean @default(false) @map("allow_text_submission")
   allowFileSubmission Boolean @default(false) @map("allow_file_submission")
 
+  maxScore Float @map("max_score")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -381,7 +383,7 @@ model StudentAssignment {
   markedBy   User?   @relation(fields: [markedById], references: [id], onDelete: SetNull, name: "markedBy")
 
   //grading
-  score   Int?
+  score   Float?
   comment String? @db.Text
 
   gradedById String?
