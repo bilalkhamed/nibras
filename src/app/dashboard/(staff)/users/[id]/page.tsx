@@ -104,54 +104,75 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
               <InfoField label="العمر" value={`${age} سنة`} />
               <InfoField
                 label="الدولة"
-                value={user.country || labels.common.null}
+                value={
+                  (user.country &&
+                    labels.countries[
+                      user.country as keyof typeof labels.countries
+                    ]) ||
+                  labels.common.null
+                }
               />
-
-              <h2 className="text-xl font-semibold text-foreground mb-3">
-                معلومات الملف الشخصي
-              </h2>
-              <Card className="border-border bg-card/80">
-                <CardContent className="p-4 md:p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InfoField
-                      label="المرحلة الدراسية"
-                      value={
-                        user.studentProfile?.gradeLevel || labels.common.null
-                      }
-                    />
-                    <InfoField
-                      label="العنوان"
-                      value={user.studentProfile?.address || labels.common.null}
-                    />
-                    <InfoField
-                      label="اسم الأم"
-                      value={
-                        user.studentProfile?.motherFullName ||
-                        labels.common.null
-                      }
-                    />
-                    <CopyValue
-                      label="رقم هاتف الأم"
-                      value={
-                        user.studentProfile?.motherPhone || labels.common.null
-                      }
-                    />
-                  </div>
-                  {user.studentProfile?.skills &&
-                    user.studentProfile.skills.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          المهارات
-                        </p>
-                        <InfoField
-                          label="اسم الأم"
-                          value={user.studentProfile?.skills}
-                        />
-                      </div>
-                    )}
-                </CardContent>
-              </Card>
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold text-foreground mb-3">
+          معلومات الملف الشخصي
+        </h2>
+        <Card className="border-border bg-card/80">
+          <CardContent className="p-4 md:p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField
+                label="المرحلة الدراسية"
+                value={
+                  user.studentProfile?.gradeLevel
+                    ? labels.gradeLevels[user.studentProfile.gradeLevel]
+                    : labels.common.null
+                }
+              />
+              {(function () {
+                const country =
+                  user.country &&
+                  labels.countries[
+                    user.country as keyof typeof labels.countries
+                  ];
+                return (
+                  <InfoField
+                    label="العنوان"
+                    value={
+                      user.studentProfile?.address
+                        ? country
+                          ? country + '، ' + user.studentProfile.address
+                          : user.studentProfile.address
+                        : country || '–'
+                    }
+                  />
+                );
+              })()}
+
+              <InfoField
+                label="اسم الأم"
+                value={
+                  user.studentProfile?.motherFullName || labels.common.null
+                }
+              />
+              <CopyValue
+                label="رقم هاتف الأم"
+                value={user.studentProfile?.motherPhone || labels.common.null}
+              />
+            </div>
+            {user.studentProfile?.skills &&
+              user.studentProfile.skills.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">المهارات</p>
+                  <InfoField
+                    label="اسم الأم"
+                    value={user.studentProfile?.skills}
+                  />
+                </div>
+              )}
           </CardContent>
         </Card>
       </section>

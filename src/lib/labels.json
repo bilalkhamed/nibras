@@ -231,5 +231,20 @@
     "AU": "أستراليا",
     "MY": "ماليزيا",
     "IN": "الهند"
+  },
+  "gradeLevels": {
+    "first_grade": "الصف الأول",
+    "second_grade": "الصف الثاني",
+    "third_grade": "الصف الثالث",
+    "fourth_grade": "الصف الرابع",
+    "fifth_grade": "الصف الخامس",
+    "sixth_grade": "الصف السادس",
+    "seventh_grade": "الصف السابع",
+    "eighth_grade": "الصف الثامن",
+    "ninth_grade": "الصف التاسع",
+    "tenth_grade": "الصف العاشر",
+    "eleventh_grade": "الصف الحادي عشر",
+    "twelfth_grade": "الصف الثاني عشر",
+    "bachelor": "بكالوريوس"
   }
 }
