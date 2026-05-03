@@ -64,11 +64,11 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
   }, [cohortId]);
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [createdUserName, setCreatedUserName] = useState('');
   const {
     register,
     handleSubmit,
     control,
-    watch,
     reset,
     formState: { errors },
   } = useForm<CreateUserInput>({
@@ -95,11 +95,10 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
 
       setInviteCode(result.inviteCode);
       setModalOpen(true);
+      setCreatedUserName(`${data.firstName} ${data.lastName}`);
       reset();
     });
   };
-
-  const firstName = watch('firstName');
 
   return (
     <>
@@ -309,7 +308,7 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
       <InviteCodeModal
         inviteCode={inviteCode}
         open={modalOpen}
-        userName={firstName || 'المستخدم الجديد'}
+        userName={createdUserName || 'المستخدم الجديد'}
         onOpenChange={setModalOpen}
       />
     </>

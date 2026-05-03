@@ -57,7 +57,7 @@ export function InviteCodeModal({
           {/* Info Text */}
           <div className="rounded-lg bg-foreground/20 p-3 text-sm text-foreground border border-accent-muted/20">
             <p>
-              شاركي رابط الدعوة مع {userName} حتى يتمكن من إكمال التسجيل والدخول
+              شاركي رابط الدعوة مع {userName} حتى تتمكن من إكمال التسجيل والدخول
               إلى نبراس.
             </p>
             <p className="text-xs font-bold mt-4 text-center">
