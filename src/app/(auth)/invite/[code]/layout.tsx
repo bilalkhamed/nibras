@@ -6,7 +6,7 @@ export default function InvitePageLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="bg-background fixed inset-0 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-2 duration-500">
         {children}
         <div className="mt-6 text-center">

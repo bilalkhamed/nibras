@@ -16,6 +16,7 @@ import { FormField, PasswordField } from '@/components/forms/form-fields';
 import { Loader2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ErrorMessage } from '@/components/forms/error-message';
+import Image from 'next/image';
 
 export function InviteSuccessForm({
   user,
@@ -84,6 +85,13 @@ export function InviteSuccessForm({
   return (
     <Card className="border-border shadow-2xl backdrop-blur bg-card/90">
       <CardHeader className="space-y-1 text-center">
+        <Image
+          src={'/logo.svg'}
+          alt="نبراس"
+          width={150}
+          height={150}
+          className="mx-auto"
+        />
         <CardTitle className="text-2xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
           مرحبًا بك، {user.firstName}!
         </CardTitle>
@@ -122,7 +130,7 @@ export function InviteSuccessForm({
                 error={errors.email?.message}
                 handleOnBlur={onBlur}
                 handleChange={onChange}
-                label={`${labels.common.email} (اختياري)`}
+                label={`${labels.common.email} (إن وجد)`}
               />
             )}
           />
