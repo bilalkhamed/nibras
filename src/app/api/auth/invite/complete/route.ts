@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         data: {
           email: data.email,
           hashedPassword,
-          username: data.username,
+          username: data.username.toLowerCase(),
           status: ACTIVE_STATUS,
         },
         select: {
