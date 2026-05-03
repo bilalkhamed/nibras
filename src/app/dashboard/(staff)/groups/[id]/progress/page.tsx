@@ -62,28 +62,44 @@ async function StudentsAssignmentsList({
     ? `${session.firstName} ${session.lastName}`
     : 'مشرف';
   const currentWeekResult = await getCurrentWeek();
-  if (!currentWeekResult.success || !currentWeekResult.data) notFound(); // TODO: handle error properly
-  // FIX: remove current week dependency (to support when there is no current week)
+
+  // If no current week, fall back to the most recent week
+  const currentWeekNumber =
+    currentWeekResult.success && currentWeekResult.data
+      ? currentWeekResult.data.week.number
+      : null;
 
   const parsedWeek = Number(week);
-
-  // here we are checking if either the week is invalid OR a future week
   const isInvalidWeek = Number.isNaN(parsedWeek) || parsedWeek < 1;
   const isFutureWeek =
-    !isInvalidWeek && parsedWeek > currentWeekResult.data.week.number;
+    !isInvalidWeek &&
+    currentWeekNumber !== null &&
+    parsedWeek > currentWeekNumber;
 
-  // if it is , default to current week
   const targetWeekNumber =
-    isInvalidWeek || isFutureWeek
-      ? currentWeekResult.data.week.number
-      : parsedWeek;
-  // fetch the target week from DB
+    isInvalidWeek || isFutureWeek ? (currentWeekNumber ?? 1) : parsedWeek;
+
   const targetWeekResult = await getCalendarWeekByNumber(targetWeekNumber);
   const targetWeek =
     targetWeekResult.success && targetWeekResult.data
       ? targetWeekResult.data
       : null;
-  const selectedWeek = targetWeek ?? currentWeekResult.data;
+
+  // KEY CHANGE: if no current week, try to get the most recent available week
+  const selectedWeek =
+    targetWeek ??
+    (currentWeekResult.success && currentWeekResult.data
+      ? currentWeekResult.data
+      : null);
+
+  // If we truly have no week data at all, show empty state instead of 404
+  if (!selectedWeek) {
+    return (
+      <div className="p-6 text-center text-sm text-muted-foreground">
+        لا توجد أسابيع متاحة حالياً
+      </div>
+    );
+  }
 
   const weekId = selectedWeek.week.id;
 
