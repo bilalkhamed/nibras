@@ -70,7 +70,10 @@ function NoGroup() {
     <Alert variant="warning">
       <AlertTitle>لا توجد مجموعة</AlertTitle>
       <AlertDescription>
-        لم يتم تعيينك لأي مجموعة بعد. يرجى التواصل مع المشرفة.
+        <strong>لم يتم تعيينك لأي مجموعة بعد.</strong>
+        <br />
+        إذا كنتي تعتقدين أن هناك خطأ، حاولي تسجيل الخروج ثم الدخول مجددًا. إذا
+        استمرت المشكلة، يرجى التواصل مع الدعم الفني.
       </AlertDescription>
     </Alert>
   );
