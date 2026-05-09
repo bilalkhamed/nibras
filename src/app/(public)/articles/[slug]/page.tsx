@@ -94,11 +94,7 @@ export async function generateStaticParams() {
   });
 
   if (!articlesRes.success || articlesRes.data.length === 0) {
-    return [
-      {
-        slug: '__empty__',
-      },
-    ];
+    return notFound();
   }
 
   const articles = articlesRes.data;
@@ -114,6 +110,11 @@ export async function generateStaticParams() {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
+
+  if (slug === '__empty__') {
+    return notFound();
+  }
+
   const result = await findPublishedArticleBySlug(slug);
 
   if (!result.success || !result.data) {
