@@ -4,11 +4,13 @@ import { cookies } from 'next/headers';
 import { AccessTokenPayload, Role, UserStatus } from '@/types/types';
 import { SupervisorStatus } from '@prisma/client';
 
-const secretKey = process.env.SESSION_SECRET;
-if (!secretKey) {
-  throw new Error('SESSION_SECRET env var not set');
+function getEncodedKey() {
+  const secretKey = process.env.SESSION_SECRET;
+  if (!secretKey) {
+    throw new Error('SESSION_SECRET env var not set');
+  }
+  return new TextEncoder().encode(secretKey);
 }
-const encodedKey = new TextEncoder().encode(secretKey);
 
 // Access token lives 15 minutes; adjust if needed.
 const ACCESS_TOKEN_EXP_MINUTES = 60;
@@ -57,12 +59,12 @@ export async function signAccessToken(payload: AccessTokenPayload) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${ACCESS_TOKEN_EXP_MINUTES}m`)
-    .sign(encodedKey);
+    .sign(getEncodedKey());
 }
 
 export async function verifyAccessToken(token: string | undefined = '') {
   try {
-    const { payload } = await jwtVerify(token, encodedKey, {
+    const { payload } = await jwtVerify(token, getEncodedKey(), {
       algorithms: ['HS256'],
     });
     return payload as AccessTokenPayload;
