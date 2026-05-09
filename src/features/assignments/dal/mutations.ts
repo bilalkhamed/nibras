@@ -60,6 +60,8 @@ export async function upsertStudentAssignment({
         gradedById: data.markedById,
         textSubmission: data.textSubmission || null,
         fileKey: data.fileKey || null,
+        score: data.score || null,
+        comment: data.comment || null,
       },
       update: {
         isCompleted: data.isCompleted,

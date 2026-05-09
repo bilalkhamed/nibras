@@ -25,7 +25,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { cn, formatDate } from '@/lib/shared/utils';
+import { cn, formatDate, toArabicNumerals } from '@/lib/shared/utils';
 import { updateStudentAssignmentAction } from '../../actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -265,7 +265,7 @@ function AssignmentCard({
           {assignment.name}
         </CardTitle>
         <CardDescription className="line-clamp-3">
-          {assignment.description || 'ابدئي عند جاهزيتك، ننتظر إبداعك.'}
+          {assignment.description}
         </CardDescription>
 
         {hasAttachments && (
@@ -318,10 +318,35 @@ function AssignmentCard({
                   مكتمل
                 </Badge>
               ) : (
-                <CompleteButton
-                  assignment={assignment}
-                  isCompleted={data.isCompleted}
-                />
+                <>
+                  {requiresSubmission ? (
+                    <SubmissionSheet
+                      assignmentId={assignment.id}
+                      assignmentName={assignment.name}
+                      allowFileSubmission={assignment.allowFileSubmission}
+                      allowTextSubmission={assignment.allowTextSubmission}
+                      defaultValues={{
+                        fileKey: data.fileKey,
+                        textSubmission: data.textSubmission,
+                        fileUrl: data.fileUrl,
+                      }}
+                    >
+                      <Button
+                        variant="outlinePrimary"
+                        size="sm"
+                        className="gap-1"
+                      >
+                        <Send className="h-4 w-4" />
+                        سلمي المرفقات
+                      </Button>
+                    </SubmissionSheet>
+                  ) : (
+                    <CompleteButton
+                      assignment={assignment}
+                      isCompleted={data.isCompleted}
+                    />
+                  )}
+                </>
               )}
               {data.studentAssignment?.completedAt && (
                 <p className="text-xs text-muted-foreground">
@@ -334,24 +359,7 @@ function AssignmentCard({
               <p className="text-xs text-muted-foreground">
                 {requiresSubmission ? 'المراجعة' : 'الدرجة'}
               </p>
-              {requiresSubmission && !isCompleted ? (
-                <SubmissionSheet
-                  assignmentId={assignment.id}
-                  assignmentName={assignment.name}
-                  allowFileSubmission={assignment.allowFileSubmission}
-                  allowTextSubmission={assignment.allowTextSubmission}
-                  defaultValues={{
-                    fileKey: data.fileKey,
-                    textSubmission: data.textSubmission,
-                    fileUrl: data.fileUrl,
-                  }}
-                >
-                  <Button variant="outlinePrimary" size="sm" className="gap-1">
-                    <Send className="h-4 w-4" />
-                    سلمي المرفقات
-                  </Button>
-                </SubmissionSheet>
-              ) : requiresSubmission && studentInfo ? (
+              {isCompleted && requiresSubmission && studentInfo ? (
                 <SubmissionViewerSheet
                   allowFileSubmission={assignment.allowFileSubmission}
                   allowTextSubmission={assignment.allowTextSubmission}
@@ -368,12 +376,19 @@ function AssignmentCard({
                 >
                   <Button variant="outline" size="sm" className="gap-1">
                     <GradeIcon className="h-4 w-4" />
-                    {gradeLabel}
+                    {gradeLabel}{' '}
+                    {data.studentAssignment?.score
+                      ? `(${toArabicNumerals(data.studentAssignment.score)})`
+                      : ''}
                   </Button>
                 </SubmissionViewerSheet>
               ) : (
                 <p className="text-sm font-medium text-foreground">
-                  {data.studentAssignment?.score ?? '-'}
+                  {data.studentAssignment?.score
+                    ? toArabicNumerals(data.studentAssignment.score) +
+                      ' / ' +
+                      toArabicNumerals(assignment.maxScore)
+                    : '-'}
                 </p>
               )}
             </div>
@@ -416,8 +431,12 @@ function CompleteButton({
 
       data: {
         isCompleted: newValue,
+        score:
+          assignment.maxScore && newValue ? assignment.maxScore : undefined,
       },
     });
+
+    console.log('Update result:', result, 'score:', assignment.maxScore);
 
     if (result.success) {
       // Sync the rest of the app

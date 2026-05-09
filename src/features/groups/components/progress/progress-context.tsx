@@ -149,11 +149,14 @@ export function ProgressProvider({
           studentId,
           data: {
             isCompleted: newCompleted,
+            score: newCompleted
+              ? assignments.find((a) => a.id === assignmentId)?.maxScore
+              : undefined,
           },
         });
       });
     },
-    [updateOptimisticStudents],
+    [updateOptimisticStudents, assignments],
   );
 
   const getStudentStatus = useCallback(
