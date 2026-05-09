@@ -94,7 +94,11 @@ export async function generateStaticParams() {
   });
 
   if (!articlesRes.success || articlesRes.data.length === 0) {
-    return notFound();
+    return [
+      {
+        slug: '__empty__',
+      },
+    ];
   }
 
   const articles = articlesRes.data;
