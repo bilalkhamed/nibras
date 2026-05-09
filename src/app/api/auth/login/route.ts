@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
 
   const { success, error, data } = loginSchema.safeParse(body);
 
+  console.log('Parsed data:', { success, error, data });
+
   if (!success) {
     return NextResponse.json(z.treeifyError(error), { status: 422 });
   }
@@ -22,13 +24,14 @@ export async function POST(req: NextRequest) {
   const { identifier, password } = data;
 
   const res = await getUserByIdentifier(identifier);
-
-  console.log(res);
+  console.log('getUserByIdentifier result:', res);
   if (!res.success) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   const foundUser = res.data;
+
+  console.log('Found user:', foundUser);
 
   if (!foundUser.hashedPassword) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
@@ -38,6 +41,8 @@ export async function POST(req: NextRequest) {
     password,
     foundUser.hashedPassword,
   );
+
+  console.log('Password match:', passwordMatch);
 
   if (!passwordMatch) {
     return NextResponse.json(

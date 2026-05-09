@@ -140,10 +140,13 @@ export async function findUserByIdentifier(
     const where: Prisma.UserWhereUniqueInput = isEmail
       ? { email: identifier }
       : { username: identifier };
-    return await prisma.user.findUnique({
+
+    const user = await prisma.user.findUnique({
       where,
       select: userByEmailSelect,
     });
+    console.log('Identifier:', identifier, '\nUser found:', user);
+    return user;
   });
 }
 
