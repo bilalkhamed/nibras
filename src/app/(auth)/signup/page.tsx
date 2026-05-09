@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { signupSchema } from '@/lib/shared/auth-schemas';
 import { useRouter } from 'next/navigation';
 import { FormField, PasswordField } from '@/components/forms/form-fields';
+import { ApplicationsClosed } from './applications-closed';
 
 type SignupValues = {
   firstName: string;
@@ -61,7 +62,7 @@ export default function SignupPage() {
     if (!result.success) {
       const treeifiedError = z.treeifyError(result.error);
 
-      let error = treeifiedError.properties?.[field]?.errors[0];
+      const error = treeifiedError.properties?.[field]?.errors[0];
 
       setErrors((prev) => ({ ...prev, [field]: error }));
       setSuccess(false);
@@ -91,7 +92,6 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       });
-      const data = await res.json();
 
       if (res.ok) {
         // Redirect to login page or show success message
@@ -106,6 +106,7 @@ export default function SignupPage() {
     }
   };
 
+  return <ApplicationsClosed />;
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-2 duration-500">
