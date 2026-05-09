@@ -93,8 +93,12 @@ export async function generateStaticParams() {
     isPublished: true,
   });
 
-  if (!articlesRes.success) {
-    return [];
+  if (!articlesRes.success || articlesRes.data.length === 0) {
+    return [
+      {
+        slug: '__empty__',
+      },
+    ];
   }
 
   const articles = articlesRes.data;
