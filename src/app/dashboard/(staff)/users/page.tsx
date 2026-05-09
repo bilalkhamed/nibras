@@ -48,7 +48,6 @@ async function AddUserFormContainer() {
 
   if (!session) return null;
 
-  console.log(session);
   return session.role === ADMIN_ROLE ? (
     <AddUserForm />
   ) : (

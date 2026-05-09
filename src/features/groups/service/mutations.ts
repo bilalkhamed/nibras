@@ -237,7 +237,6 @@ export async function addStudentToGroup(
 
       // Validate student exists and has correct role
       const studentResult = await getUserWithRoleAndCohortAndGroup(studentId);
-      console.log(studentResult);
 
       if (!studentResult.success) {
         return {

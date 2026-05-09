@@ -140,7 +140,6 @@ export function InviteSuccessForm({
               control={control}
               name="password"
               render={({ field: { onChange, value, onBlur } }) => {
-                console.log(typeof onChange, onBlur, value);
                 return (
                   <PasswordField
                     field="password"
@@ -160,7 +159,6 @@ export function InviteSuccessForm({
               control={control}
               name="confirmPassword"
               render={({ field: { onChange, value, onBlur } }) => {
-                console.log(typeof onChange, onBlur, value);
                 return (
                   <FormField
                     field="confirmPassword"

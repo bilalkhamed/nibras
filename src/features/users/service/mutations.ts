@@ -60,7 +60,6 @@ export async function createUser(userData: CreateUserInput) {
         expiresAt,
       });
 
-      console.log(dalResult);
       if (!dalResult.success) {
         return mapDalToService(dalResult);
       }

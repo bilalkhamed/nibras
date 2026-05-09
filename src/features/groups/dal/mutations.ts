@@ -92,8 +92,6 @@ export async function updateGroup(
       };
     }
 
-    console.log(data);
-
     const updated = await prisma.group.update({
       where: { id: groupId },
       data: {

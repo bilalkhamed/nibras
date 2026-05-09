@@ -128,8 +128,6 @@ export async function getUserByIdentifier(identifier: string) {
     async () => {
       const dalResult = await findUserByIdentifier(identifier);
 
-      console.log('DAL result in getUserByIdentifier:', dalResult);
-
       if (!dalResult.success) {
         return mapDalToService<UserByEmail>(dalResult);
       }

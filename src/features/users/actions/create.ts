@@ -25,7 +25,6 @@ export async function createUserAction(
 
   const result = await createUser(parseResult.data);
 
-  console.log(parseResult.data.cohortId);
   if (!result.success) {
     return {
       success: false,

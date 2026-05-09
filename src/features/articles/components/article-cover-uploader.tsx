@@ -28,7 +28,6 @@ type ArticleCoverUploaderProps = {
  */
 async function fetchPublicUrl(key: string): Promise<string | null> {
   try {
-    console.log(getPublicS3Url(key));
     return getPublicS3Url(key);
   } catch {
     return null;

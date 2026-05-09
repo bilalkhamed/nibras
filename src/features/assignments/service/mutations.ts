@@ -136,8 +136,6 @@ export async function addGradingToStudentAssignment({
         },
       });
 
-      console.log(dalResult);
-
       return mapDalToService(dalResult);
     },
     { requireAuth: true },

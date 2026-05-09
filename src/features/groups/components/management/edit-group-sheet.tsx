@@ -176,7 +176,6 @@ export function EditGroupSheet({
     }
   };
 
-  console.log(supervisors);
   return (
     <Tooltip>
       <Sheet open={open} onOpenChange={handleOpenChange}>

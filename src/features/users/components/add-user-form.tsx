@@ -49,7 +49,6 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
         }
 
         const data = await response.json();
-        console.log('Cohorts API response:', data);
 
         const cohortsData = cohortId ? [data.cohort] : data.cohorts;
         setCohorts(cohortsData.filter((c: Cohort | undefined) => c != null));

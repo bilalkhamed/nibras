@@ -69,12 +69,6 @@ export async function getAllPrograms({
 
       const { role, supervisorStatus } = session;
 
-      console.log(
-        role === 'admin' ||
-          role === 'cohort_manager' ||
-          (role === 'supervisor' && supervisorStatus === 'in_training'),
-      );
-
       if (
         role === 'admin' ||
         role === 'cohort_manager' ||

@@ -145,7 +145,6 @@ export async function findUserByIdentifier(
       where,
       select: userByEmailSelect,
     });
-    console.log('Identifier:', identifier, '\nUser found:', user);
     return user;
   });
 }

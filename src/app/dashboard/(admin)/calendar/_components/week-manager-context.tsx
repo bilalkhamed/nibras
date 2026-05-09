@@ -270,7 +270,6 @@ export function WeekManagerProvider({
   const saveChanges = React.useCallback(async () => {
     try {
       const result = await updateCalendarWeeksAction(weeks);
-      console.log(result);
 
       if (!result.success) {
         throw new Error(result.error?.type || 'unknown');
