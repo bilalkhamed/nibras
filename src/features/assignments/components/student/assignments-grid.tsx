@@ -373,6 +373,7 @@ function AssignmentCard({
                   studentId={studentInfo.id}
                   studentName={studentInfo.name}
                   canEditGrade={false}
+                  maxScore={assignment.maxScore}
                 >
                   <Button variant="outline" size="sm" className="gap-1">
                     <GradeIcon className="h-4 w-4" />

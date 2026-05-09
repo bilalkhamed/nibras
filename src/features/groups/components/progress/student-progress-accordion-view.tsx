@@ -199,6 +199,7 @@ export function StudentProgressAccordionView({
                               }
                               currentScore={status.score}
                               currentComment={status.comment}
+                              maxScore={assignment.maxScore}
                             >
                               <Button
                                 variant="outline"

@@ -54,6 +54,8 @@ type SubmissionViewerSheetProps = {
   currentScore?: number | null;
   /** Current comment from database */
   currentComment?: string | null;
+
+  maxScore: number;
   /** Whether the user can edit the grade and comment */
   canEditGrade?: boolean;
   /** Trigger button element */
@@ -81,6 +83,7 @@ export function SubmissionViewerSheet({
   currentScore,
   currentComment,
   canEditGrade = true,
+  maxScore,
   children,
 }: SubmissionViewerSheetProps) {
   const [open, setOpen] = useState(false);
@@ -243,7 +246,7 @@ export function SubmissionViewerSheet({
                     className="text-right"
                     dir="rtl"
                     min={0}
-                    max={100}
+                    max={maxScore}
                   />
                 </div>
 
@@ -273,20 +276,24 @@ export function SubmissionViewerSheet({
                 {currentScore !== null && currentScore !== undefined ? (
                   <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-linear-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-800">
                     <div className="text-6xl">
-                      {currentScore > 8 ? '⭐' : currentScore > 5 ? '😊' : '😔'}
+                      {currentScore > maxScore * 0.8
+                        ? '⭐'
+                        : currentScore > maxScore * 0.5
+                          ? '😊'
+                          : '😔'}
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-5xl font-bold text-amber-600 dark:text-amber-400">
                         {toArabicNumerals(currentScore)}
                       </span>
                       <span className="text-2xl text-amber-600/70 dark:text-amber-400/70">
-                        / {toArabicNumerals(100)}
+                        / {toArabicNumerals(maxScore)}
                       </span>
                     </div>
                     <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                      {currentScore > 8
+                      {currentScore > maxScore * 0.8
                         ? 'أحسنتِ! عمل ممتاز! 🎉'
-                        : currentScore > 5
+                        : currentScore > maxScore * 0.5
                           ? 'عمل جيد! استمري 💪'
                           : 'يمكنك التحسن المرة القادمة 🌟'}
                     </p>

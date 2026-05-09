@@ -208,6 +208,7 @@ export function AssignmentProgressAccordion({
                                   assignmentDetails?.allowFileSubmission ??
                                   false
                                 }
+                                maxScore={assignmentDetails.maxScore}
                                 currentScore={status.score}
                                 currentComment={status.comment}
                               >
