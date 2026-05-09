@@ -38,23 +38,23 @@ export function Navbar({ extraRight, session }: NavbarProps) {
       <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* LEFT */}
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Logo" height={50} width={80} />
+          <div className="flex items-center gap-10">
+            <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
+              <Image src="/logo.svg" alt="Logo" height={45} width={75} />
             </Link>
 
             {/* DESKTOP NAV */}
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium">
               {items.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
+                    className="flex items-center gap-2 cursor-pointer text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Icon className="h-4 w-4" />
-                    {item.label}
+                    <span>{item.label}</span>
                   </Link>
                 );
               })}
