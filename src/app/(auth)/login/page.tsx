@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Loader2Icon, Sparkles } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import labels from '@/lib/labels.json';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,6 +17,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -67,25 +67,21 @@ export default function LoginPage() {
   return (
     <div className="bg-background flex min-h-screen items-center justify-center p-4">
       <div className="animate-in fade-in slide-in-from-bottom-2 w-full max-w-md duration-500">
-        <div className="mb-8 text-center">
-          <Link href="/" className="mb-4 inline-flex items-center gap-2">
-            <Sparkles className="text-primary h-10 w-10" />
-            <h1 className="from-primary to-secondary bg-linear-to-r bg-clip-text text-3xl font-bold text-transparent">
-              {labels.common.appName}
-            </h1>
-          </Link>
-        </div>
         <Card
           className="border-border bg-card/90 shadow-2xl backdrop-blur"
           data-auth-mode="login"
         >
-          <CardHeader className="space-y-1 text-center">
+          <CardHeader className="text-center">
+            <Image
+              src={'/logo.svg'}
+              alt="نبراس"
+              width={150}
+              height={150}
+              className="mx-auto"
+            />
             <CardTitle className="from-primary to-secondary bg-linear-to-r bg-clip-text text-2xl font-bold text-transparent leading-10">
               {labels.auth.loginTitle}
             </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {labels.auth.loginSubtitle}
-            </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
