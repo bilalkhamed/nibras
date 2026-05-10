@@ -1,9 +1,5 @@
-import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
-import labels from '@/lib/labels.json';
 import { InvalidInvite } from './invalid-invite';
 import { InviteSuccessForm } from './invite-success-form';
-import prisma from '@/lib/server/prisma';
 
 async function validateInviteCode(code: string): Promise<{
   valid: boolean;
@@ -16,8 +12,6 @@ async function validateInviteCode(code: string): Promise<{
       return { valid: false };
     }
   }
-
-  const [selector, validator] = code.split('.');
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/invite/validate`,
     {
@@ -26,7 +20,7 @@ async function validateInviteCode(code: string): Promise<{
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ inviteCode: code }),
-    }
+    },
   );
 
   if (!res.ok) {
@@ -47,7 +41,15 @@ export default async function InviteCodePage({
   params: { code: string };
 }) {
   const { code } = await params;
-  const { valid, user, status } = await validateInviteCode(code);
+  let result;
+  try {
+    result = await validateInviteCode(code);
+  } catch (err) {
+    console.error(err);
+    return <InvalidInvite status={500} />;
+  }
+
+  const { valid, user, status } = result;
 
   if (!valid || !user) {
     return <InvalidInvite status={status || 400} />;

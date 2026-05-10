@@ -1,15 +1,6 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { TriangleAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 const statusMessages: {
   [key: number]: { title: string; description: string };
@@ -33,6 +24,11 @@ const statusMessages: {
     title: 'لقد تجاوزت الحد المسموح من المحاولات',
     description:
       'تم قفل رمز الدعوة بسبب العديد من المحاولات غير الصالحة. تواصلي مع الإدارة لطلب المساعدة.',
+  },
+  500: {
+    title: 'عذرًا!',
+    description:
+      'عذرًا! حدث خطأ غير متوقع أثناء التحقق من الدعوة. يرجى المحاولة لاحقًا.',
   },
 };
 
