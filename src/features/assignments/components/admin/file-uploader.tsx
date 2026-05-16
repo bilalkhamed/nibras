@@ -282,6 +282,8 @@ export function FileUploader({
     accept: {
       'image/*': [],
       'application/pdf': [],
+      'audio/*': [],
+      'video/*': [],
     },
     disabled: files.length >= maxFiles,
   });

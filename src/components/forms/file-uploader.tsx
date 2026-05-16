@@ -82,7 +82,9 @@ export function FileUploader({
       }
 
       setFiles((prevFiles) =>
-        prevFiles.map((f) => (f.id === fileId ? { ...f, isDeleting: true } : f))
+        prevFiles.map((f) =>
+          f.id === fileId ? { ...f, isDeleting: true } : f,
+        ),
       );
 
       const response = await fetch('/api/s3/delete', {
@@ -99,8 +101,8 @@ export function FileUploader({
         toast.error('فشل في حذف الملف من الخادم.');
         setFiles((prevFiles) =>
           prevFiles.map((f) =>
-            f.id === fileId ? { ...f, isDeleting: false } : f
-          )
+            f.id === fileId ? { ...f, isDeleting: false } : f,
+          ),
         );
         return;
       }
@@ -112,15 +114,15 @@ export function FileUploader({
 
       setFiles((prevFiles) =>
         prevFiles.map((f) =>
-          f.id === fileId ? { ...f, isDeleting: false, error: true } : f
-        )
+          f.id === fileId ? { ...f, isDeleting: false, error: true } : f,
+        ),
       );
     }
   }
 
   async function uploadFile(file: File) {
     setFiles((prevFiles) =>
-      prevFiles.map((f) => (f.file === file ? { ...f, uploading: true } : f))
+      prevFiles.map((f) => (f.file === file ? { ...f, uploading: true } : f)),
     );
 
     try {
@@ -142,8 +144,8 @@ export function FileUploader({
           prevFiles.map((f) =>
             f.file === file
               ? { ...f, uploading: false, progress: 0, error: true }
-              : f
-          )
+              : f,
+          ),
         );
         return;
       }
@@ -160,8 +162,8 @@ export function FileUploader({
               prevFiles.map((f) =>
                 f.file === file
                   ? { ...f, progress: Math.round(percentCompleted), key }
-                  : f
-              )
+                  : f,
+              ),
             );
           }
         };
@@ -172,8 +174,8 @@ export function FileUploader({
               prevFiles.map((f) =>
                 f.file === file
                   ? { ...f, uploading: false, progress: 100, error: false }
-                  : f
-              )
+                  : f,
+              ),
             );
             // Call onFileUpload passed prop with the key
             if (onFileUpload) {
@@ -182,7 +184,7 @@ export function FileUploader({
             resolve();
           } else {
             reject(
-              new Error(`حدث خطأ أثناء رفع الملف. رمز الخطأ: ${xhr.status}`)
+              new Error(`حدث خطأ أثناء رفع الملف. رمز الخطأ: ${xhr.status}`),
             );
           }
         };
@@ -201,8 +203,8 @@ export function FileUploader({
         prevFiles.map((f) =>
           f.file === file
             ? { ...f, uploading: false, progress: 0, error: true }
-            : f
-        )
+            : f,
+        ),
       );
     }
   }
@@ -230,13 +232,13 @@ export function FileUploader({
     (fileRejections: FileRejection[]) => {
       if (fileRejections.length > 0) {
         const tooManyFiles = fileRejections.find(
-          (rejection) => rejection.errors[0].code === 'too-many-files'
+          (rejection) => rejection.errors[0].code === 'too-many-files',
         );
         const fileTooLarge = fileRejections.find(
-          (rejection) => rejection.errors[0].code === 'file-too-large'
+          (rejection) => rejection.errors[0].code === 'file-too-large',
         );
         const invalidFileType = fileRejections.find(
-          (rejection) => rejection.errors[0].code === 'file-invalid-type'
+          (rejection) => rejection.errors[0].code === 'file-invalid-type',
         );
 
         if (tooManyFiles) {
@@ -245,19 +247,19 @@ export function FileUploader({
 
         if (invalidFileType) {
           toast.error(
-            'لا يكنك رفع هذا النوع من الملفات. الملفات المسموحة: الصور، وال PDF.'
+            'لا يكنك رفع هذا النوع من الملفات. الملفات المسموحة: الصور، وال PDF.',
           );
         }
 
         if (fileTooLarge) {
           const maxSizeMB = maxSize / (1024 * 1024);
           toast.error(
-            `الملف الذي تحاول رفعه أكبر من الحجم المسموح به (${maxSizeMB} ميجابايت).`
+            `الملف الذي تحاول رفعه أكبر من الحجم المسموح به (${maxSizeMB} ميجابايت).`,
           );
         }
       }
     },
-    [maxFiles, maxSize]
+    [maxFiles, maxSize],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -268,6 +270,8 @@ export function FileUploader({
     accept: {
       'image/*': [],
       'application/pdf': [],
+      'audio/*': [],
+      'video/*': [],
     },
   });
 
@@ -279,7 +283,7 @@ export function FileUploader({
           isDragActive
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25 hover:border-primary/50',
-          compact ? 'h-32' : 'h-64'
+          compact ? 'h-32' : 'h-64',
         )}
         {...getRootProps()}
       >
@@ -289,13 +293,13 @@ export function FileUploader({
             <div
               className={cn(
                 'rounded-full bg-background p-2 border shadow-sm',
-                compact ? 'size-8' : 'size-12'
+                compact ? 'size-8' : 'size-12',
               )}
             >
               <UploadCloud
                 className={cn(
                   'text-muted-foreground',
-                  compact ? 'size-4' : 'size-6'
+                  compact ? 'size-4' : 'size-6',
                 )}
               />
             </div>
@@ -303,7 +307,7 @@ export function FileUploader({
               <p
                 className={cn(
                   'font-medium text-foreground',
-                  compact ? 'text-sm' : 'text-base'
+                  compact ? 'text-sm' : 'text-base',
                 )}
               >
                 {isDragActive
@@ -327,7 +331,7 @@ export function FileUploader({
             'grid gap-4',
             compact
               ? 'grid-cols-2'
-              : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+              : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4',
           )}
         >
           {files.map((file) => (
@@ -335,7 +339,7 @@ export function FileUploader({
               key={file.id}
               className={cn(
                 'group relative overflow-hidden transition-all duration-200 aspect-square flex flex-col',
-                file.error ? 'border-destructive' : 'border-border'
+                file.error ? 'border-destructive' : 'border-border',
               )}
             >
               <div className="relative flex-1 w-full overflow-hidden bg-muted/20">
