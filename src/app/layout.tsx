@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   title: 'نبراس',
   description:
     'برنامجُ نبراس هو أحدُ برامجِ مِشكاة، وهو برنامجٌ مخصّصٌ للشّابات اليافعات ضمن الفئة العمريّة 12-17 سنة، يهدفُ لبناءِ شخصيّاتٍ فعّالة، ومؤثّرة، وقياديّة في المجتمع',
+  icons: {
+    icon: ['/favicon.ico', '/icon1.png', '/icon0.svg'],
+    apple: ['/apple-icon.png'],
+  },
+  manifest: '/manifest.json',
 };
 
 export default async function RootLayout({
@@ -30,6 +35,9 @@ export default async function RootLayout({
         suppressHydrationWarning
         data-scroll-behavior="smooth"
       >
+        <head>
+          <meta name="apple-mobile-web-app-title" content="نبراس" />
+        </head>
         <body
           className={`${ibmPlexSansArabic.className} antialiased min-h-screen`}
         >
