@@ -69,7 +69,7 @@ export function mapDalToService<T extends object | null>(
         } else if (dalError.error.code === 'P2003') {
           return {
             success: false,
-            error: { type: 'bad-request', statusCode: 400 },
+            error: { type: 'conflict', statusCode: 409 },
           };
         }
 
