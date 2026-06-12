@@ -30,6 +30,7 @@ import {
 } from '@/types/types';
 import clsx from 'clsx';
 import { InviteRegenModal } from './invite-regen-modal';
+import { ResetUserDialog } from './reset-user-dialog';
 import { UserWithCohortDTO } from '../types';
 
 interface UsersTableProps {
@@ -303,15 +304,29 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
                     {labels.dashboard.users[u.role]}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/dashboard/users/${u.id}`}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-border text-primary hover:bg-primary/15 dark:hover:bg-primary/25"
+                    <div className="flex items-center gap-2">
+                      <ResetUserDialog
+                        userId={u.id}
+                        userName={`${u.firstName} ${u.lastName}`}
                       >
-                        {labels.dashboard.users.view}
-                      </Button>
-                    </Link>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-warning/50 text-warning hover:bg-warning/10 dark:hover:bg-warning/15"
+                        >
+                          إعادة تعيين
+                        </Button>
+                      </ResetUserDialog>
+                      <Link href={`/dashboard/users/${u.id}`}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-border text-primary hover:bg-primary/15 dark:hover:bg-primary/25"
+                        >
+                          {labels.dashboard.users.view}
+                        </Button>
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

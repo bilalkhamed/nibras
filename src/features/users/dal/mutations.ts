@@ -1,6 +1,7 @@
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import { DalReturn } from '@/lib/server/dal/types';
 import prisma, { Prisma } from '@/lib/server/prisma';
+import { revalidatePath } from 'next/cache';
 import { CreateUserInput, CreatedUserDTO } from '../types';
 
 // ============================================================================
@@ -101,6 +102,43 @@ export async function updateManyUsers({
 }
 
 // TODO: Add update user functions as needed
+
+// ============================================================================
+// Reset Operations
+// ============================================================================
+
+/**
+ * Reset a user account — clears credentials, sets status back to `invited`.
+ * All other data (StudentProfile, GroupStudent, progress, etc.) is preserved.
+ *
+ * @param userId - The user ID to reset
+ * @returns The reset user's id
+ */
+export async function resetUser(
+  userId: string,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    return await prisma.$transaction(async (tx) => {
+      // 1. Clear credentials and revert status
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: {
+          email: null,
+          username: null,
+          hashedPassword: null,
+          status: 'invited',
+        },
+        select: { id: true },
+      });
+
+      // 2. Remove the old invite so a fresh one can be issued
+      await tx.invite.deleteMany({ where: { userId } });
+
+      revalidatePath('/dashboard/users');
+      return user;
+    });
+  });
+}
 
 // ============================================================================
 // Delete Operations

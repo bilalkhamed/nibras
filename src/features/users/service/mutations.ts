@@ -2,7 +2,8 @@ import {
   mapDalToService,
   runServiceOperation,
 } from '@/lib/server/service/helpers';
-import { createUserWithInvite, updateManyUsers, updateUser } from '../dal';
+import type { ServiceReturn } from '@/lib/server/service/types';
+import { createUserWithInvite, updateManyUsers, updateUser, resetUser } from '../dal';
 import { CreateUserInput, CreateUserResult } from '../types';
 import { generateInvite } from '@/lib/server/hash';
 import { SupervisorStatus } from '@prisma/client';
@@ -144,6 +145,44 @@ export async function updateMultipleSupervisorsStatus({
 }
 
 // TODO: Add update user services as needed
+
+// ============================================================================
+// Reset Services
+// ============================================================================
+
+/**
+ * Reset a user account — admin only.
+ * Sets status → invited, nullifies email/username/passwordHash.
+ * All other data is preserved.
+ *
+ * @param userId - The user ID to reset
+ */
+export async function resetUserAccount(
+  userId: string,
+): Promise<ServiceReturn<{ userId: string }>> {
+  return runServiceOperation(
+    async (session) => {
+      if (!session || session.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await resetUser(userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: { userId: dalResult.data.id },
+      };
+    },
+    { requireAuth: true },
+  );
+}
 
 // ============================================================================
 // Delete Services
