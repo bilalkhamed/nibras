@@ -126,31 +126,7 @@ export default function Home() {
         </div>
 
         {/* Info Grid */}
-        <div className="mt-40 grid gap-20 lg:grid-cols-2">
-          <div>
-            <h2 className="text-4xl font-bold text-foreground mb-12">
-              {toArabicNumerals(labels.home.levelsTitle)}
-            </h2>
-            <div className="space-y-10">
-              {about.levels.map((level) => (
-                <div
-                  key={level.id}
-                  className="relative pr-8 border-r-2 border-border hover:border-primary transition-colors"
-                >
-                  <span className="text-xs font-bold text-secondary uppercase tracking-widest">
-                    {toArabicNumerals(level.age)}
-                  </span>
-                  <h3 className="text-2xl font-bold text-foreground mt-1 mb-2">
-                    {toArabicNumerals(level.title)}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {toArabicNumerals(level.description)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
+        <div className="mt-40">
           <div>
             <h2 className="text-4xl font-bold text-foreground mb-12">
               {toArabicNumerals(labels.home.conditionsTitle)}
