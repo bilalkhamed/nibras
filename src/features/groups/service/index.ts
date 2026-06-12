@@ -16,4 +16,5 @@ export {
   updateGroup,
   addStudentToGroup,
   removeStudentFromGroup,
+  removeGroup,
 } from './mutations';

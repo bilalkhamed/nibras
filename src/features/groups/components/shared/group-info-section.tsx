@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { User, Archive, Trash2, ExternalLink } from 'lucide-react';
+import { User, Trash2, ExternalLink } from 'lucide-react';
 import { InfoField } from '@/components/common/info-field';
 import {
   Tooltip,
@@ -16,6 +16,7 @@ import { Role } from '@prisma/client';
 import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
 import { GroupDetailDTO } from '../../types';
 import { EditGroupSheet } from '../management/edit-group-sheet';
+import { DeleteGroupDialog } from '../management/delete-group-dialog';
 
 interface GroupInfoSectionProps {
   group: GroupDetailDTO;
@@ -48,22 +49,11 @@ function ActionButtons({ group, managedCohortId }: ActionButtonsProps) {
         defaultValues={defaultValues}
         cohortId={managedCohortId || undefined}
       />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Archive className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>أرشفة المجموعة</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>حذف المجموعة</TooltipContent>
-      </Tooltip>
+      <DeleteGroupDialog groupId={group.id} groupName={group.name}>
+        <Button variant="outline" size="sm" title="حذف المجموعة">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </DeleteGroupDialog>
     </div>
   );
 }

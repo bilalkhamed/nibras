@@ -132,10 +132,14 @@ export async function deleteGroup(
   groupId: string,
 ): Promise<DalReturn<{ id: string }>> {
   return runDalOperation(async () => {
-    return prisma.group.delete({
+    const deleted = await prisma.group.delete({
       where: { id: groupId },
       select: { id: true },
     });
+
+    revalidateTag('groups-list', 'max');
+
+    return deleted;
   });
 }
 

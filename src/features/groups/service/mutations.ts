@@ -19,6 +19,7 @@ import {
   deactivateGroupStudent,
   findGroupById,
   updateGroup as updateGroupDal,
+  deleteGroup,
 } from '../dal';
 import type {
   CreateGroupData,
@@ -348,3 +349,65 @@ export async function removeStudentFromGroup(
     { requireAuth: true },
   );
 }
+
+/**
+ * Delete a group - admin or cohort manager only
+ *
+ * @param groupId - The group ID to delete
+ * @returns The deleted group ID
+ */
+export async function removeGroup(
+  groupId: string,
+): Promise<ServiceReturn<{ groupId: string }>> {
+  return runServiceOperation(
+    async (session) => {
+      // Authorization: admin or cohort manager only
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      // Fetch the existing group to check permissions
+      const groupResult = await findGroupById(groupId);
+      if (!groupResult.success) {
+        return mapDalToService(groupResult);
+      }
+
+      if (!groupResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      // Cohort manager permission check: can only delete groups in their cohort
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (groupResult.data.cohortId !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
+      // Delete the group
+      const dalResult = await deleteGroup(groupId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: { groupId: dalResult.data.id },
+      };
+    },
+    { requireAuth: true },
+  );
+}
+
