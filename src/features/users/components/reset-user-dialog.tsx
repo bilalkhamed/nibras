@@ -3,6 +3,10 @@
  *
  * Alert dialog for confirming a user account reset.
  * Styled identically to DeleteCohortDialog.
+ *
+ * Supports two modes:
+ *  - Controlled: pass `open` + `onOpenChange` (no children) — driven by parent.
+ *  - Uncontrolled: pass `children` as the trigger — manages its own open state.
  */
 
 'use client';
@@ -24,20 +28,39 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Loader2, RotateCcw } from 'lucide-react';
 
-type ResetUserDialogProps = {
-  children: React.ReactNode;
-  userId: string;
-  userName: string;
-};
+type ResetUserDialogProps =
+  | {
+      /** Controlled mode — parent manages open state, no trigger child needed. */
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      children?: never;
+      userId: string;
+      userName: string;
+    }
+  | {
+      /** Uncontrolled mode — renders children as the AlertDialog trigger. */
+      open?: never;
+      onOpenChange?: never;
+      children: React.ReactNode;
+      userId: string;
+      userName: string;
+    };
 
 export function ResetUserDialog({
   children,
   userId,
   userName,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: ResetUserDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  // Resolve whether we are in controlled or uncontrolled mode
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
 
   const handleReset = async () => {
     setIsResetting(true);
@@ -61,7 +84,10 @@ export function ResetUserDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      {/* Only render a Trigger in uncontrolled mode */}
+      {children && (
+        <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      )}
       <AlertDialogContent className="sm:max-w-105 gap-8">
         <AlertDialogHeader className="flex flex-col items-center! gap-2 text-center sm:text-center">
           {/* Icon Visual */}
@@ -121,3 +147,4 @@ export function ResetUserDialog({
     </AlertDialog>
   );
 }
+

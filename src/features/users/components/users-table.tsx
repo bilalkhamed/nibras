@@ -21,6 +21,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   ACTIVE_STATUS,
   CountryCode,
   DELETED_STATUS,
@@ -29,6 +36,7 @@ import {
   UserStatus,
 } from '@/types/types';
 import clsx from 'clsx';
+import { MoreVertical } from 'lucide-react';
 import { InviteRegenModal } from './invite-regen-modal';
 import { ResetUserDialog } from './reset-user-dialog';
 import { UserWithCohortDTO } from '../types';
@@ -70,8 +78,6 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
     page * itemsPerPage,
     page * itemsPerPage + itemsPerPage,
   );
-
-  const age = (birthYear: number) => new Date().getFullYear() - birthYear;
 
   return (
     <>
@@ -221,7 +227,6 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
           <Table className="">
             <TableHeader className="bg-linear-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-right font-semibold">#</TableHead>
                 <TableHead className="text-right font-semibold">
                   {labels.dashboard.users.name}
                 </TableHead>
@@ -240,95 +245,23 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
                 <TableHead className="text-right font-semibold">
                   {labels.dashboard.users.role}
                 </TableHead>
-                <TableHead className="text-right font-semibold">
+                <TableHead className="text-right font-semibold w-12">
                   {labels.dashboard.users.actions}
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="">
-              {pageUsers.map((u, idx) => (
-                <TableRow
+              {pageUsers.map((u) => (
+                <RowWithActions
                   key={u.id}
-                  className="odd:bg-muted/40 even:bg-card dark:odd:bg-muted/25 dark:even:bg-card hover:bg-accent-soft/70 dark:hover:bg-accent-soft/30 transition-colors"
-                >
-                  <TableCell className="text-muted-foreground font-medium">
-                    {page * itemsPerPage + idx + 1}
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/dashboard/users/${u.id}`}
-                      className="text-primary hover:underline font-medium"
-                    >
-                      {u.firstName} {u.middleName} {u.lastName}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-foreground/90 dark:text-foreground">
-                    {age(u.birthYear)}
-                  </TableCell>
-                  <TableCell className="text-foreground/90 dark:text-foreground">
-                    {u.cohort?.name || '-'}
-                  </TableCell>
-                  <TableCell className="text-foreground/90 dark:text-foreground">
-                    {labels.countries[u.country as CountryCode] ||
-                      labels.common.null}
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    <span
-                      className={clsx('font-medium text-center', {
-                        'text-success': u.status === ACTIVE_STATUS,
-                        'text-warning': u.status === SUSPENDED_STATUS,
-                        'text-secondary': u.status === INVITED_STATUS,
-                        'text-destructive': u.status === DELETED_STATUS,
-                      })}
-                    >
-                      {u.status === INVITED_STATUS ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className=" text-secondary translate-x-2.5"
-                          onClick={() =>
-                            setInviteModalState({
-                              open: true,
-                              user: { id: u.id, firstName: u.firstName },
-                            })
-                          }
-                        >
-                          {labels.dashboard.users.invited}
-                        </Button>
-                      ) : (
-                        labels.dashboard.users[u.status]
-                      )}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-foreground">
-                    {labels.dashboard.users[u.role]}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <ResetUserDialog
-                        userId={u.id}
-                        userName={`${u.firstName} ${u.lastName}`}
-                      >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-warning/50 text-warning hover:bg-warning/10 dark:hover:bg-warning/15"
-                        >
-                          إعادة تعيين
-                        </Button>
-                      </ResetUserDialog>
-                      <Link href={`/dashboard/users/${u.id}`}>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-border text-primary hover:bg-primary/15 dark:hover:bg-primary/25"
-                        >
-                          {labels.dashboard.users.view}
-                        </Button>
-                      </Link>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  u={u}
+                  onInviteClick={() =>
+                    setInviteModalState({
+                      open: true,
+                      user: { id: u.id, firstName: u.firstName },
+                    })
+                  }
+                />
               ))}
             </TableBody>
           </Table>
@@ -378,6 +311,110 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
           return setInviteModalState((prev) => ({ ...prev, open }));
         }}
         user={inviteModalState.user}
+      />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// RowWithActions
+// ---------------------------------------------------------------------------
+// Extracted into its own component so each row owns its dropdown + dialog
+// state independently — only one dialog ever mounts per row.
+
+type RowWithActionsProps = {
+  u: UserWithCohortDTO;
+  onInviteClick: () => void;
+};
+
+function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
+  const [resetOpen, setResetOpen] = useState(false);
+  const age = (birthYear: number) => new Date().getFullYear() - birthYear;
+
+  return (
+    <>
+      <TableRow className="odd:bg-muted/40 even:bg-card dark:odd:bg-muted/25 dark:even:bg-card hover:bg-accent-soft/70 dark:hover:bg-accent-soft/30 transition-colors">
+        <TableCell>
+          <Link
+            href={`/dashboard/users/${u.id}`}
+            className="text-primary hover:underline font-medium"
+          >
+            {u.firstName} {u.middleName} {u.lastName}
+          </Link>
+        </TableCell>
+        <TableCell className="text-foreground/90 dark:text-foreground">
+          {age(u.birthYear)}
+        </TableCell>
+        <TableCell className="text-foreground/90 dark:text-foreground">
+          {u.cohort?.name || '-'}
+        </TableCell>
+        <TableCell className="text-foreground/90 dark:text-foreground">
+          {labels.countries[u.country as CountryCode] || labels.common.null}
+        </TableCell>
+        <TableCell className="text-foreground">
+          <span
+            className={clsx('font-medium text-center', {
+              'text-success': u.status === ACTIVE_STATUS,
+              'text-warning': u.status === SUSPENDED_STATUS,
+              'text-secondary': u.status === INVITED_STATUS,
+              'text-destructive': u.status === DELETED_STATUS,
+            })}
+          >
+            {u.status === INVITED_STATUS ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-secondary translate-x-2.5"
+                onClick={onInviteClick}
+              >
+                {labels.dashboard.users.invited}
+              </Button>
+            ) : (
+              labels.dashboard.users[u.status]
+            )}
+          </span>
+        </TableCell>
+        <TableCell className="text-foreground">
+          {labels.dashboard.users[u.role]}
+        </TableCell>
+        <TableCell className="text-left">
+          <DropdownMenu dir="rtl">
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="bottom" className="bg-card">
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/users/${u.id}`}>
+                  {labels.dashboard.users.view}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setResetOpen(true);
+                }}
+              >
+                إعادة تعيين الحساب
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      {/* Mounted outside the row so the AlertDialog portal isn't clipped */}
+      <ResetUserDialog
+        userId={u.id}
+        userName={`${u.firstName} ${u.lastName}`}
+        open={resetOpen}
+        onOpenChange={setResetOpen}
       />
     </>
   );
