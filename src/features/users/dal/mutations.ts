@@ -144,4 +144,25 @@ export async function resetUser(
 // Delete Operations
 // ============================================================================
 
-// TODO: Add delete user functions as needed
+/**
+ * Hard-delete a user by ID.
+ * Child records (StudentProfile, GroupStudent, GroupManager, CohortManager,
+ * Invite, StudentAssignment) will be removed via database CASCADE rules.
+ * markedBy / gradedBy references on StudentAssignment are SET NULL via schema.
+ *
+ * @param userId - The user ID to permanently delete
+ * @returns The deleted user's id
+ */
+export async function deleteUser(
+  userId: string,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    const user = await prisma.user.delete({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    revalidatePath('/dashboard/users');
+    return user;
+  });
+}

@@ -1,4 +1,5 @@
 export { AddUserForm } from './add-user-form';
+export { DeleteUserDialog } from './delete-user-dialog';
 export { InviteCodeModal } from './invite-code-modal';
 export { InviteRegenModal } from './invite-regen-modal';
 export { ResetUserDialog } from './reset-user-dialog';

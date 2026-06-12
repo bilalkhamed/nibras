@@ -3,7 +3,13 @@ import {
   runServiceOperation,
 } from '@/lib/server/service/helpers';
 import type { ServiceReturn } from '@/lib/server/service/types';
-import { createUserWithInvite, updateManyUsers, updateUser, resetUser } from '../dal';
+import {
+  createUserWithInvite,
+  updateManyUsers,
+  updateUser,
+  resetUser,
+  deleteUser,
+} from '../dal';
 import { CreateUserInput, CreateUserResult } from '../types';
 import { generateInvite } from '@/lib/server/hash';
 import { SupervisorStatus } from '@prisma/client';
@@ -188,4 +194,35 @@ export async function resetUserAccount(
 // Delete Services
 // ============================================================================
 
-// TODO: Add delete user services as needed
+/**
+ * Hard-delete a user account — admin only.
+ * Permanently removes the user and all cascaded child records.
+ *
+ * @param userId - The user ID to permanently delete
+ */
+export async function deleteUserAccount(
+  userId: string,
+): Promise<ServiceReturn<{ userId: string }>> {
+  return runServiceOperation(
+    async (session) => {
+      if (!session || session.role !== 'admin') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await deleteUser(userId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      return {
+        success: true,
+        data: { userId: dalResult.data.id },
+      };
+    },
+    { requireAuth: true },
+  );
+}

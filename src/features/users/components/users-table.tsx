@@ -39,6 +39,7 @@ import clsx from 'clsx';
 import { MoreVertical } from 'lucide-react';
 import { InviteRegenModal } from './invite-regen-modal';
 import { ResetUserDialog } from './reset-user-dialog';
+import { DeleteUserDialog } from './delete-user-dialog';
 import { UserWithCohortDTO } from '../types';
 
 interface UsersTableProps {
@@ -329,6 +330,7 @@ type RowWithActionsProps = {
 
 function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
   const [resetOpen, setResetOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const age = (birthYear: number) => new Date().getFullYear() - birthYear;
 
   return (
@@ -404,6 +406,15 @@ function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
               >
                 إعادة تعيين الحساب
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setDeleteOpen(true);
+                }}
+                className="bg-destructive text-white focus:bg-destructive/90 focus:text-white mt-1"
+              >
+                حذف الحساب نهائياً
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>
@@ -415,6 +426,12 @@ function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
         userName={`${u.firstName} ${u.lastName}`}
         open={resetOpen}
         onOpenChange={setResetOpen}
+      />
+      <DeleteUserDialog
+        userId={u.id}
+        userName={`${u.firstName} ${u.lastName}`}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
       />
     </>
   );
