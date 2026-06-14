@@ -4,9 +4,9 @@ import { z } from 'zod';
 const passwordSchema = z
   .string()
   .min(1, { error: 'يجب إدخال كلمة سر' })
-  .min(8, { error: 'كلمة السر لا تستوفي الشروط المطلوبة' })
-  .regex(/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,64})/, {
-    error: 'كلمة السر لا تستوفي الشروط المطلوبة',
+  .min(8, { error: 'يجب أن تكون كلمة السر 8 أحرف على الأقل' })
+  .regex(/^(?=.*[A-Z]).+$/, {
+    error: 'يجب أن تحتوي كلمة السر على حرف كبير واحد على الأقل (A-Z)',
   });
 
 export const userSchema = z.object({
@@ -78,13 +78,7 @@ export const invitedUserSchema = z
         /^[a-zA-Z0-9_.]+$/,
         'يمكن أن يحتوي المعرف على: حروف إنجليزية، أرقام، نقاط، شرطات سفلية (underscores "_")',
       ),
-    password: z
-      .string('يجب إدخال كلمة سر')
-      .min(1, { error: 'يجب إدخال كلمة سر' })
-      .min(8, { error: 'كلمة السر لا تستوفي الشروط المطلوبة' })
-      .regex(/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,64})/, {
-        error: 'كلمة السر لا تستوفي الشروط المطلوبة',
-      }),
+    password: passwordSchema,
     confirmPassword: z
       .string('يجب تأكيد كلمة السر')
       .min(1, { error: 'يجب تأكيد كلمة السر' }),
