@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <main className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
         <div className="text-right max-w-4xl">
           <Image
             src={'/logo.svg'}
@@ -148,43 +148,13 @@ export default function Home() {
         </div>
 
         {/* Supervisor Section */}
-        <div className="mt-50 m text-center max-w-4xl mx-auto">
+        <div className="mt-50 text-center max-w-4xl mx-auto">
           <div className=" text-accent text-s font-bold mb-8">
             {toArabicNumerals(labels.home.supervisorTitle)}
           </div>
-          <h2 className="text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-5xl font-bold text-foreground">
             {toArabicNumerals(about.supervisor.name)}
           </h2>
-          <p className="text-2xl text-muted-foreground leading-relaxed opacity-80 mb-12">
-            {toArabicNumerals(about.supervisor.bio)}
-          </p>
-
-          <div className="text-right space-y-12 border-t border-border pt-12">
-            <p className="text-xl text-foreground/80 leading-relaxed max-w-3xl mx-auto text-center">
-              {toArabicNumerals(about.supervisor.longBio)}
-            </p>
-
-            <div className="max-w-2xl mx-auto">
-              <h3 className="text-lg font-bold text-secondary mb-8 text-center">
-                {toArabicNumerals(about.supervisor.activitiesTitle)}
-              </h3>
-              <ul className="space-y-4">
-                {about.supervisor.activities.map(
-                  (activity: string, idx: number) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-4 text-muted-foreground group"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" />
-                      <span className="text-lg">
-                        {toArabicNumerals(activity)}
-                      </span>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-          </div>
         </div>
       </main>
 
