@@ -156,7 +156,7 @@ export function SupervisorsTable({
                 البريد الإلكتروني
               </TableHead>
               <TableHead className="text-right font-semibold">العمر</TableHead>
-              <TableHead className="text-right font-semibold">الدور</TableHead>
+              <TableHead className="text-right font-semibold">الرتبة</TableHead>
               <TableHead className="text-right font-semibold">
                 الإجراءات
               </TableHead>

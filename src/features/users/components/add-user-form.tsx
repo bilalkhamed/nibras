@@ -257,7 +257,7 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
                         id="role"
                         className="w-full border-border bg-card text-foreground focus:ring-primary"
                       >
-                        <SelectValue placeholder="اختر الدور" />
+                        <SelectValue placeholder="اختر الرتبة" />
                       </SelectTrigger>
 
                       <SelectContent className="bg-card text-foreground border border-border">

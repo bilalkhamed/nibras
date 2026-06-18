@@ -93,7 +93,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 value={user.phone || labels.common.null}
               />
               <InfoField
-                label="الدور"
+                label="الرتبة"
                 value={labels.dashboard.users[user.role]}
               />
               <InfoField

@@ -50,7 +50,7 @@ export default async function UserInfoSection() {
               icon={<MailIcon className="h-4 w-4" />}
             />
             <InfoField
-              label="الدور"
+              label="الرتبة"
               value={formatRole(user.role)}
               icon={<ShieldCheckIcon className="h-4 w-4" />}
             />
