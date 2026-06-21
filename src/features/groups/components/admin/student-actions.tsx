@@ -57,14 +57,6 @@ export function StudentActions({ groupId, studentId }: StudentActionsProps) {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <Edit className="h-4 w-4 text-blue-500" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>تحرير</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
