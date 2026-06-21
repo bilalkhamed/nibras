@@ -117,10 +117,10 @@ export function EditCohortSheet({
 
   const defaultValues: CreateCohortData = {
     name: cohort.name,
-    startDate: cohort.startDate.toISOString().split('T')[0],
-    endDate: cohort.endDate
-      ? cohort.endDate.toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
+    // startDate: cohort.startDate.toISOString().split('T')[0], // TODO: re-enable when dates are surfaced in UI
+    // endDate: cohort.endDate
+    //   ? cohort.endDate.toISOString().split('T')[0]
+    //   : new Date().toISOString().split('T')[0],
     currentLevelId: cohort.currentLevel.id,
   };
 

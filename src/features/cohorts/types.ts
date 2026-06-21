@@ -16,8 +16,8 @@ import { z } from 'zod';
  */
 export const createCohortSchema = z.object({
   name: z.string().min(1, 'اسم الدفعة مطلوب'),
-  startDate: z.string().min(1, 'تاريخ البداية مطلوب'),
-  endDate: z.string().min(1, 'تاريخ النهاية مطلوب'),
+  // startDate: z.string().min(1, 'تاريخ البداية مطلوب'), // TODO: re-enable when dates are surfaced in UI
+  // endDate: z.string().min(1, 'تاريخ النهاية مطلوب'),   // TODO: re-enable when dates are surfaced in UI
   currentLevelId: z.string('المستوى الحالي مطلوب'),
 });
 

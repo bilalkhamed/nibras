@@ -15,7 +15,7 @@ import type { ServiceReturn } from '@/lib/server/service/types';
 import { insertCohort, updateCohort, deleteCohort } from '../dal';
 import type { CreateCohortData } from '../types';
 import { ADMIN_ROLE } from '@/types/types';
-import { toArabicNumerals } from '@/lib/shared/utils';
+// import { toArabicNumerals } from '@/lib/shared/utils'; // TODO: re-enable with date/label logic
 
 // ============================================================================
 // Cohort CRUD - Admin Only
@@ -39,15 +39,14 @@ export async function createCohort(
         };
       }
 
-      const toShortYear = (date: Date) => {
-        return date.getFullYear().toString().slice(-2);
-      };
-
-      const startDate = new Date(data.startDate);
-      const endDate = new Date(data.endDate);
-      const label = toArabicNumerals(
-        `${toShortYear(startDate)}/${toShortYear(endDate)}`,
-      );
+      // TODO: re-enable date/label logic when startDate & endDate are re-added to the form
+      // const toShortYear = (date: Date) => date.getFullYear().toString().slice(-2);
+      // const startDate = new Date(data.startDate);
+      // const endDate = new Date(data.endDate);
+      // const label = toArabicNumerals(`${toShortYear(startDate)}/${toShortYear(endDate)}`);
+      const startDate = new Date();
+      const endDate = new Date();
+      const label = '';
 
       const dalResult = await insertCohort({
         name: data.name,
@@ -92,15 +91,14 @@ export async function modifyCohort(
         };
       }
 
-      const toShortYear = (date: Date) => {
-        return date.getFullYear().toString().slice(-2);
-      };
-
-      const startDate = new Date(data.startDate);
-      const endDate = new Date(data.endDate);
-      const label = toArabicNumerals(
-        `${toShortYear(startDate)}/${toShortYear(endDate)}`,
-      );
+      // TODO: re-enable date/label logic when startDate & endDate are re-added to the form
+      // const toShortYear = (date: Date) => date.getFullYear().toString().slice(-2);
+      // const startDate = new Date(data.startDate);
+      // const endDate = new Date(data.endDate);
+      // const label = toArabicNumerals(`${toShortYear(startDate)}/${toShortYear(endDate)}`);
+      const startDate = new Date();
+      const endDate = new Date();
+      const label = '';
 
       const dalResult = await updateCohort(cohortId, {
         name: data.name,

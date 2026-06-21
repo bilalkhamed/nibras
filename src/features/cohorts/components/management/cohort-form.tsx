@@ -113,8 +113,9 @@ export function CohortForm({
           )}
         </div>
 
+        {/* TODO: re-enable date fields when they are surfaced in UI */}
         {/* Start Date */}
-        <div className="space-y-1">
+        {/* <div className="space-y-1">
           <Label className="text-right block">تاريخ البداية</Label>
           <Input
             type="date"
@@ -127,10 +128,10 @@ export function CohortForm({
               {errors.startDate.message}
             </p>
           )}
-        </div>
+        </div> */}
 
         {/* End Date */}
-        <div className="space-y-1">
+        {/* <div className="space-y-1">
           <Label className="text-right block">تاريخ النهاية</Label>
           <Input
             type="date"
@@ -143,7 +144,7 @@ export function CohortForm({
               {errors.endDate.message}
             </p>
           )}
-        </div>
+        </div> */}
 
         {/* Current Level */}
         <div className="space-y-1">
