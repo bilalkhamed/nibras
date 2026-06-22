@@ -209,19 +209,110 @@ async function AssignmentsList({
     }),
   );
 
+  // Compute week totals from already-fetched data — no extra query needed.
+  // Earned: sum of snapshotted scores on graded StudentAssignment records.
+  // Max:    sum of maxScore on every Assignment in the week.
+  const weekMaxScore = assignmentsResult.data.reduce(
+    (sum, a) => sum + a.maxScore,
+    0,
+  );
+  const weekEarnedScore = studentAssignments.reduce(
+    (sum, sa) => sum + (sa.score ?? 0),
+    0,
+  );
+  const gradedCount = studentAssignments.filter(
+    (sa) => sa.score !== null,
+  ).length;
+
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-medium text-foreground">المهام</h3>
-      <AssignmentsGrid
-        assignments={assignmentsWithUrls}
-        programs={programs}
-        studentAssignments={studentAssignmentsWithUrls}
-        view="history"
-        studentInfo={{
-          id: session.userId,
-          name: session.firstName + ' ' + session.lastName,
-        }}
+    <div className="space-y-6">
+      <WeekTotalCard
+        earnedScore={weekEarnedScore}
+        maxScore={weekMaxScore}
+        gradedCount={gradedCount}
+        totalCount={assignmentsResult.data.length}
       />
+      <div className="space-y-3">
+        <h3 className="text-lg font-medium text-foreground">المهام</h3>
+        <AssignmentsGrid
+          assignments={assignmentsWithUrls}
+          programs={programs}
+          studentAssignments={studentAssignmentsWithUrls}
+          view="history"
+          studentInfo={{
+            id: session.userId,
+            name: session.firstName + ' ' + session.lastName,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function WeekTotalCard({
+  earnedScore,
+  maxScore,
+  gradedCount,
+  totalCount,
+}: {
+  earnedScore: number;
+  maxScore: number;
+  gradedCount: number;
+  totalCount: number;
+}) {
+  const percentage =
+    maxScore > 0 ? Math.round((earnedScore / maxScore) * 100) : 0;
+  const ungradedCount = totalCount - gradedCount;
+
+  return (
+    <div className="rounded-2xl border bg-card p-5 shadow-sm space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-foreground">
+          مجموع الأسبوع
+        </h3>
+        <span className="text-xs text-muted-foreground">
+          {gradedCount} / {totalCount} مهام مكتملة
+        </span>
+      </div>
+
+      {/* Score row */}
+      <div className="flex items-end gap-1.5">
+        <span className="text-4xl font-bold tabular-nums leading-none">
+          {earnedScore % 1 === 0 ? earnedScore : earnedScore.toFixed(1)}
+        </span>
+        <span className="text-lg font-medium text-muted-foreground mb-0.5">
+          / {maxScore % 1 === 0 ? maxScore : maxScore.toFixed(1)}
+        </span>
+        <span
+          className={`mr-auto text-sm font-medium mb-0.5 ${
+            percentage === 100 ? 'text-green-500' : 'text-muted-foreground'
+          }`}
+        >
+          {percentage}%
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div
+        className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-valuenow={percentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${
+            percentage === 100 ? 'bg-green-500' : 'bg-primary'
+          }`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+
+      {ungradedCount > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {ungradedCount} مهام متبقية
+        </p>
+      )}
     </div>
   );
 }
