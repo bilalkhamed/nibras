@@ -383,8 +383,9 @@ model StudentAssignment {
   markedBy   User?   @relation(fields: [markedById], references: [id], onDelete: SetNull, name: "markedBy")
 
   //grading
-  score   Float?
-  comment String? @db.Text
+  score    Float?
+  maxScore Float? @map("max_score")
+  comment  String? @db.Text
 
   gradedById String?
   gradedBy   User?   @relation(fields: [gradedById], references: [id], onDelete: SetNull, name: "gradedBy")
