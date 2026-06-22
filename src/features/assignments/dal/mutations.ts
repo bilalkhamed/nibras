@@ -40,6 +40,15 @@ export async function upsertStudentAssignment({
   data,
 }: UpdateStudentAssignmentInputDal): Promise<DalReturn<StudentAssignmentDTO>> {
   return runDalOperation<StudentAssignmentDTO>(async () => {
+    // Snapshot maxScore from the parent assignment at write time so that
+    // aggregated scores remain accurate even if the assignment is later
+    // edited or deleted by an admin.
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: { maxScore: true },
+    });
+    const maxScore = assignment?.maxScore ?? null;
+
     return prisma.studentAssignment.upsert({
       where: {
         studentId_assignmentId: {
@@ -61,6 +70,7 @@ export async function upsertStudentAssignment({
         textSubmission: data.textSubmission || null,
         fileKey: data.fileKey || null,
         score: data.score || null,
+        maxScore,
         comment: data.comment || null,
       },
       update: {
@@ -71,6 +81,7 @@ export async function upsertStudentAssignment({
         ...(data.fileKey && { fileKey: data.fileKey }),
         ...(data.gradedById && { gradedById: data.gradedById }),
         ...(data.score && { score: data.score }),
+        maxScore,
         ...(data.comment && { comment: data.comment }),
       },
     });
