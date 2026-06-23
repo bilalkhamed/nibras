@@ -1,6 +1,7 @@
 import { AuthGuard } from '@/components/auth/auth-gaurd';
 import { STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { Suspense } from 'react';
+import { DashboardSkeleton } from '@/components/skeletons';
 
 export default async function StudentDashboardLayout({
   children,
@@ -8,7 +9,7 @@ export default async function StudentDashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<DashboardSkeleton />}>
       <AuthGuard roles={[STUDENT_ROLE, SUPERVISOR_ROLE]}>{children}</AuthGuard>
     </Suspense>
   );
