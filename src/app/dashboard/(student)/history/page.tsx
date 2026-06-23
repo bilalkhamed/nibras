@@ -25,7 +25,7 @@ export default async function StudentHistoryPage({
 }: {
   searchParams: { week?: string };
 }) {
-  const weekNumber = (await searchParams).week || undefined;
+  const weekNumber = (await searchParams).week || 1;
 
   return (
     <div className="space-y-6">

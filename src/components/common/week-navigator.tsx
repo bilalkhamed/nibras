@@ -25,6 +25,8 @@ interface WeekNavigatorProps {
 
 export function WeekNavigator({
   weeks,
+  // We can keep currentWeekNumber in props in case you want to use it for
+  // UI highlighting later, but we won't use it to force a redirect.
   currentWeekNumber,
 }: WeekNavigatorProps) {
   const router = useRouter();
@@ -32,15 +34,20 @@ export function WeekNavigator({
   const searchParams = useSearchParams();
 
   const weekFromParams = searchParams.get('week');
-  const defaultWeek = currentWeekNumber ?? weeks[0]?.number ?? 1;
 
-  const [activeWeek, setActiveWeek] = useState<number>(defaultWeek);
+  // FIX: Default to the first available week (Week 1), matching your server logic.
+  const defaultWeek = weeks[0]?.number ?? 1;
+
+  const [activeWeek, setActiveWeek] = useState<number>(
+    weekFromParams ? Number(weekFromParams) : defaultWeek,
+  );
 
   useEffect(() => {
     if (weeks.length === 0) return;
     const parsed = Number(weekFromParams);
+
     if (!weekFromParams || Number.isNaN(parsed) || parsed < 1) {
-      // normalize URL to first available week
+      // This will now normalize the URL to ?week=1 instead of 35
       updateWeek(defaultWeek, { replace: true });
       setActiveWeek(defaultWeek);
     } else {
