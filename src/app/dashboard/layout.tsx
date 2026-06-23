@@ -5,6 +5,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { DashboardSidebar } from './components/sidebar/sidebar';
+import { DashboardSidebarSkeleton } from './components/sidebar/sidebar-skeleton';
 import { DashboardTitle } from './components/sidebar/page-title';
 import { Suspense } from 'react';
 
@@ -15,7 +16,7 @@ export default async function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <Suspense fallback={<div>Loading sidebar...</div>}>
+      <Suspense fallback={<DashboardSidebarSkeleton />}>
         <DashboardSidebar />
       </Suspense>
       <SidebarInset>
