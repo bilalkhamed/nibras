@@ -16,6 +16,7 @@ import {
   CheckLineIcon,
   CheckCheckIcon,
   ClockIcon,
+  RotateCcw,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -314,9 +315,14 @@ function AssignmentCard({
             <div className="space-y-1 border-l border-border/80 pl-4">
               <p className="text-xs text-muted-foreground">الحالة</p>
               {isCompleted ? (
-                <Badge variant="success" className="w-fit">
-                  مكتمل
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="success" className="w-fit">
+                    مكتمل
+                  </Badge>
+                  {!requiresSubmission && (
+                    <UndoCompleteButton assignment={assignment} />
+                  )}
+                </div>
               ) : (
                 <>
                   {requiresSubmission ? (
@@ -437,8 +443,6 @@ function CompleteButton({
       },
     });
 
-    console.log('Update result:', result, 'score:', assignment.maxScore);
-
     if (result.success) {
       // Sync the rest of the app
       router.refresh();
@@ -489,6 +493,54 @@ function CompleteButton({
             ? 'لقد أكملت هذه المهمة. أحسنت!'
             : 'اضغطي عند الإنجاز'}
         </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+/**
+ * Undo completion button for auto-check assignments (no file/text submission)
+ */
+function UndoCompleteButton({ assignment }: { assignment: Assignment }) {
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
+
+  const handleUndo = async () => {
+    setIsPending(true);
+
+    const result = await updateStudentAssignmentAction({
+      assignmentId: assignment.id,
+      data: {
+        isCompleted: false,
+        score: 0,
+      },
+    });
+
+    if (result.success) {
+      router.refresh();
+    } else {
+      toast.error('حدث خطأ أثناء التراجع. يرجى المحاولة مرة أخرى.');
+    }
+
+    setIsPending(false);
+  };
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleUndo}
+            disabled={isPending}
+            aria-label="التراجع عن الإنجاز"
+            className="cursor-pointer text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RotateCcw
+              className={cn('h-3.5 w-3.5', isPending && 'animate-spin')}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>التراجع عن الإنجاز</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
