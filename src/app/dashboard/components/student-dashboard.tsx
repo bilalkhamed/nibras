@@ -1,12 +1,14 @@
-import { BookOpen, Clock, CheckCircle2, TrendingUp } from 'lucide-react';
-import { StatCard } from './shared/stat-card';
-import { ActivityCard, ActivityItem } from './shared/activity-card';
-import { ProgressCard } from './shared/progress-card';
-import prisma from '@/lib/server/prisma';
-import getAuthSession from '@/lib/server/auth-session';
-import labels from '@/lib/labels.json';
-import { AssignmentTypes } from '@prisma/client';
+import { CheckCircle2, BookOpen, Star, Trophy, ArrowLeft } from 'lucide-react';
 import { getStudentBasicInfo } from '@/features/users/service';
+import { getStudentDashboardData } from '@/features/assignments/service';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { toArabicNumerals } from '@/lib/shared/utils';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -16,246 +18,230 @@ function getGreeting() {
   return 'مساء الخير';
 }
 
-function getTimeAgo(date: Date) {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'اليوم';
-  if (diffDays === 1) return 'أمس';
-  if (diffDays < 7) return `منذ ${diffDays} أيام`;
-  return `منذ ${Math.floor(diffDays / 7)} أسابيع`;
+function fmtNum(n: number) {
+  return n % 1 === 0 ? String(n) : n.toFixed(1);
 }
 
-export async function StudentDashboard() {
-  const session = await getAuthSession();
-  if (!session) return null;
+function fmtDate(date: Date) {
+  return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+}
 
-  const [
-    studentResult,
-    completedCount,
-    pendingAssignments,
-    programProgress,
-    recentCompletions,
-  ] = await Promise.all([
+/** Converts a western numeral to an Eastern Arabic numeral string */
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+export async function StudentDashboard() {
+  const [studentResult, dashboardResult] = await Promise.all([
     getStudentBasicInfo(),
-    prisma.studentAssignment.count({
-      where: {
-        studentId: session.userId,
-        isCompleted: true,
-      },
-    }),
-    prisma.assignment.findMany({
-      where: {
-        level: {
-          cohortsAsCurrentLevel: {
-            some: {
-              students: {
-                some: { id: session.userId },
-              },
-            },
-          },
-        },
-        studentAssignments: {
-          none: {
-            studentId: session.userId,
-            isCompleted: true,
-          },
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        createdAt: true,
-        program: { select: { name: true } },
-        week: { select: { number: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
-    prisma.program.findMany({
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: {
-            assignments: {
-              where: {
-                level: {
-                  cohortsAsCurrentLevel: {
-                    some: {
-                      students: {
-                        some: { id: session.userId },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        assignments: {
-          where: {
-            level: {
-              cohortsAsCurrentLevel: {
-                some: {
-                  students: {
-                    some: { id: session.userId },
-                  },
-                },
-              },
-            },
-            studentAssignments: {
-              some: {
-                studentId: session.userId,
-                isCompleted: true,
-              },
-            },
-          },
-          select: { id: true },
-        },
-      },
-    }),
-    prisma.studentAssignment.findMany({
-      where: {
-        studentId: session.userId,
-        isCompleted: true,
-      },
-      select: {
-        completedAt: true,
-        assignment: {
-          select: {
-            name: true,
-            type: true,
-            program: { select: { name: true } },
-            week: { select: { number: true } },
-          },
-        },
-      },
-      orderBy: { completedAt: 'desc' },
-      take: 3,
-    }),
+    getStudentDashboardData(),
   ]);
 
+  if (!dashboardResult.success) return null;
+
   const student = studentResult.success ? studentResult.data : null;
-
-  const pendingCount = pendingAssignments.length;
-  const totalAssignments = completedCount + pendingCount;
-  const completionRate =
-    totalAssignments > 0
-      ? Math.round((completedCount / totalAssignments) * 100)
-      : 0;
-
-  const pendingActivities: ActivityItem[] = pendingAssignments.map(
-    (assignment) => ({
-      id: assignment.id,
-      title: assignment.name,
-      description: `${assignment.program.name} • الأسبوع ${assignment.week.number}`,
-      timestamp: getTimeAgo(assignment.createdAt),
-      badge: {
-        label: labels.dashboard.curriculum[assignment.type as AssignmentTypes],
-        variant: 'default' as const,
-      },
-      action: {
-        label: 'عرض',
-        href: '/dashboard/assignments',
-      },
-    }),
-  );
-
-  const completedActivities: ActivityItem[] = recentCompletions.map((sa) => ({
-    id: sa.assignment.name,
-    title: sa.assignment.name,
-    description: `${sa.assignment.program.name} • الأسبوع ${sa.assignment.week.number}`,
-    timestamp: sa.completedAt ? getTimeAgo(sa.completedAt) : '',
-    badge: {
-      label: 'مكتمل',
-      variant: 'secondary' as const,
-    },
-  }));
-
-  const progressItems = programProgress.map((program) => ({
-    label: program.name,
-    current: program.assignments.length,
-    total: program._count.assignments,
-  }));
-
+  const data = dashboardResult.data;
   const greeting = getGreeting();
-  const encouragement =
-    pendingCount === 0
-      ? 'رائع! لا توجد مهام معلقة 🎉'
-      : pendingCount <= 2
-        ? `لديكِ ${pendingCount} مهام متبقية. يمكنكِ إنجازها!`
-        : `${pendingCount} مهام في انتظاركِ. لنبدأ! 💪`;
+
+  const weekLabel = data.currentWeek
+    ? `الأسبوع ${data.currentWeek.number}`
+    : 'الأسبوع الحالي';
+  const weekDateRange = data.currentWeek
+    ? `${fmtDate(data.currentWeek.startDate)} – ${fmtDate(data.currentWeek.endDate)}`
+    : '';
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
+      {/* ── Greeting ─────────────────────────────────────────────────── */}
       <div>
         <h1 className="text-3xl font-bold">
-          {greeting}, {student?.firstName}! 👋
+          {greeting}، {student?.firstName}! 👋
         </h1>
-        <p className="text-muted-foreground mt-2">{encouragement}</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="المهام المعلقة"
-          value={pendingCount}
-          icon={BookOpen}
-          href="/dashboard/assignments"
-          description="واجبات قيد التنفيذ"
-        />
-        <StatCard
-          title="المهام المكتملة"
-          value={completedCount}
-          icon={CheckCircle2}
-          href="/dashboard/assignments"
-          description="إجمالي المنجزات"
-        />
-        <StatCard
-          title="نسبة الإنجاز"
-          value={`${completionRate}%`}
-          icon={TrendingUp}
-          trend={
-            completionRate >= 75
-              ? { value: completionRate - 75, isPositive: true }
-              : undefined
-          }
-        />
-        <StatCard
-          title="المستوى الحالي"
-          value={student?.cohort?.currentLevel.number || '-'}
-          icon={Clock}
-          description={student?.cohort?.name || 'غير محدد'}
-        />
+      {/* ── Two-column main content ───────────────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-stretch">
+        {/* Right (wider) — pending this week */}
+        <Card className="flex flex-col">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                <BookOpen className="h-5 w-5 text-blue-500" />
+                مهام هذا الأسبوع
+              </CardTitle>
+              <div className="text-end">
+                <p className="text-sm font-medium">
+                  {toArabicNumerals(weekLabel)}
+                </p>
+                {weekDateRange && (
+                  <p className="text-muted-foreground text-xs">
+                    {weekDateRange}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {data.pendingThisWeek.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-8 text-center">
+                <CheckCircle2 className="h-8 w-8 text-green-500" />
+                <p className="font-medium">أنجزت كل مهام الأسبوع 🎉</p>
+                <p className="text-muted-foreground text-sm">
+                  عمل رائع، استمري!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {(() => {
+                  // Group by programName preserving insertion order
+                  const grouped = data.pendingThisWeek.reduce<
+                    Record<string, typeof data.pendingThisWeek>
+                  >((acc, item) => {
+                    (acc[item.programName] ??= []).push(item);
+                    return acc;
+                  }, {});
+
+                  return Object.entries(grouped).map(([program, items]) => {
+                    const visible = items.slice(0, 2);
+                    const overflow = items.length - visible.length;
+                    return (
+                      <div key={program}>
+                        <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase tracking-wide">
+                          {program}
+                        </p>
+                        <ul className="divide-border divide-y">
+                          {visible.map((item) => (
+                            <li
+                              key={item.assignmentId}
+                              className="py-3 first:pt-0 last:pb-0"
+                            >
+                              <p className="min-w-0 truncate font-medium">
+                                {item.name}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                        {overflow > 0 && (
+                          <p className="text-muted-foreground mt-2 text-start text-xs">
+                            {overflow === 1
+                              ? 'مهمة أخرى'
+                              : overflow === 2
+                                ? 'مهمتان أخريان'
+                                : `${toArabicNumerals(overflow)} مهمات أخرى`}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            )}
+          </CardContent>
+          {data.currentWeek && (
+            <div className="px-6 pb-4 text-left">
+              <Link
+                href={`/dashboard/history?week=${data.currentWeek.number}`}
+                className="text-muted-foreground hover:text-primary text-sm transition-colors"
+              >
+                <ArrowLeft className="me-2 inline h-4 w-4" />
+                عرض مهام الأسبوع
+              </Link>
+            </div>
+          )}
+        </Card>
+
+        {/* Left (narrower) — recently completed */}
+        <Card className="flex flex-col lg:w-72">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <Star className="h-5 w-5 text-yellow-500" />
+              آخر التقييمات
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {data.recentCompletions.length === 0 ? (
+              <p className="text-muted-foreground py-6 text-center text-sm">
+                لا توجد مهام مقيمة بعد
+              </p>
+            ) : (
+              <ul className="divide-border divide-y">
+                {data.recentCompletions.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {item.name}
+                      </p>
+                      {item.completedAt && (
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          {new Date(item.completedAt).toLocaleString('ar-SA', {
+                            month: 'numeric',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    {item.score != null && item.maxScore != null && (
+                      <Badge
+                        variant="secondary"
+                        className="shrink-0 font-mono text-white"
+                      >
+                        {toArabicNumerals(fmtNum(item.score))} /{' '}
+                        {toArabicNumerals(fmtNum(item.maxScore))}
+                      </Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Active Assignments */}
-        <ActivityCard
-          title="المهام المعلقة"
-          items={pendingActivities}
-          emptyMessage="رائع! لا توجد مهام معلقة 🎉"
-          icon={BookOpen}
-          viewAllHref="/dashboard/assignments"
-        />
+      {/* ── Bottom stat row ───────────────────────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Weekly score */}
+        <Card>
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">درجة الأسبوع</p>
+              <p className="text-xl font-bold tabular-nums">
+                {toArabicNumerals(fmtNum(data.weekEarnedScore))}{' '}
+                <span className="text-muted-foreground text-sm font-normal">
+                  / {toArabicNumerals(fmtNum(data.weekMaxScore))}
+                </span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Progress Summary */}
-        <ProgressCard title="ملخص التقدم" items={progressItems} />
+        {/* Total score */}
+        <Card>
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-yellow-500/10 text-yellow-500">
+              <Trophy className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">الدرجة الكلية</p>
+              <p className="text-xl font-bold tabular-nums">
+                {toArabicNumerals(fmtNum(data.totalEarnedScore))}{' '}
+                <span className="text-muted-foreground text-sm font-normal">
+                  / {toArabicNumerals(fmtNum(data.totalMaxScore))}
+                </span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Recent Completions */}
-      {completedActivities.length > 0 && (
-        <ActivityCard
-          title="آخر الإنجازات"
-          items={completedActivities}
-          emptyMessage="لا توجد إنجازات حديثة"
-          icon={CheckCircle2}
-        />
-      )}
     </div>
   );
 }

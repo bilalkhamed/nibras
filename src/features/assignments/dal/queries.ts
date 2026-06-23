@@ -10,15 +10,18 @@ import 'server-only';
 import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
+import type { DalReturn } from '@/lib/server/dal/types';
 import type {
   AssignmentWithRawAttachmentsDTO,
   AssignmentDTO,
   StudentAssignmentDTO,
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
+  StudentDashboardData,
 } from '../types';
 import { Program } from '@prisma/client';
 import { findProgramBySlug } from '@/features/programs/dal';
+import { getAcademicYear } from '@/lib/server/academic-year';
 
 // ============================================================================
 // Week Assignments Queries
@@ -184,5 +187,204 @@ export async function findAssignmentAttachments(assignmentId: string) {
     return prisma.assignmentAttachment.findMany({
       where: { assignmentId },
     });
+  });
+}
+
+// ============================================================================
+// Student Dashboard Query
+// ============================================================================
+
+/**
+ * Fetch all data needed by the student dashboard in parallel.
+ * @param studentId - The student's user ID
+ * @param levelId   - The student's current level ID (from session)
+ */
+export async function findStudentDashboardData(
+  studentId: string,
+  levelId: string | null,
+): Promise<DalReturn<StudentDashboardData>> {
+  return runDalOperation(async () => {
+    const { year: academicYear } = getAcademicYear();
+    const today = new Date();
+
+    // 1. Resolve current calendar week, fall back to week 1
+    let activeWeek = await prisma.calendarWeek.findFirst({
+      where: {
+        academicYear,
+        startDate: { lte: today },
+        endDate: { gte: today },
+      },
+      select: {
+        startDate: true,
+        endDate: true,
+        week: { select: { id: true, number: true, title: true } },
+      },
+    });
+
+    if (!activeWeek) {
+      activeWeek = await prisma.calendarWeek.findFirst({
+        where: { academicYear },
+        orderBy: { week: { number: 'asc' } },
+        select: {
+          startDate: true,
+          endDate: true,
+          week: { select: { id: true, number: true, title: true } },
+        },
+      });
+    }
+
+    const weekId = activeWeek?.week.id ?? null;
+
+    // 2. Run all remaining queries in parallel
+    const [
+      weekAssignments,
+      weekStudentAssignments,
+      recentRows,
+      weekEarnAgg,
+      totalEarnAgg,
+      weekMaxAgg,
+      totalMaxAgg,
+    ] = await Promise.all([
+      // All assignments for this week at the student's level
+      weekId && levelId
+        ? prisma.assignment.findMany({
+            where: { weekId, levelId },
+            select: {
+              id: true,
+              name: true,
+              maxScore: true,
+              program: { select: { name: true } },
+            },
+          })
+        : Promise.resolve([]),
+
+      // Existing StudentAssignment rows for this student in this week
+      weekId
+        ? prisma.studentAssignment.findMany({
+            where: {
+              studentId,
+              assignment: { weekId },
+            },
+            select: {
+              assignmentId: true,
+              isCompleted: true,
+            },
+          })
+        : Promise.resolve([]),
+
+      // Recent completions: last 4 graded completed rows
+      prisma.studentAssignment.findMany({
+        where: {
+          studentId,
+          isCompleted: true,
+          score: { not: null },
+          gradedById: { notIn: [studentId] },
+        },
+        select: {
+          score: true,
+          maxScore: true,
+          completedAt: true,
+          assignment: {
+            select: {
+              name: true,
+              week: { select: { number: true } },
+            },
+          },
+        },
+        orderBy: { completedAt: 'desc' },
+        take: 4,
+      }),
+
+      // Weekly earned score
+      weekId
+        ? prisma.studentAssignment.aggregate({
+            where: {
+              studentId,
+              isCompleted: true,
+              score: { not: null },
+              assignment: { weekId },
+            },
+            _sum: { score: true },
+          })
+        : Promise.resolve({ _sum: { score: null } }),
+
+      // Total earned score
+      prisma.studentAssignment.aggregate({
+        where: {
+          studentId,
+          isCompleted: true,
+          score: { not: null },
+        },
+        _sum: { score: true },
+      }),
+
+      // Weekly max score: from Assignment directly, scoped to week + level
+      weekId && levelId
+        ? prisma.assignment.aggregate({
+            where: { weekId, levelId },
+            _sum: { maxScore: true },
+          })
+        : Promise.resolve({ _sum: { maxScore: null } }),
+
+      // Total max score: scoped to level + program to avoid cross-cohort inflation
+      levelId
+        ? prisma.assignment.aggregate({
+            where: { levelId },
+            _sum: { maxScore: true },
+          })
+        : Promise.resolve({ _sum: { maxScore: null } }),
+    ]);
+
+    // 3. Diff in memory to find pending assignments
+    const completedIds = new Set(
+      (
+        weekStudentAssignments as Array<{
+          assignmentId: string;
+          isCompleted: boolean;
+        }>
+      )
+        .filter((sa) => sa.isCompleted)
+        .map((sa) => sa.assignmentId),
+    );
+
+    const pendingThisWeek = (
+      weekAssignments as Array<{
+        id: string;
+        name: string;
+        maxScore: number;
+        program: { name: string };
+      }>
+    )
+      .filter((a) => !completedIds.has(a.id))
+      .map((a) => ({
+        assignmentId: a.id,
+        name: a.name,
+        programName: a.program.name,
+      }));
+
+    console.log(recentRows);
+    return {
+      currentWeek: activeWeek
+        ? {
+            weekId: activeWeek.week.id,
+            number: activeWeek.week.number,
+            title: activeWeek.week.title,
+            startDate: activeWeek.startDate,
+            endDate: activeWeek.endDate,
+          }
+        : null,
+      pendingThisWeek,
+      recentCompletions: recentRows.map((row) => ({
+        name: row.assignment.name,
+        weekNumber: row.assignment.week.number,
+        score: row.score,
+        maxScore: row.maxScore,
+        completedAt: row.completedAt,
+      })),
+      weekEarnedScore: weekEarnAgg._sum.score ?? 0,
+      weekMaxScore: weekMaxAgg._sum.maxScore ?? 0,
+      totalEarnedScore: totalEarnAgg._sum.score ?? 0,
+      totalMaxScore: totalMaxAgg._sum.maxScore ?? 0,
+    };
   });
 }

@@ -16,6 +16,7 @@ import {
   findWeekAssignments,
   findStudentAssignments,
   findManyStudentAssignments,
+  findStudentDashboardData,
 } from '../dal';
 import type {
   AssignmentWithRawAttachmentsDTO,
@@ -23,6 +24,7 @@ import type {
   StudentAssignmentDTO,
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
+  StudentDashboardData,
 } from '../types';
 
 // ============================================================================
@@ -167,6 +169,44 @@ export async function getManyStudentAssignments(
         ...dalResult,
         data: dataWithOverdue,
       });
+    },
+    { requireAuth: true },
+  );
+}
+
+// ============================================================================
+// Student Dashboard Service
+// ============================================================================
+
+/**
+ * Get all data needed by the student dashboard.
+ * Only the authenticated student can call this for their own data.
+ */
+export async function getStudentDashboardData(): Promise<
+  ServiceReturn<StudentDashboardData>
+> {
+  return runServiceOperation(
+    async (session) => {
+      if (!session) {
+        return {
+          success: false,
+          error: { type: 'unauthorized', statusCode: 401 },
+        };
+      }
+
+      if (session.role !== 'student' && session.role !== 'supervisor') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findStudentDashboardData(
+        session.userId,
+        session.currentLevelId,
+      );
+
+      return mapDalToService(dalResult);
     },
     { requireAuth: true },
   );

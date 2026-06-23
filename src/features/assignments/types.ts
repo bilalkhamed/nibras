@@ -269,3 +269,47 @@ export const assignmentFormSchema = z.object({
 });
 
 export type AssignmentFormData = z.infer<typeof assignmentFormSchema>;
+
+// ============================================================================
+// Student Dashboard DTOs
+// ============================================================================
+
+/** A pending assignment for the dashboard's current-week list */
+export type DashboardPendingItem = {
+  assignmentId: string;
+  name: string;
+  programName: string;
+};
+
+/** A recently completed assignment for the dashboard's right column */
+export type DashboardRecentItem = {
+  name: string;
+  weekNumber: number;
+  score: number | null;
+  maxScore: number | null;
+  completedAt: Date | null;
+};
+
+/** Everything the student dashboard needs, fetched in a single DAL call */
+export type StudentDashboardData = {
+  /** Current (or fallback week-1) calendar week */
+  currentWeek: {
+    weekId: string;
+    number: number;
+    title: string;
+    startDate: Date;
+    endDate: Date;
+  } | null;
+  /** Incomplete StudentAssignment rows for the current week */
+  pendingThisWeek: DashboardPendingItem[];
+  /** Last 4 completed StudentAssignment rows */
+  recentCompletions: DashboardRecentItem[];
+  /** Sum of earned scores for the current week */
+  weekEarnedScore: number;
+  /** Sum of maxScore on all Assignments in the current week at the student's level */
+  weekMaxScore: number;
+  /** Sum of all earned scores at the student's level */
+  totalEarnedScore: number;
+  /** Sum of maxScore on all Assignments at the student's level */
+  totalMaxScore: number;
+};

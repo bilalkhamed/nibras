@@ -12,6 +12,7 @@ export {
   getWeekAssignments,
   getStudentAssignments,
   getManyStudentAssignments,
+  getStudentDashboardData,
 } from './queries';
 
 // Mutation operations
