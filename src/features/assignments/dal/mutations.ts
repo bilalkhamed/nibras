@@ -49,6 +49,7 @@ export async function upsertStudentAssignment({
     });
     const maxScore = assignment?.maxScore ?? null;
 
+    console.log(data.score);
     return prisma.studentAssignment.upsert({
       where: {
         studentId_assignmentId: {
@@ -69,7 +70,7 @@ export async function upsertStudentAssignment({
         gradedById: data.markedById,
         textSubmission: data.textSubmission || null,
         fileKey: data.fileKey || null,
-        score: data.score || null,
+        score: data.score ?? null,
         maxScore,
         comment: data.comment || null,
       },
@@ -80,7 +81,7 @@ export async function upsertStudentAssignment({
         ...(data.textSubmission && { textSubmission: data.textSubmission }),
         ...(data.fileKey && { fileKey: data.fileKey }),
         ...(data.gradedById && { gradedById: data.gradedById }),
-        ...(data.score && { score: data.score }),
+        ...(data.score !== undefined && { score: data.score }),
         maxScore,
         ...(data.comment && { comment: data.comment }),
       },
