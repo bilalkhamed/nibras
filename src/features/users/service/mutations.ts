@@ -5,12 +5,15 @@ import {
 import type { ServiceReturn } from '@/lib/server/service/types';
 import {
   createUserWithInvite,
+  editUserFields,
+  findUserById,
   updateManyUsers,
   updateUser,
+  upsertUserProfile,
   resetUser,
   deleteUser,
 } from '../dal';
-import { CreateUserInput, CreateUserResult } from '../types';
+import { CreateUserInput, CreateUserResult, EditUserInput, EditUserProfileInput } from '../types';
 import { generateInvite } from '@/lib/server/hash';
 import { SupervisorStatus } from '@prisma/client';
 
@@ -150,7 +153,69 @@ export async function updateMultipleSupervisorsStatus({
   );
 }
 
-// TODO: Add update user services as needed
+// ============================================================================
+// Edit User Services
+// ============================================================================
+
+/**
+ * Edit a user's core fields and optional student profile.
+ * Allowed for: admin, cohort_manager (within their own cohort), or the user themselves.
+ */
+export async function editUser(
+  targetUserId: string,
+  userFields: EditUserInput,
+  profileFields: EditUserProfileInput,
+): Promise<ServiceReturn<{ userId: string }>> {
+  return runServiceOperation(
+    async (session) => {
+      const isAdmin = session!.role === 'admin';
+      const isSelf = session!.userId === targetUserId;
+      const isCohortManager = session!.role === 'cohort_manager';
+
+      if (!isAdmin && !isSelf && !isCohortManager) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      // If cohort_manager: verify target user belongs to their cohort
+      if (isCohortManager && !isSelf) {
+        const targetResult = await findUserById(targetUserId);
+        if (!targetResult.success || !targetResult.data) {
+          return {
+            success: false,
+            error: { type: 'not-found', statusCode: 404 },
+          };
+        }
+        if (targetResult.data.cohort?.id !== session!.managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
+      // 1. Update core user fields
+      const userResult = await editUserFields(targetUserId, userFields);
+      if (!userResult.success) {
+        return mapDalToService(userResult);
+      }
+
+      // 2. Upsert student profile (always — profile may not exist yet)
+      const profileResult = await upsertUserProfile(targetUserId, profileFields);
+      if (!profileResult.success) {
+        return mapDalToService(profileResult);
+      }
+
+      return {
+        success: true,
+        data: { userId: targetUserId },
+      };
+    },
+    { requireAuth: true },
+  );
+}
 
 // ============================================================================
 // Reset Services

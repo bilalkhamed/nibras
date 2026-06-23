@@ -2,7 +2,7 @@ import { runDalOperation } from '@/lib/server/dal/helpers';
 import { DalReturn } from '@/lib/server/dal/types';
 import prisma, { Prisma } from '@/lib/server/prisma';
 import { revalidatePath } from 'next/cache';
-import { CreateUserInput, CreatedUserDTO } from '../types';
+import { CreateUserInput, CreatedUserDTO, EditUserInput, EditUserProfileInput } from '../types';
 
 // ============================================================================
 // Create Operations
@@ -102,6 +102,70 @@ export async function updateManyUsers({
 }
 
 // TODO: Add update user functions as needed
+
+// ============================================================================
+// Edit User Operations
+// ============================================================================
+
+/**
+ * Update core User row fields (firstName, middleName, lastName, email,
+ * birthYear, country). Role and cohort are intentionally excluded.
+ */
+export async function editUserFields(
+  userId: string,
+  data: EditUserInput,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName: data.firstName,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        email: data.email || null,
+        birthYear: data.birthYear,
+        country: data.country,
+      },
+      select: { id: true },
+    });
+
+    revalidatePath(`/dashboard/users/${userId}`);
+    revalidatePath('/dashboard/users');
+    return user;
+  });
+}
+
+/**
+ * Upsert StudentProfile for the given user.
+ * Creates the profile if it does not exist yet.
+ */
+export async function upsertUserProfile(
+  userId: string,
+  data: EditUserProfileInput,
+): Promise<DalReturn<{ id: string }>> {
+  return runDalOperation(async () => {
+    const profile = await prisma.studentProfile.upsert({
+      where: { userId },
+      create: {
+        userId,
+        gradeLevel: data.gradeLevel ?? null,
+        address: data.address || null,
+        motherFullName: data.motherFullName || null,
+        motherPhone: data.motherPhone || null,
+      },
+      update: {
+        gradeLevel: data.gradeLevel ?? null,
+        address: data.address || null,
+        motherFullName: data.motherFullName || null,
+        motherPhone: data.motherPhone || null,
+      },
+      select: { id: true },
+    });
+
+    revalidatePath(`/dashboard/users/${userId}`);
+    return profile;
+  });
+}
 
 // ============================================================================
 // Reset Operations

@@ -15,6 +15,7 @@ import { Role, STUDENT_ROLE, SUPERVISOR_ROLE } from '@/types/types';
 import { formatDate } from '@/lib/shared/utils';
 import { runServiceOrRedirect } from '@/lib/server/service/helpers';
 import { getUserById } from '@/features/users/service';
+import { EditUserSheet } from '@/features/users/components';
 import Link from 'next/link';
 import {
   getGroups,
@@ -72,9 +73,28 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-3">
-          معلومات الحساب
-        </h2>
+        <div className="flex items-center justify-between mb-3" dir="rtl">
+          <h2 className="text-xl font-semibold text-foreground">
+            معلومات الحساب
+          </h2>
+          <EditUserSheet
+            userId={user.id}
+            defaultUserValues={{
+              firstName: user.firstName,
+              middleName: user.middleName,
+              lastName: user.lastName,
+              email: user.email ?? undefined,
+              birthYear: user.birthYear,
+              country: user.country ?? '',
+            }}
+            defaultProfileValues={{
+              gradeLevel: user.studentProfile?.gradeLevel,
+              address: user.studentProfile?.address,
+              motherFullName: user.studentProfile?.motherFullName,
+              motherPhone: user.studentProfile?.motherPhone,
+            }}
+          />
+        </div>
         <Card className="border-border bg-card/80">
           <CardContent className="p-4 md:p-6 space-y-4">
             <div className="flex flex-wrap items-center gap-3">
