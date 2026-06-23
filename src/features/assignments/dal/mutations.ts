@@ -49,7 +49,6 @@ export async function upsertStudentAssignment({
     });
     const maxScore = assignment?.maxScore ?? null;
 
-    console.log(data.score);
     return prisma.studentAssignment.upsert({
       where: {
         studentId_assignmentId: {

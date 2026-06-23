@@ -361,8 +361,6 @@ export async function findStudentDashboardData(
         name: a.name,
         programName: a.program.name,
       }));
-
-    console.log(recentRows);
     return {
       currentWeek: activeWeek
         ? {

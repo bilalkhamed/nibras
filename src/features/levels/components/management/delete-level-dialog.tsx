@@ -31,8 +31,6 @@ export function DeleteLevelDialog({ levelId }: DeleteLevelDialogProps) {
       try {
         const result = await deleteLevelAction(levelId);
 
-        console.log(result);
-
         if (!result.success) {
           throw new ServiceError(result.error);
         }
