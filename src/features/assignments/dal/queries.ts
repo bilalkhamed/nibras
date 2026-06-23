@@ -7,7 +7,7 @@
 
 import 'server-only';
 
-import { cacheTag } from 'next/cache';
+// import { cacheTag } from 'next/cache';
 import prisma from '@/lib/server/prisma';
 import { runDalOperation } from '@/lib/server/dal/helpers';
 import type { DalReturn } from '@/lib/server/dal/types';
@@ -55,8 +55,6 @@ export async function findWeekAssignments({
   programFilter,
   withAttachments = true,
 }: WeekAssignmentsOptions): Promise<AssignmentWithRawAttachmentsDTO[]> {
-  'use cache';
-
   const programResult = programSlug
     ? await findProgramBySlug(programSlug)
     : undefined;
@@ -67,13 +65,6 @@ export async function findWeekAssignments({
   } else {
     program = programResult?.data || undefined;
   }
-
-  // Build cache tags for efficient revalidation
-  const tags = [
-    `assignments-level-${levelId}-week-${weekId}-program-${program?.id}`,
-  ];
-  if (!program) tags.push(`assignments-level-${levelId}-week-${weekId}`);
-  cacheTag(...tags);
 
   const assignments = await prisma.assignment.findMany({
     where: {
