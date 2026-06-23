@@ -77,12 +77,12 @@ export async function upsertStudentAssignment({
         isCompleted: data.isCompleted,
         completedAt: data.isCompleted ? new Date() : null,
         ...(data.markedById && { markedById: data.markedById }),
-        ...(data.textSubmission && { textSubmission: data.textSubmission }),
-        ...(data.fileKey && { fileKey: data.fileKey }),
+        ...(data.textSubmission !== undefined && { textSubmission: data.textSubmission }),
+        ...(data.fileKey !== undefined && { fileKey: data.fileKey }),
         ...(data.gradedById && { gradedById: data.gradedById }),
         ...(data.score !== undefined && { score: data.score }),
         maxScore,
-        ...(data.comment && { comment: data.comment }),
+        ...(data.comment !== undefined && { comment: data.comment }),
       },
     });
   });

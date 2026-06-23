@@ -366,29 +366,46 @@ function AssignmentCard({
                 {requiresSubmission ? 'المراجعة' : 'الدرجة'}
               </p>
               {isCompleted && requiresSubmission && studentInfo ? (
-                <SubmissionViewerSheet
-                  allowFileSubmission={assignment.allowFileSubmission}
-                  allowTextSubmission={assignment.allowTextSubmission}
-                  fileKey={data.fileKey || null}
-                  fileUrl={data.fileUrl || null}
-                  textSubmission={data.textSubmission || null}
-                  currentScore={data.studentAssignment?.score || null}
-                  currentComment={data.studentAssignment?.comment || null}
-                  assignmentId={assignment.id}
-                  assignmentName={assignment.name}
-                  studentId={studentInfo.id}
-                  studentName={studentInfo.name}
-                  canEditGrade={false}
-                  maxScore={assignment.maxScore}
-                >
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <GradeIcon className="h-4 w-4" />
-                    {gradeLabel}{' '}
-                    {data.studentAssignment?.score
-                      ? `(${toArabicNumerals(data.studentAssignment.score)})`
-                      : ''}
-                  </Button>
-                </SubmissionViewerSheet>
+                data.studentAssignment?.score !== null && data.studentAssignment?.score !== undefined ? (
+                  <SubmissionViewerSheet
+                    allowFileSubmission={assignment.allowFileSubmission}
+                    allowTextSubmission={assignment.allowTextSubmission}
+                    fileKey={data.fileKey || null}
+                    fileUrl={data.fileUrl || null}
+                    textSubmission={data.textSubmission || null}
+                    currentScore={data.studentAssignment?.score || null}
+                    currentComment={data.studentAssignment?.comment || null}
+                    assignmentId={assignment.id}
+                    assignmentName={assignment.name}
+                    studentId={studentInfo.id}
+                    studentName={studentInfo.name}
+                    canEditGrade={false}
+                    maxScore={assignment.maxScore}
+                  >
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <GradeIcon className="h-4 w-4" />
+                      {"تم التقييم"}{' '}
+                      {`(${toArabicNumerals(data.studentAssignment.score)})`}
+                    </Button>
+                  </SubmissionViewerSheet>
+                ) : (
+                  <SubmissionSheet
+                    assignmentId={assignment.id}
+                    assignmentName={assignment.name}
+                    allowFileSubmission={assignment.allowFileSubmission}
+                    allowTextSubmission={assignment.allowTextSubmission}
+                    defaultValues={{
+                      fileKey: data.fileKey,
+                      textSubmission: data.textSubmission,
+                      fileUrl: data.fileUrl,
+                    }}
+                  >
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <Send className="h-4 w-4" />
+                      تعديل التسليم
+                    </Button>
+                  </SubmissionSheet>
+                )
               ) : (
                 <p className="text-sm font-medium text-foreground">
                   {data.studentAssignment?.score
