@@ -166,9 +166,8 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             {user.studentProfile?.skills &&
               user.studentProfile.skills.length > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">المهارات</p>
                   <InfoField
-                    label="اسم الأم"
+                    label="المهارات"
                     value={user.studentProfile?.skills}
                   />
                 </div>
