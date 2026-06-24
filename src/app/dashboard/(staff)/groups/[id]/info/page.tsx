@@ -7,8 +7,8 @@ import {
   GroupInfoSection,
   GroupStudentsTable,
   AddStudentDialog,
-  type GroupStudent,
 } from '@/features/groups';
+import { type GroupStudentInfoDTO } from '@/features/groups/types';
 import getAuthSession from '@/lib/server/auth-session';
 import { Role } from '@prisma/client';
 import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
@@ -21,7 +21,7 @@ async function GroupStudentsSection({
   userRole,
 }: {
   groupId: string;
-  groupStudents: GroupStudent[];
+  groupStudents: GroupStudentInfoDTO[];
   cohortId: string;
   cohortName: string;
   userRole: Role;

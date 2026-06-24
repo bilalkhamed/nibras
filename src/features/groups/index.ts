@@ -34,7 +34,6 @@ export {
   CohortNavigator,
   CohortNavigatorWrapper,
   GroupsListSection,
-  type GroupStudent,
   // Progress
   StudentProgressContainer,
   StudentProgressTable,

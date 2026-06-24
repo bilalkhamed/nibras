@@ -15,7 +15,6 @@ export {
   CohortNavigator,
   CohortNavigatorWrapper,
   GroupsListSection,
-  type GroupStudent,
 } from './shared';
 
 // Progress tracking components

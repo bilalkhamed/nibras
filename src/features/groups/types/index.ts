@@ -84,6 +84,7 @@ const selectGroupStudentInfo = {
       firstName: true,
       middleName: true,
       lastName: true,
+      status: true,
       id: true,
     },
   },
