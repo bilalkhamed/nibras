@@ -352,7 +352,7 @@ export async function getStudentsWithAssignments(limit: number = 100) {
 export async function getUserForInvite(userId: string) {
   return runServiceOperation<UserInviteStatusDTO>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (!['admin', 'cohort_manager', 'supervisor', 'group_manager'].includes(session!.role)) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
