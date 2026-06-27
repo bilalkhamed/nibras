@@ -1,6 +1,8 @@
+import { CohortListDTO, getAllCohorts } from '@/features/cohorts';
 import { getAllUsers } from '../service';
 import { UsersTable } from './users-table';
 import { runServiceOrRedirect } from '@/lib/server/service/helpers';
+import { Role } from '@prisma/client';
 
 export async function UsersTableSection() {
   const res = await runServiceOrRedirect(getAllUsers);
@@ -11,5 +13,18 @@ export async function UsersTableSection() {
 
   const users = res.data;
 
-  return <UsersTable users={users} />;
+  const cohortsResult = await getAllCohorts();
+  let cohorts: CohortListDTO[] = [];
+
+  if (cohortsResult.success) {
+    cohorts = cohortsResult.data;
+  }
+
+  return (
+    <UsersTable
+      users={users}
+      cohorts={cohorts}
+      roles={Object.values(Role).filter((v) => v !== Role.admin)}
+    />
+  );
 }

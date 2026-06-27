@@ -32,6 +32,7 @@ import {
   CountryCode,
   DELETED_STATUS,
   INVITED_STATUS,
+  Role,
   SUSPENDED_STATUS,
   UserStatus,
 } from '@/types/types';
@@ -41,13 +42,21 @@ import { InviteRegenModal } from './invite-regen-modal';
 import { ResetUserDialog } from './reset-user-dialog';
 import { DeleteUserDialog } from './delete-user-dialog';
 import { UserWithCohortDTO } from '../types';
+import { CohortListDTO } from '@/features/cohorts';
 
 interface UsersTableProps {
   users: UserWithCohortDTO[];
   pageSize?: number;
+  cohorts: CohortListDTO[];
+  roles: Role[];
 }
 
-export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
+export function UsersTable({
+  users,
+  pageSize = 10,
+  cohorts,
+  roles,
+}: UsersTableProps) {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [cohortFilter, setCohortFilter] = useState<string>('all');
@@ -68,7 +77,8 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
         fullName.includes(search.trim().toLowerCase()) ||
         u.email?.toLowerCase().includes(search.trim().toLowerCase());
       const matchesRole = roleFilter === 'all' || u.role === roleFilter;
-      const matchesCohort = cohortFilter === 'all';
+      const matchesCohort =
+        cohortFilter === 'all' || u.cohort?.id === cohortFilter;
       const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
       return matchesName && matchesRole && matchesCohort && matchesStatus;
     });
@@ -121,12 +131,11 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
                 <SelectItem value="all">
                   {labels.dashboard.users.all}
                 </SelectItem>
-                <SelectItem value="student">
-                  {labels.dashboard.users.student}
-                </SelectItem>
-                <SelectItem value="supervisor">
-                  {labels.dashboard.users.supervisor}
-                </SelectItem>
+                {roles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {labels.dashboard.users[role] || role}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -150,6 +159,11 @@ export function UsersTable({ users, pageSize = 10 }: UsersTableProps) {
                 <SelectItem value="all">
                   {labels.dashboard.users.all}
                 </SelectItem>
+                {cohorts.map((cohort) => (
+                  <SelectItem key={cohort.id} value={cohort.id}>
+                    {cohort.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
