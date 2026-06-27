@@ -18,6 +18,7 @@ import type {
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
   StudentDashboardData,
+  StudentAchievementsData,
 } from '../types';
 import { Program } from '@prisma/client';
 import { findProgramBySlug } from '@/features/programs/dal';
@@ -248,28 +249,28 @@ export async function findStudentDashboardData(
       // All assignments for this week at the student's level
       weekId && levelId
         ? prisma.assignment.findMany({
-            where: { weekId, levelId },
-            select: {
-              id: true,
-              name: true,
-              maxScore: true,
-              program: { select: { name: true } },
-            },
-          })
+          where: { weekId, levelId },
+          select: {
+            id: true,
+            name: true,
+            maxScore: true,
+            program: { select: { name: true } },
+          },
+        })
         : Promise.resolve([]),
 
       // Existing StudentAssignment rows for this student in this week
       weekId
         ? prisma.studentAssignment.findMany({
-            where: {
-              studentId,
-              assignment: { weekId },
-            },
-            select: {
-              assignmentId: true,
-              isCompleted: true,
-            },
-          })
+          where: {
+            studentId,
+            assignment: { weekId },
+          },
+          select: {
+            assignmentId: true,
+            isCompleted: true,
+          },
+        })
         : Promise.resolve([]),
 
       // Recent completions: last 4 graded completed rows
@@ -298,14 +299,14 @@ export async function findStudentDashboardData(
       // Weekly earned score
       weekId
         ? prisma.studentAssignment.aggregate({
-            where: {
-              studentId,
-              isCompleted: true,
-              score: { not: null },
-              assignment: { weekId },
-            },
-            _sum: { score: true },
-          })
+          where: {
+            studentId,
+            isCompleted: true,
+            score: { not: null },
+            assignment: { weekId },
+          },
+          _sum: { score: true },
+        })
         : Promise.resolve({ _sum: { score: null } }),
 
       // Total earned score
@@ -321,17 +322,17 @@ export async function findStudentDashboardData(
       // Weekly max score: from Assignment directly, scoped to week + level
       weekId && levelId
         ? prisma.assignment.aggregate({
-            where: { weekId, levelId },
-            _sum: { maxScore: true },
-          })
+          where: { weekId, levelId },
+          _sum: { maxScore: true },
+        })
         : Promise.resolve({ _sum: { maxScore: null } }),
 
       // Total max score: scoped to level + program to avoid cross-cohort inflation
       levelId
         ? prisma.assignment.aggregate({
-            where: { levelId },
-            _sum: { maxScore: true },
-          })
+          where: { levelId },
+          _sum: { maxScore: true },
+        })
         : Promise.resolve({ _sum: { maxScore: null } }),
     ]);
 
@@ -364,12 +365,12 @@ export async function findStudentDashboardData(
     return {
       currentWeek: activeWeek
         ? {
-            weekId: activeWeek.week.id,
-            number: activeWeek.week.number,
-            title: activeWeek.week.title,
-            startDate: activeWeek.startDate,
-            endDate: activeWeek.endDate,
-          }
+          weekId: activeWeek.week.id,
+          number: activeWeek.week.number,
+          title: activeWeek.week.title,
+          startDate: activeWeek.startDate,
+          endDate: activeWeek.endDate,
+        }
         : null,
       pendingThisWeek,
       recentCompletions: recentRows.map((row) => ({
@@ -386,3 +387,82 @@ export async function findStudentDashboardData(
     };
   });
 }
+
+/**
+ * Fetch achievements and cohort level progress for the student.
+ */
+export async function findStudentAchievements(
+  studentId: string,
+  levelId: string | null
+): Promise<DalReturn<StudentAchievementsData>> {
+  return runDalOperation(async () => {
+    // 1. Group by assignment.type for counts of completed assignments for this student
+    const countsGroup = await prisma.assignment.groupBy({
+      by: ['type'],
+      where: {
+        studentAssignments: {
+          some: {
+            studentId,
+            isCompleted: true,
+            score: { not: null },
+          },
+        },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    const counts = {
+      reading: 0,
+      lecture: 0,
+      exercise: 0,
+    };
+
+    countsGroup.forEach((group) => {
+      if (group.type === 'reading') counts.reading = group._count.id;
+      if (group.type === 'lecture') counts.lecture = group._count.id;
+      if (group.type === 'exercise') counts.exercise = group._count.id;
+    });
+
+    // 2. Two count queries for the progress bar (completed assignments in cohort level vs total assignments in cohort level)
+    let completedCount = 0;
+    let totalCount = 0;
+    let levelTitle = '';
+
+    if (levelId) {
+      const [comp, tot, levelObj] = await Promise.all([
+        prisma.studentAssignment.count({
+          where: {
+            studentId,
+            isCompleted: true,
+            score: { not: null },
+            assignment: {
+              levelId,
+            },
+          },
+        }),
+        prisma.assignment.count({
+          where: {
+            levelId,
+          },
+        }),
+        prisma.level.findUnique({
+          where: { id: levelId },
+          select: { title: true },
+        }),
+      ]);
+      completedCount = comp;
+      totalCount = tot;
+      levelTitle = levelObj?.title ?? '';
+    }
+
+    return {
+      counts,
+      completedCount,
+      totalCount,
+      levelTitle,
+    };
+  });
+}
+

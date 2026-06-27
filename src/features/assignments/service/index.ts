@@ -13,6 +13,7 @@ export {
   getStudentAssignments,
   getManyStudentAssignments,
   getStudentDashboardData,
+  getStudentAchievements,
 } from './queries';
 
 // Mutation operations

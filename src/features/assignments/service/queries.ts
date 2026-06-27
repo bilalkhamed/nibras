@@ -17,6 +17,7 @@ import {
   findStudentAssignments,
   findManyStudentAssignments,
   findStudentDashboardData,
+  findStudentAchievements,
 } from '../dal';
 import type {
   AssignmentWithRawAttachmentsDTO,
@@ -25,6 +26,7 @@ import type {
   StudentAssignmentWithMarkerDTO,
   WeekAssignmentsOptions,
   StudentDashboardData,
+  StudentAchievementsData,
 } from '../types';
 
 // ============================================================================
@@ -211,3 +213,37 @@ export async function getStudentDashboardData(): Promise<
     { requireAuth: true },
   );
 }
+
+/**
+ * Get achievements data for the current student.
+ */
+export async function getStudentAchievements(): Promise<
+  ServiceReturn<StudentAchievementsData>
+> {
+  return runServiceOperation(
+    async (session) => {
+      if (!session) {
+        return {
+          success: false,
+          error: { type: 'unauthorized', statusCode: 401 },
+        };
+      }
+
+      if (session.role !== 'student' && session.role !== 'supervisor') {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      const dalResult = await findStudentAchievements(
+        session.userId,
+        session.currentLevelId
+      );
+
+      return mapDalToService(dalResult);
+    },
+    { requireAuth: true }
+  );
+}
+

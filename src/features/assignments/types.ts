@@ -313,3 +313,15 @@ export type StudentDashboardData = {
   /** Sum of maxScore on all Assignments at the student's level */
   totalMaxScore: number;
 };
+
+export type StudentAchievementsData = {
+  counts: {
+    reading: number;
+    lecture: number;
+    exercise: number;
+  };
+  completedCount: number;
+  totalCount: number;
+  levelTitle: string;
+};
+

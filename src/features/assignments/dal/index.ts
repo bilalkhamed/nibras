@@ -15,6 +15,7 @@ export {
   findAssignmentById,
   findAssignmentAttachments,
   findStudentDashboardData,
+  findStudentAchievements,
 } from './queries';
 
 // Mutation operations

@@ -1,6 +1,10 @@
 import { CheckCircle2, BookOpen, Star, Trophy, ArrowLeft } from 'lucide-react';
 import { getStudentBasicInfo } from '@/features/users/service';
-import { getStudentDashboardData } from '@/features/assignments/service';
+import {
+  getStudentDashboardData,
+  getStudentAchievements,
+} from '@/features/assignments/service';
+import { StudentAchievements } from '@/features/assignments/components/student/student-achievements';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -33,10 +37,12 @@ function fmtDate(date: Date) {
 // ---------------------------------------------------------------------------
 
 export async function StudentDashboard() {
-  const [studentResult, dashboardResult] = await Promise.all([
-    getStudentBasicInfo(),
-    getStudentDashboardData(),
-  ]);
+  const [studentResult, dashboardResult, achievementsResult] =
+    await Promise.all([
+      getStudentBasicInfo(),
+      getStudentDashboardData(),
+      getStudentAchievements(),
+    ]);
 
   if (!dashboardResult.success) return null;
 
@@ -242,6 +248,11 @@ export async function StudentDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ── Achievements and Cohort Progress ──────────────────────────── */}
+      {achievementsResult.success && (
+        <StudentAchievements data={achievementsResult.data} />
+      )}
     </div>
   );
 }
