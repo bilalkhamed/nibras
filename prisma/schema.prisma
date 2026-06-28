@@ -12,6 +12,7 @@ enum Role {
   admin
   cohort_manager
   group_manager
+  program_manager
   supervisor
   student
   media_team
@@ -54,8 +55,9 @@ model User {
   supervisedGroup   Group?            @relation("GroupSupervisors", fields: [supervisedGroupId], references: [id])
   supervisorStatus  SupervisorStatus?
 
-  managedGroups  GroupManager[]  @relation("UserGroupManagers")
-  managedCohorts CohortManager[] @relation("UserCohortManagers")
+  managedGroups   GroupManager[]   @relation("UserGroupManagers")
+  managedCohorts  CohortManager[]  @relation("UserCohortManagers")
+  managedPrograms ProgramManager[] @relation("UserProgramManagers")
 
   cohort   Cohort? @relation("CohortStudents", fields: [cohortId], references: [id])
   cohortId String?
@@ -153,6 +155,23 @@ model GroupManager {
   @@index([groupId])
   @@index([userId])
   @@map("group_managers")
+}
+
+model ProgramManager {
+  id String @id @default(cuid(2))
+
+  programId String
+  userId    String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation("UserProgramManagers", fields: [userId], references: [id], onDelete: Cascade)
+  program   Program  @relation("ProgramProgramManagers", fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, userId])
+  @@index([programId])
+  @@index([userId])
+  @@map("program_managers")
 }
 
 model GroupStudent {
@@ -267,6 +286,8 @@ model Program {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  managers ProgramManager[] @relation("ProgramProgramManagers")
 
   @@map("programs")
 }
@@ -384,7 +405,7 @@ model StudentAssignment {
 
   //grading
   score    Float?
-  maxScore Float? @map("max_score")
+  maxScore Float?  @map("max_score")
   comment  String? @db.Text
 
   gradedById String?
