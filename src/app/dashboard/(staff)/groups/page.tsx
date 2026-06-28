@@ -26,6 +26,7 @@ export default async function GroupsPage({
       <AuthGuard
         roles={[
           ADMIN_ROLE,
+          'director',
           COHORT_MANAGER_ROLE,
           GROUP_MANAGER_ROLE,
           SUPERVISOR_ROLE,
@@ -43,7 +44,7 @@ export default async function GroupsPage({
               )}
             </div>
 
-            {session.role === ADMIN_ROLE && (
+            {(session.role === ADMIN_ROLE || session.role === 'director') && (
               <Suspense fallback={<CohortNavigator cohorts={[]} />}>
                 <CohortNavigatorWrapper />
               </Suspense>

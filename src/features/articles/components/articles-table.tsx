@@ -68,6 +68,7 @@ import { deleteArticleAction, toggleArticlePublishAction } from '../actions';
 
 type ArticlesTableProps = {
   articles: ArticleListDTO[];
+  isDirector?: boolean;
 };
 
 type FilterState = {
@@ -91,7 +92,7 @@ function formatDate(date: Date | string): string {
 // Component
 // ============================================================================
 
-export function ArticlesTable({ articles }: ArticlesTableProps) {
+export function ArticlesTable({ articles, isDirector }: ArticlesTableProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     category: 'all',
@@ -184,12 +185,14 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
             إدارة مقالات الموقع والأخبار
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/articles/editor/new">
-            <Plus className="h-4 w-4 ml-2" />
-            إنشاء مقال جديد
-          </Link>
-        </Button>
+        {!isDirector && (
+          <Button asChild>
+            <Link href="/dashboard/articles/editor/new">
+              <Plus className="h-4 w-4 ml-2" />
+              إنشاء مقال جديد
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -280,7 +283,7 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
                       ? 'لا توجد مقالات تطابق معايير البحث'
                       : 'لا توجد مقالات بعد'}
                   </div>
-                  {!hasActiveFilters && (
+                  {!hasActiveFilters && !isDirector && (
                     <Button asChild variant="link" className="mt-2">
                       <Link href="/dashboard/articles/editor/new">
                         إنشاء مقال جديد
@@ -326,63 +329,73 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
                     {formatDate(article.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu dir="rtl">
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-card">
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/dashboard/articles/editor/${article.id}`}
-                            className="flex items-center gap-2"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            تعديل
+                    {isDirector ? (
+                      article.isPublished ? (
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/articles/${article.slug}`} target="_blank">
+                            <ExternalLink className="h-4 w-4" />
                           </Link>
-                        </DropdownMenuItem>
-                        {article.isPublished && (
+                        </Button>
+                      ) : null
+                    ) : (
+                      <DropdownMenu dir="rtl">
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-card">
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/articles/${article.slug}`}
-                              target="_blank"
+                              href={`/dashboard/articles/editor/${article.id}`}
                               className="flex items-center gap-2"
                             >
-                              <ExternalLink className="h-4 w-4" />
-                              عرض المقال
+                              <Pencil className="h-4 w-4" />
+                              تعديل
                             </Link>
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => handleTogglePublish(article)}
-                          disabled={isPending}
-                        >
-                          {article.isPublished ? (
-                            <>
-                              <EyeOff className="h-4 w-4 ml-2" />
-                              إلغاء النشر
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="h-4 w-4 ml-2" />
-                              نشر
-                            </>
+                          {article.isPublished && (
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href={`/articles/${article.slug}`}
+                                target="_blank"
+                                className="flex items-center gap-2"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                عرض المقال
+                              </Link>
+                            </DropdownMenuItem>
                           )}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setArticleToDelete(article);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 ml-2" />
-                          حذف
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <DropdownMenuItem
+                            onClick={() => handleTogglePublish(article)}
+                            disabled={isPending}
+                          >
+                            {article.isPublished ? (
+                              <>
+                                <EyeOff className="h-4 w-4 ml-2" />
+                                إلغاء النشر
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="h-4 w-4 ml-2" />
+                                نشر
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setArticleToDelete(article);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 ml-2" />
+                            حذف
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

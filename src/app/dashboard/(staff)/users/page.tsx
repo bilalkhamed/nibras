@@ -52,6 +52,8 @@ async function AddUserFormContainer() {
   const programsRes = await getAllPrograms({ filter: 'all' });
   const programs = programsRes.success ? programsRes.data : [];
 
+  if (session.role === 'director') return null;
+
   return session.role === ADMIN_ROLE ? (
     <AddUserForm programs={programs} />
   ) : (

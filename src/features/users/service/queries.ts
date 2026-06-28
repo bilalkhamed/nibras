@@ -38,7 +38,11 @@ import { Role } from '@prisma/client';
 export async function getAllUsers() {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -61,7 +65,11 @@ export async function getAllUsers() {
 export async function getUserById(id: string) {
   return runServiceOperation<UserWithCohortAndStudentProfileDTO>(
     async (session) => {
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -160,7 +168,11 @@ export type UserFilters = {
 export async function getUsersNameOnly(filters?: UserFilters) {
   return runServiceOperation<UserNameDTO[]>(
     async (session) => {
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -182,7 +194,11 @@ export async function getUsersNameOnly(filters?: UserFilters) {
 export async function getUsersBasic(filters?: UserFilters) {
   return runServiceOperation<UserBasicDTO[]>(
     async (session) => {
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -208,7 +224,11 @@ export async function getUsersRoleCounts(filters?: { cohortId?: string }) {
   return runServiceOperation<{ [key in Role]: number }>(
     async (session) => {
       // Allow admin and cohort manager
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -237,6 +257,7 @@ export async function getUsersRoleCounts(filters?: { cohortId?: string }) {
         student: 0,
         group_manager: 0,
         program_manager: 0,
+        director: 0,
         media_team: 0,
       };
 
@@ -257,7 +278,11 @@ export async function getUsersRoleCounts(filters?: { cohortId?: string }) {
 export async function getUsersCount(filters?: { cohortId?: string }) {
   return runServiceOperation<{ count: number }>(
     async (session) => {
-      if (session!.role !== 'admin' && session!.role !== 'cohort_manager') {
+      if (
+        session!.role !== 'admin' &&
+        session!.role !== 'director' &&
+        session!.role !== 'cohort_manager'
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -287,7 +312,7 @@ export async function getUsersCount(filters?: { cohortId?: string }) {
 export async function getRecentUsers(limit: number = 5) {
   return runServiceOperation<RecentUserDTO[]>(
     async (session) => {
-      if (session!.role !== 'admin') {
+      if (session!.role !== 'admin' && session!.role !== 'director') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -353,7 +378,15 @@ export async function getStudentsWithAssignments(limit: number = 100) {
 export async function getUserForInvite(userId: string) {
   return runServiceOperation<UserInviteStatusDTO>(
     async (session) => {
-      if (!['admin', 'cohort_manager', 'supervisor', 'group_manager'].includes(session!.role)) {
+      if (
+        ![
+          'admin',
+          'director',
+          'cohort_manager',
+          'supervisor',
+          'group_manager',
+        ].includes(session!.role)
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -383,7 +416,11 @@ export async function getUserForInvite(userId: string) {
 export async function getUserWithRoleAndCohortAndGroup(userId: string) {
   return runServiceOperation<UserWithRoleAndCohortAndGroupDTO>(
     async (session) => {
-      if (!['admin', 'cohort_manager', 'supervisor'].includes(session!.role)) {
+      if (
+        !['admin', 'director', 'cohort_manager', 'supervisor'].includes(
+          session!.role,
+        )
+      ) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },

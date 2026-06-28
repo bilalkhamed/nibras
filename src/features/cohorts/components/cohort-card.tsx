@@ -16,9 +16,10 @@ import { DeleteCohortDialog } from './management/delete-cohort-dialog';
 
 type CohortCardProps = {
   cohort: CohortListDetailedDTO;
+  isDirector?: boolean;
 };
 
-export function CohortCard({ cohort }: CohortCardProps) {
+export function CohortCard({ cohort, isDirector }: CohortCardProps) {
   return (
     <Card className="group relative border-primary/15 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30">
       <CardHeader className="pb-4">
@@ -44,22 +45,24 @@ export function CohortCard({ cohort }: CohortCardProps) {
               </span>
             </div>
           </div>
-          <div className="flex gap-1">
-            <EditCohortSheet cohort={cohort}>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </EditCohortSheet>
-            <DeleteCohortDialog cohortId={cohort.id} cohortName={cohort.name}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </DeleteCohortDialog>
-          </div>
+          {!isDirector && (
+            <div className="flex gap-1">
+              <EditCohortSheet cohort={cohort}>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </EditCohortSheet>
+              <DeleteCohortDialog cohortId={cohort.id} cohortName={cohort.name}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </DeleteCohortDialog>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

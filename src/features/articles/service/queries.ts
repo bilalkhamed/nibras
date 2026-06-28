@@ -12,7 +12,7 @@ import {
 import { ServiceReturn } from '@/lib/server/service/types';
 import { Article } from '@prisma/client';
 
-const ALLOWED_ROLES = ['media_team', 'admin'] as const;
+const ALLOWED_ROLES = ['media_team', 'admin', 'director'] as const;
 
 function isAllowedRole(role: string): boolean {
   return ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number]);

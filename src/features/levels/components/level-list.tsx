@@ -5,9 +5,10 @@ import { XCircleIcon } from 'lucide-react';
 
 interface LevelListProps {
   levels: LevelListDTO[];
+  isDirector?: boolean;
 }
 
-export function LevelList({ levels }: LevelListProps) {
+export function LevelList({ levels, isDirector }: LevelListProps) {
   if (!levels.length) {
     return (
       <div className="flex items-center justify-center">
@@ -25,7 +26,7 @@ export function LevelList({ levels }: LevelListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {levels.map((level) => (
-        <LevelCard key={level.id} level={level} />
+        <LevelCard key={level.id} level={level} isDirector={isDirector} />
       ))}
     </div>
   );

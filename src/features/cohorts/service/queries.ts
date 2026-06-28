@@ -29,7 +29,7 @@ import { findCohortById, findManyCohortsDetailed } from '../dal/queries';
 export async function getAllCohorts(): Promise<ServiceReturn<CohortListDTO[]>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (session!.role !== ADMIN_ROLE && session!.role !== 'director') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -56,7 +56,7 @@ export async function getAllCohortsDetailed(): Promise<
 > {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== ADMIN_ROLE) {
+      if (session!.role !== ADMIN_ROLE && session!.role !== 'director') {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -85,6 +85,7 @@ export async function getCohortById(
     async (session) => {
       if (
         session!.role !== ADMIN_ROLE &&
+        session!.role !== 'director' &&
         session!.role !== COHORT_MANAGER_ROLE
       ) {
         return {

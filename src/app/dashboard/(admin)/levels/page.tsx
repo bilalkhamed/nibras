@@ -3,8 +3,10 @@ import { getAllLevels } from '@/features/levels/service/queries';
 import { LevelList, CreateLevelSheet } from '@/features/levels';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import getAuthSession from '@/lib/server/auth-session';
 
 export default async function LevelsPage() {
+  const session = await getAuthSession();
   const levelsResult = await getAllLevels();
 
   if (!levelsResult.success) {
@@ -27,14 +29,16 @@ export default async function LevelsPage() {
             إدارة المستويات الدراسية للنظام
           </p>
         </div>
-        <CreateLevelSheet>
-          <Button>
-            <Plus className="h-4 w-4 ml-2" />
-            إضافة مستوى جديد
-          </Button>
-        </CreateLevelSheet>
+        {session?.role !== 'director' && (
+          <CreateLevelSheet>
+            <Button>
+              <Plus className="h-4 w-4 ml-2" />
+              إضافة مستوى جديد
+            </Button>
+          </CreateLevelSheet>
+        )}
       </div>
-      <LevelList levels={levels} />
+      <LevelList levels={levels} isDirector={session?.role === 'director'} />
     </div>
   );
 }

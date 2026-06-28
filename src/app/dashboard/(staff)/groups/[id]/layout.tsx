@@ -48,6 +48,7 @@ export default function GroupLayout({
         <AuthGuard
           roles={[
             ADMIN_ROLE,
+            'director',
             COHORT_MANAGER_ROLE,
             GROUP_MANAGER_ROLE,
             SUPERVISOR_ROLE,

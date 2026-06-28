@@ -17,6 +17,7 @@ import type { AssignmentWithAttachmentsDTO } from '../../types';
 type AssignmentsTableWithActionsProps = {
   /** Assignments to display */
   assignments: AssignmentWithAttachmentsDTO[];
+  isDirector?: boolean;
 };
 
 /**
@@ -24,11 +25,12 @@ type AssignmentsTableWithActionsProps = {
  */
 export function AssignmentsTableWithActions({
   assignments,
+  isDirector,
 }: AssignmentsTableWithActionsProps) {
   return (
     <AssignmentsTable
       assignments={assignments}
-      actionButtons={(assignment: AssignmentWithAttachmentsDTO) => {
+      actionButtons={isDirector ? undefined : (assignment: AssignmentWithAttachmentsDTO) => {
         const defaultValues: AssignmentFormData = {
           name: assignment.name,
           description: assignment.description,

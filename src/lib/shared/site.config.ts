@@ -53,8 +53,7 @@ const articles: SidebarNavItem = {
   icon: Newspaper,
 };
 
-export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
-  admin: [
+const adminNavItems: SidebarNavItem[] = [
     {
       label: 'المستخدمون',
       href: '/dashboard/users',
@@ -72,16 +71,6 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       href: '/dashboard/levels',
       icon: FolderKanban,
     },
-    // {
-    //   label: 'المشرفات',
-    //   href: '/dashboard/supervisors',
-    //   items: [
-    //     {
-    //       label: 'البرنامج التدريبي',
-    //       href: '/dashboard/supervisors/training',
-    //     },
-    //   ],
-    // },
     {
       label: 'إدارة التقويم',
       href: '/dashboard/calendar',
@@ -89,7 +78,12 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
     },
     programs,
     articles,
-  ],
+];
+
+export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
+  admin: adminNavItems,
+  director: adminNavItems,
+
   supervisor: [
     {
       label: 'مجموعتي',

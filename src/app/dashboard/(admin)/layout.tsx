@@ -6,5 +6,5 @@ export default async function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGuard roles={[ADMIN_ROLE]}>{children}</AuthGuard>;
+  return <AuthGuard roles={[ADMIN_ROLE, 'director']}>{children}</AuthGuard>;
 }

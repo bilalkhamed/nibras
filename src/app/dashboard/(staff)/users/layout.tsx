@@ -7,6 +7,6 @@ export default function UsersLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE]}>{children}</AuthGuard>
+    <AuthGuard roles={[ADMIN_ROLE, COHORT_MANAGER_ROLE, 'director']}>{children}</AuthGuard>
   );
 }

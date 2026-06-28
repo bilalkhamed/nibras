@@ -49,6 +49,7 @@ interface UsersTableProps {
   pageSize?: number;
   cohorts: CohortListDTO[];
   roles: Role[];
+  isDirector?: boolean;
 }
 
 export function UsersTable({
@@ -56,6 +57,7 @@ export function UsersTable({
   pageSize = 10,
   cohorts,
   roles,
+  isDirector,
 }: UsersTableProps) {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -276,6 +278,7 @@ export function UsersTable({
                       user: { id: u.id, firstName: u.firstName },
                     })
                   }
+                  isDirector={isDirector}
                 />
               ))}
             </TableBody>
@@ -340,9 +343,10 @@ export function UsersTable({
 type RowWithActionsProps = {
   u: UserWithCohortDTO;
   onInviteClick: () => void;
+  isDirector?: boolean;
 };
 
-function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
+function RowWithActions({ u, onInviteClick, isDirector }: RowWithActionsProps) {
   const [resetOpen, setResetOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const age = (birthYear: number) => new Date().getFullYear() - birthYear;
@@ -394,43 +398,51 @@ function RowWithActions({ u, onInviteClick }: RowWithActionsProps) {
           {labels.dashboard.users[u.role]}
         </TableCell>
         <TableCell className="text-left">
-          <DropdownMenu dir="rtl">
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="bottom" className="bg-card">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/users/${u.id}`}>
-                  {labels.dashboard.users.view}
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  setResetOpen(true);
-                }}
-              >
-                إعادة تعيين الحساب
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  setDeleteOpen(true);
-                }}
-                className="bg-destructive text-white focus:bg-destructive/90 focus:text-white mt-1"
-              >
-                حذف الحساب نهائياً
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isDirector ? (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={`/dashboard/users/${u.id}`}>
+                {labels.dashboard.users.view}
+              </Link>
+            </Button>
+          ) : (
+            <DropdownMenu dir="rtl">
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" side="bottom" className="bg-card">
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/users/${u.id}`}>
+                    {labels.dashboard.users.view}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setResetOpen(true);
+                  }}
+                >
+                  إعادة تعيين الحساب
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setDeleteOpen(true);
+                  }}
+                  className="bg-destructive text-white focus:bg-destructive/90 focus:text-white mt-1"
+                >
+                  حذف الحساب نهائياً
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </TableCell>
       </TableRow>
 

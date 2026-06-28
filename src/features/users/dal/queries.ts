@@ -34,7 +34,7 @@ export async function findManyUsers({
   cacheTag('users');
   return runDalOperation(async () => {
     const where: Prisma.UserWhereInput = {
-      role: { not: Role.admin },
+      role: { notIn: [Role.admin, Role.director] },
     };
 
     if (cohortId) {
@@ -75,7 +75,7 @@ export async function findManyUsersWithTimestamps(): Promise<
   return runDalOperation(async () => {
     return await prisma.user.findMany({
       where: {
-        role: { not: Role.admin },
+        role: { notIn: [Role.admin, Role.director] },
       },
       select: {
         id: true,
@@ -168,7 +168,7 @@ export async function findUsersNameOnly(
     // 1. Base Filter (Safe defaults)
     const where: Prisma.UserWhereInput = {
       role: filters?.role,
-      NOT: { role: 'admin' },
+      NOT: { role: { in: ['admin', 'director'] } },
       groupsAsStudent:
         filters?.groupStatus === 'inactive'
           ? { none: { isActive: true } }
@@ -217,7 +217,7 @@ export async function findUsersBasic(
     const where: Prisma.UserWhereInput = {
       role: filters?.role,
       supervisorStatus: filters?.isTraining ? 'in_training' : undefined,
-      NOT: { role: 'admin' },
+      NOT: { role: { in: ['admin', 'director'] } },
       groupsAsStudent:
         filters?.groupStatus === 'inactive'
           ? { none: { isActive: true } }

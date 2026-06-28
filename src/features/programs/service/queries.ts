@@ -95,6 +95,7 @@ export async function getAllPrograms({
 
       if (
         role === 'admin' ||
+        role === 'director' ||
         role === 'cohort_manager' ||
         (role === 'supervisor' && supervisorStatus === 'in_training')
       ) {

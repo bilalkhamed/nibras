@@ -8,6 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatRole(role: string) {
   if (role === 'admin') return 'مديرة النظام';
+  if (role === 'director') return 'الادارة العامة';
   if (role === 'supervisor') return 'مشرفة';
   if (role === 'student') return 'طالبة';
   return role;

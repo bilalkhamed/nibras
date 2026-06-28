@@ -4,10 +4,11 @@ import { getAllArticlesAdmin } from '@/features/articles/service/queries';
 import { ArticlesTable } from '@/features/articles/components';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthGuard } from '@/components/auth/auth-gaurd';
+import getAuthSession from '@/lib/server/auth-session';
 
 export default async function ArticlesPage() {
   return (
-    <AuthGuard roles={['media_team', 'admin']}>
+    <AuthGuard roles={['media_team', 'admin', 'director']}>
       <Suspense fallback={<ArticlesPageSkeleton />}>
         <ArticlesContent />
       </Suspense>
@@ -16,6 +17,7 @@ export default async function ArticlesPage() {
 }
 
 async function ArticlesContent() {
+  const session = await getAuthSession();
   const result = await getAllArticlesAdmin();
 
   if (!result.success) {
@@ -28,7 +30,7 @@ async function ArticlesContent() {
     );
   }
 
-  return <ArticlesTable articles={result.data} />;
+  return <ArticlesTable articles={result.data} isDirector={session?.role === 'director'} />;
 }
 
 function ArticlesPageSkeleton() {

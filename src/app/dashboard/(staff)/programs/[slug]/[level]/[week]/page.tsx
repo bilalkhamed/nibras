@@ -1,5 +1,6 @@
 import { CustomToaster } from '@/components/common/custom-toaster';
 import { notFound } from 'next/navigation';
+import getAuthSession from '@/lib/server/auth-session';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { S3 } from '@/lib/server/s3-client';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -17,6 +18,7 @@ export default async function ProgramWeekPage({
   params: Promise<{ slug: string; level: string; week: string }>;
 }) {
   const { level, slug, week } = await params;
+  const session = await getAuthSession();
 
   //TODO get Week instead of CalendarWeek
   const weekResult = await getWeekByNumber(Number(week.replace('week-', '')));
@@ -93,13 +95,18 @@ export default async function ProgramWeekPage({
           <h3 className="text-xl font-bold text-foreground">
             {weekData.title}
           </h3>
-          <CreateAssignmentSheet
-            levelSlug={level}
-            weekId={weekData.id}
-            programSlug={slug}
-          />
+          {session?.role !== 'director' && (
+            <CreateAssignmentSheet
+              levelSlug={level}
+              weekId={weekData.id}
+              programSlug={slug}
+            />
+          )}
         </div>
-        <AssignmentsTableWithActions assignments={assignmentsWithUrls} />
+        <AssignmentsTableWithActions 
+          assignments={assignmentsWithUrls} 
+          isDirector={session?.role === 'director'} 
+        />
       </div>
       <CustomToaster />
     </>

@@ -23,6 +23,7 @@ export default async function DashboardPage() {
         {(auth) => {
           switch (auth.role) {
             case ADMIN_ROLE:
+            case Role.director:
               return <AdminDashboard />;
             case SUPERVISOR_ROLE:
               return <SupervisorDashboard />;

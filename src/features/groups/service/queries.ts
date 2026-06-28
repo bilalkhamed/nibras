@@ -128,7 +128,7 @@ export async function getGroups(
       }
 
       // Admins can see all groups (optionally filtered)
-      if (role === ADMIN_ROLE) {
+      if (role === ADMIN_ROLE || role === 'director') {
         const dalResult = await findGroups(options);
         return mapDalToService(dalResult);
       }

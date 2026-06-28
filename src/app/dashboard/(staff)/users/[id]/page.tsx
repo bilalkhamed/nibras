@@ -23,6 +23,7 @@ import {
   GroupStudentDTO,
 } from '@/features/groups';
 import { getStudentAllGroups } from '@/features/groups/service/queries';
+import getAuthSession from '@/lib/server/auth-session';
 
 type UserDetailPageProps = {
   params: {
@@ -32,6 +33,8 @@ type UserDetailPageProps = {
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const { id } = await params;
+
+  const session = await getAuthSession();
 
   const res = await runServiceOrRedirect(() => getUserById(id));
 
@@ -77,23 +80,25 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
           <h2 className="text-xl font-semibold text-foreground">
             معلومات الحساب
           </h2>
-          <EditUserSheet
-            userId={user.id}
-            defaultUserValues={{
-              firstName: user.firstName,
-              middleName: user.middleName,
-              lastName: user.lastName,
-              email: user.email ?? undefined,
-              birthYear: user.birthYear,
-              country: user.country ?? '',
-            }}
-            defaultProfileValues={{
-              gradeLevel: user.studentProfile?.gradeLevel,
-              address: user.studentProfile?.address,
-              motherFullName: user.studentProfile?.motherFullName,
-              motherPhone: user.studentProfile?.motherPhone,
-            }}
-          />
+          {session?.role !== Role.director && (
+            <EditUserSheet
+              userId={user.id}
+              defaultUserValues={{
+                firstName: user.firstName,
+                middleName: user.middleName,
+                lastName: user.lastName,
+                email: user.email ?? undefined,
+                birthYear: user.birthYear,
+                country: user.country ?? '',
+              }}
+              defaultProfileValues={{
+                gradeLevel: user.studentProfile?.gradeLevel,
+                address: user.studentProfile?.address,
+                motherFullName: user.studentProfile?.motherFullName,
+                motherPhone: user.studentProfile?.motherPhone,
+              }}
+            />
+          )}
         </div>
         <Card className="border-border bg-card/80">
           <CardContent className="p-4 md:p-6 space-y-4">
@@ -366,6 +371,10 @@ function RoleBadge({ role }: { role: Role }) {
   const map = {
     admin: {
       label: 'مسؤول',
+      className: 'bg-primary/15 text-primary border-primary/30',
+    },
+    director: {
+      label: 'الادارة العامة',
       className: 'bg-primary/15 text-primary border-primary/30',
     },
     supervisor: {

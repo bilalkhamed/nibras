@@ -7,7 +7,7 @@ export default async function ProgramsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard roles={[ADMIN_ROLE, PROGRAM_MANAGER_ROLE]}>
+    <AuthGuard roles={[ADMIN_ROLE, PROGRAM_MANAGER_ROLE, 'director']}>
       {children}
     </AuthGuard>
   );

@@ -3,6 +3,7 @@ import { getAllUsers } from '../service';
 import { UsersTable } from './users-table';
 import { runServiceOrRedirect } from '@/lib/server/service/helpers';
 import { Role } from '@prisma/client';
+import getAuthSession from '@/lib/server/auth-session';
 
 export async function UsersTableSection() {
   const res = await runServiceOrRedirect(getAllUsers);
@@ -20,11 +21,14 @@ export async function UsersTableSection() {
     cohorts = cohortsResult.data;
   }
 
+  const session = await getAuthSession();
+
   return (
     <UsersTable
       users={users}
       cohorts={cohorts}
       roles={Object.values(Role).filter((v) => v !== Role.admin)}
+      isDirector={session?.role === 'director'}
     />
   );
 }

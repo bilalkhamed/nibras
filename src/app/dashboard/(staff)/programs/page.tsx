@@ -42,7 +42,7 @@ export default async function ProgramsPage() {
 }
 
 async function Wrapper() {
-  // await connection();
+  const session = await getAuthSession();
   const result = await getAllPrograms({ filter: 'all' });
 
   if (!result.success) {
@@ -68,9 +68,11 @@ async function Wrapper() {
               <p className="mt-4 text-sm text-muted-foreground">
                 لا توجد برامج حتى الآن
               </p>
-              <div className="mt-4">
-                <CreateProgramDialog buttonVariant="outline" />
-              </div>
+              {session && session.role === 'admin' && (
+                <div className="mt-4">
+                  <CreateProgramDialog buttonVariant="outline" />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
