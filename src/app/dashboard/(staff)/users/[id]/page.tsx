@@ -392,6 +392,11 @@ function RoleBadge({ role }: { role: Role }) {
       className:
         'bg-secondary/20 text-secondary-foreground border-secondary/30',
     },
+    program_manager: {
+      label: 'مديرة برنامج',
+      className:
+        'bg-secondary/20 text-secondary-foreground border-secondary/30',
+    },
   } as const;
 
   const cfg = map[role];

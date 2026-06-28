@@ -16,6 +16,7 @@ import {
   upsertStudentAssignment,
   deleteAssignmentById,
   insertAssignment,
+  findAssignmentById,
 } from '../dal';
 import type {
   AssignmentDTO,
@@ -31,7 +32,9 @@ import {
   COHORT_MANAGER_ROLE,
   GROUP_MANAGER_ROLE,
   SUPERVISOR_ROLE,
+  PROGRAM_MANAGER_ROLE,
 } from '@/types/types';
+import { checkProgramManager } from '@/features/programs/dal/queries';
 
 // ============================================================================
 // Student Assignment Mutations
@@ -157,11 +160,23 @@ export async function deleteAssignment(
 ): Promise<ServiceReturn<AssignmentDTO>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== 'admin') {
+      const { role, userId } = session!;
+      if (role !== ADMIN_ROLE && role !== PROGRAM_MANAGER_ROLE) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
+      }
+
+      if (role === PROGRAM_MANAGER_ROLE) {
+        const dalResult = await findAssignmentById(assignmentId);
+        if (!dalResult.success || !dalResult.data) {
+          return { success: false, error: { type: 'not-found', statusCode: 404 } };
+        }
+        const isManager = await checkProgramManager(userId, dalResult.data.programId);
+        if (!isManager.success || !isManager.data) {
+          return { success: false, error: { type: 'forbidden', statusCode: 403 } };
+        }
       }
 
       const dalResult = await deleteAssignmentById(assignmentId);
@@ -186,11 +201,23 @@ export async function modifyAssignment(
 ): Promise<ServiceReturn<AssignmentDTO>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== 'admin') {
+      const { role, userId } = session!;
+      if (role !== ADMIN_ROLE && role !== PROGRAM_MANAGER_ROLE) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
         };
+      }
+
+      if (role === PROGRAM_MANAGER_ROLE) {
+        const dalResult = await findAssignmentById(assignmentId);
+        if (!dalResult.success || !dalResult.data) {
+          return { success: false, error: { type: 'not-found', statusCode: 404 } };
+        }
+        const isManager = await checkProgramManager(userId, dalResult.data.programId);
+        if (!isManager.success || !isManager.data) {
+          return { success: false, error: { type: 'forbidden', statusCode: 403 } };
+        }
       }
 
       // Validate input
@@ -220,7 +247,8 @@ export async function createAssignment(
 ): Promise<ServiceReturn<AssignmentDTO>> {
   return runServiceOperation(
     async (session) => {
-      if (session!.role !== 'admin') {
+      const { role, userId } = session!;
+      if (role !== ADMIN_ROLE && role !== PROGRAM_MANAGER_ROLE) {
         return {
           success: false,
           error: { type: 'forbidden', statusCode: 403 },
@@ -234,6 +262,21 @@ export async function createAssignment(
           success: false,
           error: { type: 'bad-request', statusCode: 400 },
         };
+      }
+
+      if (role === PROGRAM_MANAGER_ROLE) {
+        const programSlug = parsed.data.programSlug;
+        // Need to get the program ID to check manager junction
+        // We'll import and use findProgramBySlug
+        const { findProgramBySlug } = await import('@/features/programs/dal/queries');
+        const programResult = await findProgramBySlug(programSlug);
+        if (!programResult.success || !programResult.data) {
+          return { success: false, error: { type: 'not-found', statusCode: 404 } };
+        }
+        const isManager = await checkProgramManager(userId, programResult.data.id);
+        if (!isManager.success || !isManager.data) {
+          return { success: false, error: { type: 'forbidden', statusCode: 403 } };
+        }
       }
 
       const dalResult = await insertAssignment(parsed.data);

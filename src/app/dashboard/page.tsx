@@ -14,6 +14,7 @@ import { Suspense } from 'react';
 import { DashboardSkeleton } from '@/components/skeletons/dashboard-skeleton';
 import { CohortManagerDashboard } from './components/cohort-manager-dashboard';
 import { GroupManagerDashboard } from './components/group-manager-dashboard';
+import { Role } from '@prisma/client';
 
 export default async function DashboardPage() {
   return (
@@ -33,6 +34,8 @@ export default async function DashboardPage() {
               return <GroupManagerDashboard />;
             case 'media_team':
               return <h3>hi media</h3>;
+            case Role.program_manager:
+              return <h3>hi program manager</h3>;
             default:
               redirect('/forbidden');
           }

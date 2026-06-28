@@ -134,6 +134,13 @@ export const sidebarNavItems: Record<Role, SidebarNavItem[]> = {
       icon: UsersRound,
     },
   ],
+  program_manager: [
+    {
+      label: 'البرامج',
+      href: '/dashboard/programs',
+      icon: BookOpen,
+    },
+  ],
   media_team: [articles],
 };
 

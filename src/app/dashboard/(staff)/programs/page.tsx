@@ -15,8 +15,11 @@ import { Suspense } from 'react';
 import { CardsListSkeleton } from '@/components/skeletons';
 import { getAllPrograms } from '@/features/programs/service';
 import { CustomAlert } from '@/components/common/custom-alert';
+import getAuthSession from '@/lib/server/auth-session';
 
 export default async function ProgramsPage() {
+  const session = await getAuthSession();
+
   return (
     <div className="space y-6">
       <CustomToaster />
@@ -28,7 +31,7 @@ export default async function ProgramsPage() {
             إدارة البرامج التعليمية والمقررات الدراسية
           </p>
         </div>
-        <CreateProgramDialog />
+        {session && session.role === 'admin' && <CreateProgramDialog />}
       </div>
 
       <Suspense fallback={<CardsListSkeleton numberOfCards={3} />}>

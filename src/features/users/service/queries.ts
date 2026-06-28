@@ -236,6 +236,7 @@ export async function getUsersRoleCounts(filters?: { cohortId?: string }) {
         supervisor: 0,
         student: 0,
         group_manager: 0,
+        program_manager: 0,
         media_team: 0,
       };
 

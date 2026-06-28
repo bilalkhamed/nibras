@@ -37,6 +37,24 @@ export async function findManyPrograms({
   });
 }
 
+export async function findManagerPrograms(
+  userId: string,
+): Promise<DalReturn<Program[]>> {
+  return runDalOperation(async () => {
+    cacheTag('programs');
+    const programs = await prisma.program.findMany({
+      where: {
+        managers: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+    return programs;
+  });
+}
+
 export async function findLevelBySlug(
   slug: string,
 ): Promise<DalReturn<Level | null>> {
@@ -198,5 +216,22 @@ export async function findManyCalendarWeeks(
         },
       },
     });
+  });
+}
+
+export async function checkProgramManager(
+  userId: string,
+  programId: string,
+): Promise<DalReturn<boolean>> {
+  return runDalOperation(async () => {
+    const manager = await prisma.programManager.findUnique({
+      where: {
+        programId_userId: {
+          programId,
+          userId,
+        },
+      },
+    });
+    return !!manager;
   });
 }

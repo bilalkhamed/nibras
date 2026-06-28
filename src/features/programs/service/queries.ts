@@ -1,6 +1,6 @@
 // 'use cache';
 
-import { Level, Program } from '@prisma/client';
+import { Level, Program, Role } from '@prisma/client';
 import { ServiceReturn } from '@/lib/server/service/types';
 import {
   mapDalToService,
@@ -17,6 +17,8 @@ import {
   findProgramBySlug,
   findWeekByDate,
   findWeekByNumber,
+  checkProgramManager,
+  findManagerPrograms,
 } from '../dal/queries';
 import { getAcademicYear } from '@/lib/server/academic-year';
 import { CalendarWeekDTO, WeekDTO } from '../types';
@@ -25,7 +27,7 @@ export async function getProgramBySlug(
   slug: string,
 ): Promise<ServiceReturn<Program | null>> {
   return runServiceOperation(
-    async () => {
+    async (session) => {
       const dalResult = await findProgramBySlug(slug);
 
       if (!dalResult.success) {
@@ -37,6 +39,18 @@ export async function getProgramBySlug(
           success: false,
           error: { type: 'not-found', statusCode: 404 },
         };
+      }
+
+      const program = dalResult.data;
+
+      if (session?.role === 'program_manager') {
+        const isManager = await checkProgramManager(session.userId, program.id);
+        if (!isManager.success || !isManager.data) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
       }
 
       return mapDalToService(dalResult);
@@ -59,6 +73,16 @@ export async function getAllPrograms({
           success: false,
           error: { type: 'unauthorized', statusCode: 401 },
         };
+      }
+
+      if (session.role === Role.program_manager) {
+        const dalResult = await findManagerPrograms(session.userId);
+
+        if (!dalResult.success) {
+          return mapDalToService(dalResult);
+        }
+
+        return mapDalToService(dalResult);
       }
 
       const dalResult = await findManyPrograms({ filter });
