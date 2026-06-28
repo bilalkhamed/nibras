@@ -12,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from '@/components/ui/multi-select';
 import SearchSelect from '@/components/common/search-select';
 import { useEffect, useState, useTransition } from 'react';
 import { ADMIN_ROLE, Cohort, STUDENT_ROLE } from '@/types/types';
@@ -27,9 +34,10 @@ import { CreateUserInput, createUserSchema } from '../types';
 
 type AddUserFormProps = {
   cohortId?: string;
+  programs?: { id: string; name: string }[];
 };
 
-export function AddUserForm({ cohortId }: AddUserFormProps) {
+export function AddUserForm({ cohortId, programs = [] }: AddUserFormProps) {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [inviteCode, setInviteCode] = useState<string>('');
   const [isPending, startTransition] = useTransition();
@@ -68,6 +76,7 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
     register,
     handleSubmit,
     control,
+    watch,
     reset,
     formState: { errors },
   } = useForm<CreateUserInput>({
@@ -76,6 +85,7 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
     defaultValues: {
       role: STUDENT_ROLE,
       cohortId: cohortId || undefined,
+      programIds: [],
     },
   });
 
@@ -286,6 +296,33 @@ export function AddUserForm({ cohortId }: AddUserFormProps) {
                 />
                 <ErrorMessage message={errors.role?.message} />
               </div>
+              {watch('role') === 'program_manager' && (
+                <div className="space-y-1">
+                  <Label>البرامج المدارة</Label>
+                  <Controller
+                    name="programIds"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <MultiSelect
+                        values={value || []}
+                        onValuesChange={onChange}
+                      >
+                        <MultiSelectTrigger>
+                          <MultiSelectValue placeholder="اختر البرامج" />
+                        </MultiSelectTrigger>
+                        <MultiSelectContent search={{ placeholder: 'ابحث عن برنامج...', emptyMessage: 'لا يوجد برامج' }}>
+                          {programs.map((prog) => (
+                            <MultiSelectItem key={prog.id} value={prog.id}>
+                              {prog.name}
+                            </MultiSelectItem>
+                          ))}
+                        </MultiSelectContent>
+                      </MultiSelect>
+                    )}
+                  />
+                  <ErrorMessage message={errors.programIds?.message} />
+                </div>
+              )}
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button

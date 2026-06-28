@@ -35,6 +35,12 @@ export async function createUserWithInvite(
                   create: { cohortId: userData.cohortId! },
                 }
               : undefined,
+          managedPrograms:
+            userData.role === 'program_manager' && userData.programIds?.length
+              ? {
+                  create: userData.programIds.map((id) => ({ programId: id })),
+                }
+              : undefined,
         },
         select: {
           id: true,

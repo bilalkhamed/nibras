@@ -169,6 +169,7 @@ export const createUserSchema = z.object({
     >,
     'الرتبة مطلوبة',
   ),
+  programIds: z.array(z.string()).optional(),
 });
 
 /** Input for creating a new user */

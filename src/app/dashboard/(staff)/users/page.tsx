@@ -1,4 +1,5 @@
 import { AddUserForm, UsersTableSection } from '@/features/users/components';
+import { getAllPrograms } from '@/features/programs/service/queries';
 import { Suspense } from 'react';
 import { UsersTableSkeleton } from '@/components/skeletons';
 import { Toaster } from '@/components/ui/sonner';
@@ -48,9 +49,12 @@ async function AddUserFormContainer() {
 
   if (!session) return null;
 
+  const programsRes = await getAllPrograms({ filter: 'all' });
+  const programs = programsRes.success ? programsRes.data : [];
+
   return session.role === ADMIN_ROLE ? (
-    <AddUserForm />
+    <AddUserForm programs={programs} />
   ) : (
-    <AddUserForm cohortId={session.managedCohortId!} />
+    <AddUserForm cohortId={session.managedCohortId!} programs={programs} />
   );
 }
