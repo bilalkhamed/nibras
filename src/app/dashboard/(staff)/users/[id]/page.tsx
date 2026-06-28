@@ -402,7 +402,7 @@ function RoleBadge({ role }: { role: Role }) {
         'bg-secondary/20 text-secondary-foreground border-secondary/30',
     },
     program_manager: {
-      label: 'مديرة برنامج',
+      label: 'مسؤولة برنامج',
       className:
         'bg-secondary/20 text-secondary-foreground border-secondary/30',
     },
