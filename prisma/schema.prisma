@@ -15,6 +15,7 @@ enum Role {
   program_manager
   supervisor
   student
+  director
   media_team
 }
 
