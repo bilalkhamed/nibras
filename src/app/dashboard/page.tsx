@@ -35,7 +35,8 @@ export default async function DashboardPage() {
             case 'media_team':
               return <h3>hi media</h3>;
             case Role.program_manager:
-              return <h3>hi program manager</h3>;
+              return redirect('/dashboard/programs');
+            // return <ProgramManagerDashboard />;
             default:
               redirect('/forbidden');
           }
