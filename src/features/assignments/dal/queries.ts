@@ -396,33 +396,49 @@ export async function findStudentAchievements(
   levelId: string | null
 ): Promise<DalReturn<StudentAchievementsData>> {
   return runDalOperation(async () => {
-    // 1. Group by assignment.type for counts of completed assignments for this student
-    const countsGroup = await prisma.assignment.groupBy({
-      by: ['type'],
+    // 1. Fetch completed and scored student assignments with their type and program slug
+    const completedAssignments = await prisma.studentAssignment.findMany({
       where: {
-        studentAssignments: {
-          some: {
-            studentId,
-            isCompleted: true,
-            score: { not: null },
+        studentId,
+        isCompleted: true,
+        score: { not: null },
+      },
+      select: {
+        assignment: {
+          select: {
+            type: true,
+            program: {
+              select: {
+                slug: true,
+              },
+            },
           },
         },
-      },
-      _count: {
-        id: true,
       },
     });
 
     const counts = {
       reading: 0,
-      lecture: 0,
+      lectureReading: 0,
+      lectureHeart: 0,
       exercise: 0,
     };
 
-    countsGroup.forEach((group) => {
-      if (group.type === 'reading') counts.reading = group._count.id;
-      if (group.type === 'lecture') counts.lecture = group._count.id;
-      if (group.type === 'exercise') counts.exercise = group._count.id;
+    completedAssignments.forEach((sa) => {
+      const type = sa.assignment.type;
+      const slug = sa.assignment.program.slug;
+
+      if (type === 'reading') {
+        counts.reading++;
+      } else if (type === 'exercise') {
+        counts.exercise++;
+      } else if (type === 'lecture') {
+        if (slug === 'reading') {
+          counts.lectureReading++;
+        } else if (slug === 'heart') {
+          counts.lectureHeart++;
+        }
+      }
     });
 
     // 2. Two count queries for the progress bar (completed assignments in cohort level vs total assignments in cohort level)
@@ -430,35 +446,57 @@ export async function findStudentAchievements(
     let totalCount = 0;
     let levelTitle = '';
 
-    if (levelId) {
-      const [comp, tot, levelObj] = await Promise.all([
-        prisma.studentAssignment.count({
-          where: {
-            studentId,
-            isCompleted: true,
-            score: { not: null },
-            assignment: {
-              levelId,
-            },
-          },
-        }),
-        prisma.assignment.count({
-          where: {
-            levelId,
-          },
-        }),
-        prisma.level.findUnique({
-          where: { id: levelId },
-          select: { title: true },
-        }),
-      ]);
+    const [compResult, readingProgramRes, heartProgramRes] = await Promise.all([
+      levelId
+        ? Promise.all([
+            prisma.studentAssignment.count({
+              where: {
+                studentId,
+                isCompleted: true,
+                score: { not: null },
+                assignment: {
+                  levelId,
+                },
+              },
+            }),
+            prisma.assignment.count({
+              where: {
+                levelId,
+              },
+            }),
+            prisma.level.findUnique({
+              where: { id: levelId },
+              select: { title: true },
+            }),
+          ])
+        : Promise.resolve([0, 0, null]),
+      findProgramBySlug('reading'),
+      findProgramBySlug('heart'),
+    ]);
+
+    if (levelId && compResult) {
+      const [comp, tot, levelObj] = compResult as [number, number, { title: string } | null];
       completedCount = comp;
       totalCount = tot;
       levelTitle = levelObj?.title ?? '';
     }
 
+    const readingProgramName =
+      readingProgramRes.success && readingProgramRes.data
+        ? readingProgramRes.data.name
+        : 'البرنامج القرائي';
+
+    const heartProgramName =
+      heartProgramRes.success && heartProgramRes.data
+        ? heartProgramRes.data.name
+        : 'طمأنينة القلب';
+
     return {
       counts,
+      programNames: {
+        reading: readingProgramName,
+        heart: heartProgramName,
+      },
       completedCount,
       totalCount,
       levelTitle,

@@ -317,8 +317,13 @@ export type StudentDashboardData = {
 export type StudentAchievementsData = {
   counts: {
     reading: number;
-    lecture: number;
+    lectureReading: number;
+    lectureHeart: number;
     exercise: number;
+  };
+  programNames: {
+    reading: string;
+    heart: string;
   };
   completedCount: number;
   totalCount: number;
