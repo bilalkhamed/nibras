@@ -1,6 +1,7 @@
-import { BookOpen, Video, Heart } from 'lucide-react';
+import { BookOpen, Video, Heart, Play } from 'lucide-react';
 import labels from '@/lib/labels.json';
 import { Footer } from '@/components/layout/footer';
+import { VideoFrame } from '@/components/ui/video-frame';
 import Image from 'next/image';
 import { toArabicNumerals } from '@/lib/shared/utils';
 
@@ -27,6 +28,15 @@ export default function Home() {
           <span className="inline-block text-sm font-semibold text-secondary px-3 py-1 mb-10">
             {toArabicNumerals(labels.home.heroSubtitle)}
           </span>
+        </div>
+
+        {/* Video Section */}
+        <div className="mt-20">
+          <VideoFrame 
+            src="/intro-video.mp4" 
+            title="الفيديو التعريفي" 
+            size="lg" 
+          />
         </div>
 
         {/* Pillars Section */}
