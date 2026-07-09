@@ -1,16 +1,12 @@
-import type { User } from '@/types/types';
 import UserInfoSection from './user-info-section';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { XIcon } from 'lucide-react';
 import getAuthSession from '@/lib/server/auth-session';
 import Link from 'next/link';
 import GroupInfoSection from './group-info-section';
+import StudentProfileSection from './student-profile-section';
 import { Suspense } from 'react';
 import { InfoSectionSkeleton } from '@/components/skeletons';
-
-type Props = {
-  user: User;
-};
 
 export default async function ProfilePage() {
   const auth = await getAuthSession();
@@ -36,6 +32,11 @@ export default async function ProfilePage() {
       <Suspense fallback={<InfoSectionSkeleton />}>
         <UserInfoSection />
       </Suspense>
+      {auth.role === 'student' && (
+        <Suspense fallback={<InfoSectionSkeleton />}>
+          <StudentProfileSection />
+        </Suspense>
+      )}
       {auth.role === 'student' && (
         <Suspense fallback={<InfoSectionSkeleton />}>
           <GroupInfoSection auth={auth} />

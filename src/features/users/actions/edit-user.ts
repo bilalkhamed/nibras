@@ -71,6 +71,7 @@ export async function editUserAction(
   }
 
   revalidatePath(`/dashboard/users/${userId}`);
+  revalidatePath(`/dashboard/profile`);
 
   return { success: true, userId: result.data.userId };
 }

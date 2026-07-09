@@ -1,11 +1,11 @@
 import { AccessTokenPayload, CountryCode } from '@/types/types';
 import getAuthSession from './auth-session';
 import { getCurrentUserData } from '@/features/users/service';
-import { UserDTO } from '@/features/users/types';
+import { UserWithCohortAndStudentProfileDTO } from '@/features/users/types';
 
 export async function getCurrentUser(
   authSession?: AccessTokenPayload,
-): Promise<UserDTO | null> {
+): Promise<UserWithCohortAndStudentProfileDTO | null> {
   const auth = authSession ?? (await getAuthSession());
   if (!auth) return null;
 

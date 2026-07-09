@@ -14,6 +14,7 @@ import { getCurrentUser } from '@/lib/server/current-user';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import labels from '@/lib/labels.json';
 import { CountryCode } from '@/types/types';
+import { EditUserSheet } from '@/features/users/components/edit-user-sheet';
 
 export default async function UserInfoSection() {
   const user = await getCurrentUser();
@@ -30,12 +31,36 @@ export default async function UserInfoSection() {
   }
 
   const fullName = `${user.firstName} ${user.middleName} ${user.lastName}`;
+  const profile = user.studentProfile;
 
   return (
     <section>
-      <h2 className="text-xl font-semibold text-foreground mb-3">
-        معلومات الحساب
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xl font-semibold text-foreground">
+          معلومات الحساب
+        </h2>
+        <EditUserSheet
+          userId={user.id}
+          defaultUserValues={{
+            firstName: user.firstName,
+            middleName: user.middleName,
+            lastName: user.lastName,
+            email: user.email ?? undefined,
+            birthYear: user.birthYear,
+            country: user.country ?? '',
+          }}
+          defaultProfileValues={
+            profile
+              ? {
+                  gradeLevel: profile.gradeLevel,
+                  address: profile.address,
+                  motherFullName: profile.motherFullName,
+                  motherPhone: profile.motherPhone,
+                }
+              : undefined
+          }
+        />
+      </div>
       <Card className="border-border bg-card/80">
         <CardContent className="p-4 md:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

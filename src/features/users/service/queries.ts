@@ -102,7 +102,7 @@ export async function getUserById(id: string) {
 
 /** Get current user info from session */
 export async function getCurrentUserData() {
-  return runServiceOperation<UserDTO>(
+  return runServiceOperation<UserWithCohortAndStudentProfileDTO>(
     async (session) => {
       if (!session) {
         return {
@@ -114,7 +114,7 @@ export async function getCurrentUserData() {
       const dalResult = await findUserById(session.userId);
 
       if (!dalResult.success) {
-        return mapDalToService<UserDTO>(dalResult);
+        return mapDalToService<UserWithCohortAndStudentProfileDTO>(dalResult);
       }
 
       if (!dalResult.data) {
