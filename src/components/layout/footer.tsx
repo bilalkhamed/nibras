@@ -69,19 +69,16 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 flex flex-col items-center gap-8 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8 text-muted-foreground">
             <div className="flex justify-center gap-4 mb-6">
-            {socialLinks.map(({ defaultIcon, coloredIcon, href, label }) => (
+            {socialLinks.map(({ coloredIcon, href, label }) => (
               <a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="group relative w-12 h-12 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:border-transparent transition-all duration-300 hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:-translate-y-1"
+                className="group relative w-12 h-12 rounded-full bg-card/50 border border-border/50 flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-card hover:scale-110 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-border"
               >
-                <span className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-all duration-300 scale-100 group-hover:scale-75">
-                  {defaultIcon}
-                </span>
-                <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-75 group-hover:scale-100">
+                <span className="flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3">
                   {coloredIcon}
                 </span>
               </a>
