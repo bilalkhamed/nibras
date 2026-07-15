@@ -43,3 +43,4 @@ next-env.d.ts
 # seeding files
 /prisma/seed.ts
 /scripts/seed.ts
+/prisma/seed/*
