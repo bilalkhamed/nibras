@@ -13,7 +13,12 @@ import {
   resetUser,
   deleteUser,
 } from '../dal';
-import { CreateUserInput, CreateUserResult, EditUserInput, EditUserProfileInput } from '../types';
+import {
+  CreateUserInput,
+  CreateUserResult,
+  EditUserInput,
+  EditUserProfileInput,
+} from '../types';
 import { generateInvite } from '@/lib/server/hash';
 import { SupervisorStatus } from '@prisma/client';
 
@@ -179,16 +184,28 @@ export async function editUser(
         };
       }
 
+      // Fetch target user to check existing role and ensure they exist
+      const targetResult = await findUserById(targetUserId);
+      if (!targetResult.success || !targetResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
       // If cohort_manager: verify target user belongs to their cohort
       if (isCohortManager && !isSelf) {
-        const targetResult = await findUserById(targetUserId);
-        if (!targetResult.success || !targetResult.data) {
+        if (targetResult.data.cohort?.id !== session!.managedCohortId) {
           return {
             success: false,
-            error: { type: 'not-found', statusCode: 404 },
+            error: { type: 'forbidden', statusCode: 403 },
           };
         }
-        if (targetResult.data.cohort?.id !== session!.managedCohortId) {
+      }
+
+      // Verify that only admin can change roles
+      if (userFields.role && userFields.role !== targetResult.data.role) {
+        if (!isAdmin) {
           return {
             success: false,
             error: { type: 'forbidden', statusCode: 403 },
@@ -203,7 +220,10 @@ export async function editUser(
       }
 
       // 2. Upsert student profile (always — profile may not exist yet)
-      const profileResult = await upsertUserProfile(targetUserId, profileFields);
+      const profileResult = await upsertUserProfile(
+        targetUserId,
+        profileFields,
+      );
       if (!profileResult.success) {
         return mapDalToService(profileResult);
       }

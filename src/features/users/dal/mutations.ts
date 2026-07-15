@@ -131,6 +131,7 @@ export async function editUserFields(
         email: data.email || null,
         birthYear: data.birthYear,
         country: data.country,
+        role: data.role,
       },
       select: { id: true },
     });

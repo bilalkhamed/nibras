@@ -90,6 +90,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 email: user.email ?? undefined,
                 birthYear: user.birthYear,
                 country: user.country ?? '',
+                role: user.role,
               }}
               defaultProfileValues={{
                 gradeLevel: user.studentProfile?.gradeLevel,
@@ -97,6 +98,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 motherFullName: user.studentProfile?.motherFullName,
                 motherPhone: user.studentProfile?.motherPhone,
               }}
+              showRoleInput={session?.role === 'admin'}
             />
           )}
         </div>

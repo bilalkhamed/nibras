@@ -29,8 +29,15 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorMessage } from '@/components/forms/error-message';
 import SearchSelect from '@/components/common/search-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import labels from '@/lib/labels.json';
-import { GradeLevel } from '@prisma/client';
+import { GradeLevel, Role } from '@prisma/client';
 import {
   editUserSchema,
   editUserProfileSchema,
@@ -55,6 +62,7 @@ type EditUserSheetProps = {
     motherFullName?: string | null;
     motherPhone?: string | null;
   };
+  showRoleInput?: boolean;
 };
 
 // ============================================================================
@@ -82,6 +90,7 @@ export function EditUserSheet({
   userId,
   defaultUserValues,
   defaultProfileValues,
+  showRoleInput = false,
 }: EditUserSheetProps) {
   const [open, setOpen] = useState(false);
 
@@ -101,6 +110,7 @@ export function EditUserSheet({
       email: defaultUserValues.email ?? '',
       birthYear: defaultUserValues.birthYear,
       country: defaultUserValues.country ?? '',
+      role: defaultUserValues.role ?? undefined,
       gradeLevel: defaultProfileValues?.gradeLevel ?? undefined,
       address: defaultProfileValues?.address ?? '',
       motherFullName: defaultProfileValues?.motherFullName ?? '',
@@ -112,13 +122,15 @@ export function EditUserSheet({
   const handleCancel = () => setOpen(false);
 
   const onSubmit: SubmitHandler<EditUserFormData> = async (data) => {
-    const { gradeLevel, address, motherFullName, motherPhone, ...userFields } = data;
+    const { gradeLevel, address, motherFullName, motherPhone, ...userFields } =
+      data;
 
-    const result = await editUserAction(
-      userId,
-      userFields,
-      { gradeLevel, address, motherFullName, motherPhone },
-    );
+    const result = await editUserAction(userId, userFields, {
+      gradeLevel,
+      address,
+      motherFullName,
+      motherPhone,
+    });
 
     if (result.success) {
       toast.success('تم تحديث بيانات المستخدم بنجاح.');
@@ -149,13 +161,14 @@ export function EditUserSheet({
         >
           {/* Header */}
           <SheetHeader className="px-3 pt-3 pb-2 shrink-0">
-            <SheetTitle className="text-right">تعديل بيانات المستخدم</SheetTitle>
+            <SheetTitle className="text-right">
+              تعديل بيانات المستخدم
+            </SheetTitle>
           </SheetHeader>
 
           {/* Scrollable body */}
           <ScrollArea className="flex-1 min-h-0" dir="rtl">
             <div className="grid gap-6 px-4 py-6">
-
               {/* ── Section 1: Core info ── */}
               <div className="grid gap-5">
                 {/* Name row */}
@@ -262,6 +275,54 @@ export function EditUserSheet({
                   />
                   <ErrorMessage message={errors.country?.message} />
                 </div>
+
+                {/* Role */}
+                {showRoleInput && (
+                  <div className="grid gap-1">
+                    <Label htmlFor="role" className="text-right">
+                      {labels.dashboard.users.role}
+                    </Label>
+                    <Controller
+                      name="role"
+                      control={control}
+                      render={({ field: { onBlur, value, onChange } }) => (
+                        <Select
+                          dir="rtl"
+                          value={value || ''}
+                          onValueChange={(v) => {
+                            onChange(v);
+                            onBlur();
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          <SelectTrigger
+                            id="role"
+                            className="w-full border-border bg-card text-foreground focus:ring-primary text-right"
+                          >
+                            <SelectValue placeholder="اختر الرتبة" />
+                          </SelectTrigger>
+
+                          <SelectContent className="bg-card text-foreground border border-border">
+                            {Object.entries(Role)
+                              .filter(([key]) => key !== 'admin')
+                              .map(([key]) => (
+                                <SelectItem
+                                  key={key}
+                                  value={key}
+                                  className="cursor-pointer"
+                                >
+                                  {labels.dashboard.users[
+                                    key as keyof typeof Role
+                                  ] || key}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <ErrorMessage message={errors.role?.message} />
+                  </div>
+                )}
               </div>
 
               {/* ── Divider ── */}
@@ -285,7 +346,9 @@ export function EditUserSheet({
                 <div className="grid gap-1">
                   <Label className="text-right">
                     المرحلة الدراسية{' '}
-                    <span className="text-muted-foreground text-xs">(اختياري)</span>
+                    <span className="text-muted-foreground text-xs">
+                      (اختياري)
+                    </span>
                   </Label>
                   <Controller
                     name="gradeLevel"
@@ -308,7 +371,9 @@ export function EditUserSheet({
                 <div className="grid gap-1">
                   <Label htmlFor="address" className="text-right">
                     العنوان{' '}
-                    <span className="text-muted-foreground text-xs">(اختياري)</span>
+                    <span className="text-muted-foreground text-xs">
+                      (اختياري)
+                    </span>
                   </Label>
                   <Input
                     id="address"
@@ -324,7 +389,9 @@ export function EditUserSheet({
                 <div className="grid gap-1">
                   <Label htmlFor="motherFullName" className="text-right">
                     اسم الأم{' '}
-                    <span className="text-muted-foreground text-xs">(اختياري)</span>
+                    <span className="text-muted-foreground text-xs">
+                      (اختياري)
+                    </span>
                   </Label>
                   <Input
                     id="motherFullName"
@@ -340,7 +407,9 @@ export function EditUserSheet({
                 <div className="grid gap-1">
                   <Label htmlFor="motherPhone" className="text-right">
                     رقم هاتف الأم{' '}
-                    <span className="text-muted-foreground text-xs">(اختياري)</span>
+                    <span className="text-muted-foreground text-xs">
+                      (اختياري)
+                    </span>
                   </Label>
                   <Input
                     id="motherPhone"
