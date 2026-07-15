@@ -195,10 +195,8 @@ export const editUserSchema = z.object({
     .max(new Date().getFullYear() - 11, 'سنة الميلاد غير صحيحة'),
   country: z.string('الدولة مطلوبة').length(2, 'الدولة مطلوبة'),
   role: z
-    .enum(
-      Object.values(Role).filter((v) => v != Role.admin),
-      { message: 'الرتبة غير صحيحة' },
-    )
+    .enum(Role, { message: 'الرتبة غير صحيحة' })
+    .refine((val) => val !== Role.admin, { message: 'الرتبة غير صحيحة' })
     .optional(),
 });
 
@@ -207,7 +205,7 @@ export type EditUserInput = z.infer<typeof editUserSchema>;
 /** Schema for editing the student profile fields (all optional) */
 export const editUserProfileSchema = z.object({
   gradeLevel: z
-    .enum(GradeLevel, { message: 'المرحلة الدراسية غير صحيحة' })
+    .nativeEnum(GradeLevel, { message: 'المرحلة الدراسية غير صحيحة' })
     .optional()
     .nullable(),
   address: z
