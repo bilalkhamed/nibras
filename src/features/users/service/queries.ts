@@ -22,7 +22,6 @@ import {
   StudentWithAssignmentsDTO,
   UserBasicDTO,
   UserByEmail,
-  UserDTO,
   UserInviteStatusDTO,
   UserNameDTO,
   UserWithCohortAndStudentProfileDTO,
@@ -35,7 +34,7 @@ import { Role } from '@prisma/client';
 // ============================================================================
 
 /** Get all users - admin only */
-export async function getAllUsers() {
+export async function getAllUsers(filters?: { cohortId?: string }) {
   return runServiceOperation(
     async (session) => {
       if (
@@ -50,7 +49,16 @@ export async function getAllUsers() {
       }
       let filter;
       if (session!.role === 'cohort_manager') {
-        filter = { cohortId: session?.managedCohortId || undefined };
+        const managedCohortId = session!.managedCohortId;
+        if (filters?.cohortId && filters.cohortId !== managedCohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+        filter = { cohortId: managedCohortId || undefined };
+      } else {
+        filter = { cohortId: filters?.cohortId || undefined };
       }
 
       const dalResult = await findManyUsers(filter);

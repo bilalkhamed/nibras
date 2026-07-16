@@ -13,9 +13,9 @@ import {
 } from '@/lib/server/service/helpers';
 import type { ServiceReturn } from '@/lib/server/service/types';
 import { findManyCohorts } from '../dal';
-import type { CohortListDetailedDTO, CohortListDTO } from '../types';
+import type { CohortListDetailedDTO, CohortListDTO, CohortDetailStatsDTO } from '../types';
 import { ADMIN_ROLE, COHORT_MANAGER_ROLE } from '@/types/types';
-import { findCohortById, findManyCohortsDetailed } from '../dal/queries';
+import { findCohortById, findManyCohortsDetailed, findCohortDetail } from '../dal/queries';
 
 // ============================================================================
 // Cohort Queries
@@ -115,3 +115,51 @@ export async function getCohortById(
     { requireAuth: true },
   );
 }
+
+export async function getCohortDetail(
+  cohortId: string,
+): Promise<ServiceReturn<CohortDetailStatsDTO | null>> {
+  return runServiceOperation(
+    async (session) => {
+      if (
+        session!.role !== ADMIN_ROLE &&
+        session!.role !== 'director' &&
+        session!.role !== COHORT_MANAGER_ROLE
+      ) {
+        return {
+          success: false,
+          error: { type: 'forbidden', statusCode: 403 },
+        };
+      }
+
+      if (session!.role === COHORT_MANAGER_ROLE) {
+        if (session!.managedCohortId !== cohortId) {
+          return {
+            success: false,
+            error: { type: 'forbidden', statusCode: 403 },
+          };
+        }
+      }
+
+      const dalResult = await findCohortDetail(cohortId);
+
+      if (!dalResult.success) {
+        return mapDalToService(dalResult);
+      }
+
+      if (!dalResult.data) {
+        return {
+          success: false,
+          error: { type: 'not-found', statusCode: 404 },
+        };
+      }
+
+      return {
+        success: true,
+        data: dalResult.data,
+      };
+    },
+    { requireAuth: true },
+  );
+}
+

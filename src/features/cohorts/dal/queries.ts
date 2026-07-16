@@ -15,6 +15,8 @@ import {
   CohortListDetailedDTO,
   cohortListDetailedSelect,
   type CohortListDTO,
+  cohortDetailStatsSelect,
+  type CohortDetailStatsDTO,
 } from '../types';
 
 // ============================================================================
@@ -76,3 +78,18 @@ export async function findCohortById(
     });
   });
 }
+
+export async function findCohortDetail(
+  id: string,
+): Promise<DalReturn<CohortDetailStatsDTO | null>> {
+  'use cache';
+  cacheTag('cohorts');
+
+  return runDalOperation(async () => {
+    return prisma.cohort.findUnique({
+      where: { id },
+      select: cohortDetailStatsSelect,
+    });
+  });
+}
+

@@ -5,8 +5,8 @@ import { runServiceOrRedirect } from '@/lib/server/service/helpers';
 import { Role } from '@prisma/client';
 import getAuthSession from '@/lib/server/auth-session';
 
-export async function UsersTableSection() {
-  const res = await runServiceOrRedirect(getAllUsers);
+export async function UsersTableSection({ cohortId }: { cohortId?: string } = {}) {
+  const res = await runServiceOrRedirect(() => getAllUsers({ cohortId }));
 
   if (!res.success) {
     return <div>Failed to load users.</div>;
@@ -29,6 +29,7 @@ export async function UsersTableSection() {
       cohorts={cohorts}
       roles={Object.values(Role).filter((v) => v !== Role.admin)}
       isDirector={session?.role === 'director'}
+      hideCohortFilter={!!cohortId}
     />
   );
 }

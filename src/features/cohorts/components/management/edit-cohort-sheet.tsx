@@ -17,7 +17,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { CohortForm } from './cohort-form';
-import type { CreateCohortData, CohortListDetailedDTO } from '../../types';
+import type { CreateCohortData, CohortListDetailedDTO, CohortDetailStatsDTO } from '../../types';
 import type { Level } from '@prisma/client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -28,7 +28,7 @@ type EditCohortSheetProps = {
   /** Trigger element (typically a button) */
   children: React.ReactNode;
   /** Cohort to edit */
-  cohort: CohortListDetailedDTO;
+  cohort: CohortListDetailedDTO | CohortDetailStatsDTO;
   /** Optional callback after successful update */
   onSuccess?: (cohortId: string) => void;
 };

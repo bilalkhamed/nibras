@@ -50,6 +50,7 @@ interface UsersTableProps {
   cohorts: CohortListDTO[];
   roles: Role[];
   isDirector?: boolean;
+  hideCohortFilter?: boolean;
 }
 
 export function UsersTable({
@@ -58,6 +59,7 @@ export function UsersTable({
   cohorts,
   roles,
   isDirector,
+  hideCohortFilter = false,
 }: UsersTableProps) {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -142,33 +144,35 @@ export function UsersTable({
             </Select>
           </div>
 
-          <div className="flex flex-col space-y-1">
-            <label className="text-xs text-muted-foreground">
-              {labels.dashboard.users.filterCohort}
-            </label>
-            <Select
-              dir="rtl"
-              value={cohortFilter}
-              onValueChange={(val) => {
-                setCohortFilter(val);
-                setPage(0);
-              }}
-            >
-              <SelectTrigger className="w-40 border-border bg-card text-foreground">
-                <SelectValue placeholder={labels.dashboard.users.all} />
-              </SelectTrigger>
-              <SelectContent className="bg-card text-foreground border border-border">
-                <SelectItem value="all">
-                  {labels.dashboard.users.all}
-                </SelectItem>
-                {cohorts.map((cohort) => (
-                  <SelectItem key={cohort.id} value={cohort.id}>
-                    {cohort.name}
+          {!hideCohortFilter && (
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs text-muted-foreground">
+                {labels.dashboard.users.filterCohort}
+              </label>
+              <Select
+                dir="rtl"
+                value={cohortFilter}
+                onValueChange={(val) => {
+                  setCohortFilter(val);
+                  setPage(0);
+                }}
+              >
+                <SelectTrigger className="w-40 border-border bg-card text-foreground">
+                  <SelectValue placeholder={labels.dashboard.users.all} />
+                </SelectTrigger>
+                <SelectContent className="bg-card text-foreground border border-border">
+                  <SelectItem value="all">
+                    {labels.dashboard.users.all}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  {cohorts.map((cohort) => (
+                    <SelectItem key={cohort.id} value={cohort.id}>
+                      {cohort.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex flex-col space-y-1">
             <label className="text-xs text-muted-foreground">

@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
+import Link from 'next/link';
 import { CohortListDetailedDTO } from '../types';
 import { EditCohortSheet } from './management/edit-cohort-sheet';
 import { DeleteCohortDialog } from './management/delete-cohort-dialog';
@@ -22,7 +23,11 @@ type CohortCardProps = {
 export function CohortCard({ cohort, isDirector }: CohortCardProps) {
   return (
     <Card className="group relative border-primary/15 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30">
-      <CardHeader className="pb-4">
+      <Link
+        href={`/dashboard/cohorts/${cohort.id}`}
+        className="absolute inset-0 z-0 rounded-xl"
+      />
+      <CardHeader className="pb-4 relative z-5 pointer-events-none">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5 flex-1">
             <CardTitle className="text-lg font-bold text-foreground">
@@ -46,7 +51,7 @@ export function CohortCard({ cohort, isDirector }: CohortCardProps) {
             </div>
           </div>
           {!isDirector && (
-            <div className="flex gap-1">
+            <div className="flex gap-1 relative z-10 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
               <EditCohortSheet cohort={cohort}>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Pencil className="h-4 w-4" />
@@ -65,7 +70,7 @@ export function CohortCard({ cohort, isDirector }: CohortCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-5 pointer-events-none">
         <div className="grid grid-cols-3 gap-3">
           <div className="flex flex-col items-center justify-center rounded-lg bg-primary/5 border border-primary/15 p-3">
             <Users className="h-5 w-5 text-primary mb-1" />
@@ -93,3 +98,4 @@ export function CohortCard({ cohort, isDirector }: CohortCardProps) {
     </Card>
   );
 }
+

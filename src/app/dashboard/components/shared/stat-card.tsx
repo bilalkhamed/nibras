@@ -5,7 +5,7 @@ import Link from 'next/link';
 interface StatCardProps {
   title: string;
   value: string | number;
-  description?: string;
+  description?: React.ReactNode;
   icon: LucideIcon;
   href?: string;
   trend?: {

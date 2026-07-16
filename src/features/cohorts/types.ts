@@ -110,3 +110,67 @@ export const cohortDetailSelect = {
 export type CohortDetailDTO = Prisma.CohortGetPayload<{
   select: typeof cohortDetailSelect;
 }>;
+
+export const cohortDetailStatsSelect = {
+  id: true,
+  name: true,
+  startDate: true,
+  endDate: true,
+  currentLevel: {
+    select: {
+      id: true,
+      title: true,
+    },
+  },
+  entryLevel: {
+    select: {
+      id: true,
+      title: true,
+    },
+  },
+  managers: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        },
+      },
+    },
+  },
+  students: {
+    select: {
+      id: true,
+      status: true,
+      role: true,
+    },
+  },
+  groups: {
+    include: {
+      supervisors: {
+        select: {
+          id: true,
+          status: true,
+          supervisorStatus: true,
+        },
+      },
+      managers: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              status: true,
+            },
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.CohortSelect;
+
+export type CohortDetailStatsDTO = Prisma.CohortGetPayload<{
+  select: typeof cohortDetailStatsSelect;
+}>;
+
