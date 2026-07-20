@@ -198,6 +198,15 @@ export const editUserSchema = z.object({
     .enum(Role, { message: 'الرتبة غير صحيحة' })
     .refine((val) => val !== Role.admin, { message: 'الرتبة غير صحيحة' })
     .optional(),
+  phone: z
+    .string()
+    .regex(
+      /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+      'رقم الهاتف غير صحيح',
+    )
+    .max(20, 'رقم الهاتف طويل جداً')
+    .optional()
+    .or(z.literal('')),
 });
 
 export type EditUserInput = z.infer<typeof editUserSchema>;

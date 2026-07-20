@@ -91,6 +91,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 birthYear: user.birthYear,
                 country: user.country ?? '',
                 role: user.role,
+                phone: user.phone ?? undefined,
               }}
               defaultProfileValues={{
                 gradeLevel: user.studentProfile?.gradeLevel,

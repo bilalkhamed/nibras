@@ -6,6 +6,7 @@ import {
   GlobeIcon,
   CalendarDaysIcon,
   ShieldCheckIcon,
+  PhoneIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { InfoField } from '@/components/common/info-field';
@@ -48,6 +49,7 @@ export default async function UserInfoSection() {
             email: user.email ?? undefined,
             birthYear: user.birthYear,
             country: user.country ?? '',
+            phone: user.phone ?? undefined,
           }}
           defaultProfileValues={
             profile
@@ -73,6 +75,11 @@ export default async function UserInfoSection() {
               label="البريد الإلكتروني"
               value={user.email || 'غير محدد'}
               icon={<MailIcon className="h-4 w-4" />}
+            />
+            <InfoField
+              label="رقم الهاتف"
+              value={user.phone || 'غير محدد'}
+              icon={<PhoneIcon className="h-4 w-4" />}
             />
             <InfoField
               label="الرتبة"

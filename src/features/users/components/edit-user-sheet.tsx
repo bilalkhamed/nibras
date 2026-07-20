@@ -111,6 +111,7 @@ export function EditUserSheet({
       birthYear: defaultUserValues.birthYear,
       country: defaultUserValues.country ?? '',
       role: defaultUserValues.role ?? undefined,
+      phone: defaultUserValues.phone ?? '',
       gradeLevel: defaultProfileValues?.gradeLevel ?? undefined,
       address: defaultProfileValues?.address ?? '',
       motherFullName: defaultProfileValues?.motherFullName ?? '',
@@ -231,6 +232,22 @@ export function EditUserSheet({
                     dir="ltr"
                   />
                   <ErrorMessage message={errors.email?.message} />
+                </div>
+
+                {/* Phone */}
+                <div className="grid gap-1">
+                  <Label htmlFor="phone" className="text-right">
+                    رقم الهاتف
+                  </Label>
+                  <Input
+                    id="phone"
+                    placeholder="+970 5x xxx xxxx"
+                    {...register('phone')}
+                    className="text-right"
+                    disabled={isSubmitting}
+                    dir="ltr"
+                  />
+                  <ErrorMessage message={errors.phone?.message} />
                 </div>
 
                 {/* Birth year */}
