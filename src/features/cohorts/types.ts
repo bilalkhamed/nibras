@@ -76,7 +76,11 @@ export const cohortListDetailedSelect = {
   },
   _count: {
     select: {
-      students: true,
+      students: {
+        where: {
+          role: 'student',
+        },
+      },
       groups: true,
       managers: true,
     },
