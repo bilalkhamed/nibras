@@ -158,6 +158,9 @@ export type GroupListItemDTO = {
     } | null;
   };
   supervisors: GroupSupervisorDTO[];
+  managers: {
+    user: UserNameDTO;
+  }[];
   _count: {
     students: number;
   };
@@ -232,6 +235,7 @@ export type GetGroupsOptions = {
 // ============================================================================
 
 import type { Assignment, Prisma } from '@prisma/client';
+import { UserNameDTO } from '@/features/users/types';
 
 export type AssignmentStatus = {
   isCompleted: boolean;

@@ -110,6 +110,18 @@ export async function findGroups(
             phone: true,
           },
         },
+        managers: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                middleName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             students: {
