@@ -138,8 +138,8 @@ export async function findUserByIdentifier(
   return runDalOperation(async () => {
     const isEmail = identifier.includes('@');
     const where: Prisma.UserWhereUniqueInput = isEmail
-      ? { email: identifier }
-      : { username: identifier };
+      ? { email: identifier.toLocaleLowerCase() }
+      : { username: identifier.toLowerCase() };
 
     const user = await prisma.user.findUnique({
       where,
