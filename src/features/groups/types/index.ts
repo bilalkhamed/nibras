@@ -16,7 +16,7 @@ import { z } from 'zod';
 export const createGroupSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),
   cohortId: z.string().min(1, 'الدفعة مطلوبة'),
-  supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
+  supervisors: z.array(z.string()),
   groupManager: z.string().optional(),
 });
 
@@ -26,7 +26,7 @@ export const createGroupSchema = z.object({
 export const updateGroupSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),
   cohortId: z.string().min(1, 'الدفعة مطلوبة'),
-  supervisors: z.array(z.string()).min(1, 'المشرفة مطلوبة'),
+  supervisors: z.array(z.string()),
   groupManager: z.string().optional(),
 });
 
